@@ -1,0 +1,35 @@
+{
+	"action_counts": {
+		"activate_creature_ability": 41,
+		"activate_fusion_ability": 12,
+		"activate_reaction": 338,
+		"advance_phase": 9744,
+		"attack": 932,
+		"change_position": 840,
+		"choose_fusion_combat_bonus": 52,
+		"decline_redirect": 5,
+		"equip_item": 367,
+		"fuse_creatures": 106,
+		"pass_reaction": 791,
+		"play_main_spell": 222,
+		"play_persistent": 274,
+		"play_terrain": 379,
+		"redirect_attack": 12,
+		"relocate_equipment": 33,
+		"set_creature": 309,
+		"set_support": 731,
+		"summon_creature": 884
+	},
+	"elapsed_msec": 1518164,
+	"finish_reasons": {
+		"life_zero": 250
+	},
+	"games_completed": 250,
+	"games_requested": 250,
+	"last_seed": 849,
+	"maximum_actions_in_match": 325,
+	"start_seed": 600,
+	"status": "PASS",
+	"tied_matches": 13,
+	"total_actions": 16072
+}

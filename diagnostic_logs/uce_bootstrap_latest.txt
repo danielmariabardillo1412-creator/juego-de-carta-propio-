@@ -1,0 +1,3 @@
+code=BOOTSTRAP_STARTED
+message=Diagnostic bootstrap entered _ready().
+unix=1789080585

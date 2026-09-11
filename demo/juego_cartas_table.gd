@@ -1,0 +1,1708 @@
+extends Control
+## Mesa local de prueba para recorrer una partida usando exclusivamente vistas y acciones legales de UCE.
+
+const UniversalCardEngine = preload("res://src/core/universal_card_engine.gd")
+const GameAction = preload("res://src/core/game_action.gd")
+const SaveCodec = preload("res://src/persistence/save_codec.gd")
+const SaveFileStore = preload("res://src/persistence/save_file_store.gd")
+const ReplayService = preload("res://src/persistence/replay_service.gd")
+const GameModule = preload("res://games/juego_cartas_propio/juego_cartas_propio_module.gd")
+const CardTile = preload("res://demo/card_tile.gd")
+const DuelTableBackdrop = preload("res://demo/duel_table_backdrop.gd")
+
+const DEFAULT_SEED := 210921
+const DEFAULT_SAVE_PATH := "user://juego_cartas_propio/partida_manual.json"
+const PLAYER_NAMES := ["Jugador 1", "Jugador 2"]
+const DIRECT_BOARD_ACTIONS := [
+	"summon_creature", "set_creature", "set_support", "play_persistent", "play_terrain",
+	"play_main_spell", "equip_item", "attack",
+]
+const ZONE_LABELS := {
+	"deck": "Baraja",
+	"terrain": "Terreno",
+	"creatures": "Criaturas",
+	"support": "Apoyos",
+	"attachments": "Equipos vinculados",
+	"fusion_materials": "Materiales contenidos",
+	"graveyard": "Cementerio",
+	"hand": "Mano",
+}
+const TERRAIN_PREVIEWS := {
+	"R01|R02": "Bosque Inundado", "R02|R01": "Humedal Fértil",
+	"R01|R03": "Bosque Ardiente", "R03|R01": "Bosque Volcánico",
+	"R02|R03": "Caldera de Vapor", "R03|R02": "Llanura de Obsidiana",
+}
+
+var _engine: Object
+var _viewer_id := 0
+var _request_number := 0
+var _privacy_hidden := false
+var _status_message := ""
+var _selected_card_id := ""
+var _choice_actions: Array = []
+var _visible_card_locations: Dictionary = {}
+var _visual_slot_assignments: Dictionary = {}
+var _pending_visual_placement: Dictionary = {}
+var _ai_running := false
+
+var _summary_label: Label
+var _viewer_label: Label
+var _board_box: VBoxContainer
+var _action_list: VBoxContainer
+var _action_heading: Label
+var _selection_label: Label
+var _card_preview_box: CenterContainer
+var _card_detail: RichTextLabel
+var _event_log: RichTextLabel
+var _result_panel: PanelContainer
+var _result_label: Label
+var _privacy_panel: PanelContainer
+var _privacy_label: Label
+var _seed_input: SpinBox
+var _auto_follow: CheckButton
+var _main_content: HSplitContainer
+var _event_panel: PanelContainer
+var _event_expanded := false
+var _board_surface: PanelContainer
+var _ai_enabled: CheckButton
+var _advance_button: Button
+var _end_turn_button: Button
+var _phase_labels: Dictionary = {}
+var _choice_overlay: PanelContainer
+var _choice_overlay_title: Label
+var _choice_overlay_list: VBoxContainer
+var _end_turn_dialog: ConfirmationDialog
+var _terrain_dialog: ConfirmationDialog
+var _pending_terrain_action: Dictionary = {}
+
+
+func _ready() -> void:
+	_build_interface()
+	start_match(DEFAULT_SEED)
+
+
+func start_match(seed: int = DEFAULT_SEED, config_overrides: Dictionary = {}) -> bool:
+	var config := {"player_names": PLAYER_NAMES.duplicate(), "starting_player": 0}
+	config.merge(config_overrides, true)
+	_engine = UniversalCardEngine.new(GameModule.new(), config)
+	_request_number = 0
+	_viewer_id = 0
+	_privacy_hidden = false
+	_selected_card_id = ""
+	_choice_actions = []
+	_visual_slot_assignments = {}
+	_pending_visual_placement = {}
+	_ai_running = false
+	if not _engine.is_ready():
+		_status_message = "No se pudo construir el motor: %s" % str(_engine.construction_error())
+		_refresh()
+		return false
+	var result = _engine.start(seed)
+	if not result.success:
+		_status_message = "No se pudo iniciar: %s — %s" % [result.code, result.message]
+		_refresh()
+		return false
+	_status_message = "Partida iniciada con semilla %d." % seed
+	_auto_resolve_opening(0)
+	_refresh()
+	return true
+
+
+func set_viewer(player_id: int, require_reveal: bool = true) -> void:
+	if _ai_enabled != null and _ai_enabled.button_pressed and player_id == 1:
+		_status_message = "El Jugador 2 está controlado por el rival automático."
+		_refresh()
+		return
+	if player_id not in [0, 1] or player_id == _viewer_id:
+		return
+	_viewer_id = player_id
+	_privacy_hidden = require_reveal
+	_selected_card_id = ""
+	_choice_actions = []
+	_status_message = "Vista preparada para %s." % PLAYER_NAMES[player_id]
+	_refresh()
+
+
+func perform_legal_action(index: int) -> bool:
+	if _engine == null or _privacy_hidden:
+		return false
+	var actions: Array = _engine.get_legal_actions(_viewer_id)
+	if index < 0 or index >= actions.size():
+		return false
+	return _perform_action(actions[index])
+
+
+func save_match(path: String = DEFAULT_SAVE_PATH) -> bool:
+	if _engine == null or _engine.lifecycle_name() not in ["RUNNING", "FINISHED"]:
+		_status_message = "No hay una partida iniciada que guardar."
+		_refresh()
+		return false
+	var package: Dictionary = SaveCodec.build(_engine, _engine.module_version())
+	if not package["ok"]:
+		_status_message = "No se pudo preparar el guardado: %s." % package["code"]
+		_refresh()
+		return false
+	var encoded: Dictionary = SaveCodec.encode(package["value"], true)
+	if not encoded["ok"]:
+		_status_message = "No se pudo codificar el guardado: %s." % encoded["code"]
+		_refresh()
+		return false
+	var stored: Dictionary = SaveFileStore.write_atomic(path, encoded["value"])
+	if not stored["ok"]:
+		_status_message = "No se pudo guardar: %s." % stored["code"]
+		_refresh()
+		return false
+	_status_message = "Partida guardada en la ranura local."
+	_refresh()
+	return true
+
+
+func load_match(path: String = DEFAULT_SAVE_PATH) -> bool:
+	var loaded: Dictionary = SaveFileStore.read_recoverable(path)
+	if not loaded["ok"]:
+		_status_message = "No se pudo leer la partida: %s." % loaded["code"]
+		_refresh()
+		return false
+	var decoded: Dictionary = SaveCodec.decode(loaded["value"])
+	if not decoded["ok"]:
+		_status_message = "El guardado no es válido: %s." % decoded["code"]
+		_refresh()
+		return false
+	var replay: Dictionary = ReplayService.replay_from_snapshot(GameModule.new(), decoded["value"]["payload"])
+	if not replay["ok"]:
+		_status_message = "No se pudo reconstruir la partida: %s." % replay["code"]
+		_refresh()
+		return false
+	_engine = replay["engine"]
+	_request_number = _engine.state_version()
+	_selected_card_id = ""
+	_choice_actions = []
+	_privacy_hidden = true
+	_status_message = "Partida cargada y verificada; revela la mesa para continuar."
+	_refresh()
+	return true
+
+
+func debug_snapshot() -> Dictionary:
+	if _engine == null:
+		return {"ready": false}
+	var envelope: Dictionary = _engine.get_player_state(_viewer_id)
+	var game: Dictionary = envelope.get("game", {})
+	var legal_actions: Array = _engine.get_legal_actions(_viewer_id)
+	var related_count := 0
+	for action in legal_actions:
+		if _action_mentions_card(action, _selected_card_id):
+			related_count += 1
+	return {
+		"ready": _engine.is_ready(),
+		"lifecycle": _engine.lifecycle_name(),
+		"module_version": _engine.module_version(),
+		"viewer_id": _viewer_id,
+		"privacy_hidden": _privacy_hidden,
+		"state_version": _engine.state_version(),
+		"phase": game.get("phase", ""),
+		"active_player": game.get("active_player", -1),
+		"legal_action_count": legal_actions.size(),
+		"legal_actions": legal_actions,
+		"selected_card_id": _selected_card_id,
+		"status_message": _status_message,
+		"related_action_count": related_count,
+		"choice_action_count": _choice_actions.size(),
+		"choice_overlay_visible": _choice_overlay.visible if _choice_overlay != null else false,
+		"card_detail_text": _card_detail.text if _card_detail != null else "",
+		"result_visible": _result_panel.visible if _result_panel != null else false,
+		"result_text": _result_label.text if _result_label != null else "",
+		"board_player_count": _board_box.get_child_count() if _board_box != null else 0,
+		"visual_board_layout": "perspective-opponent-divider-player",
+		"creature_slot_count": _count_nodes_with_role(_board_box, "creature_slot"),
+		"support_slot_count": _count_nodes_with_role(_board_box, "support_slot"),
+		"terrain_lane_count": _count_nodes_with_role(_board_box, "terrain_lane"),
+		"side_pile_count": _count_nodes_with_role(_board_box, "pile_zone"),
+		"ai_enabled": _ai_enabled.button_pressed if _ai_enabled != null else false,
+		"ai_running": _ai_running,
+		"rendered_card_count": _count_card_tiles(_board_box) if _board_box != null else 0,
+		"rendered_action_count": _action_list.get_child_count() if _action_list != null else 0,
+		"event_expanded": _event_expanded,
+		"phase_track_count": _phase_labels.size(),
+		"event_text": _event_log.text if _event_log != null else "",
+		"view": envelope,
+	}
+
+
+func _build_interface() -> void:
+	var background := ColorRect.new()
+	background.color = Color("081319")
+	background.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	background.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	add_child(background)
+
+	var margin := MarginContainer.new()
+	margin.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	margin.add_theme_constant_override("margin_left", 10)
+	margin.add_theme_constant_override("margin_right", 10)
+	margin.add_theme_constant_override("margin_top", 8)
+	margin.add_theme_constant_override("margin_bottom", 8)
+	add_child(margin)
+
+	var root_box := VBoxContainer.new()
+	root_box.add_theme_constant_override("separation", 5)
+	margin.add_child(root_box)
+
+	var title := Label.new()
+	title.text = "ZAPITY · MESA DE DUELO"
+	title.add_theme_font_size_override("font_size", 19)
+	title.add_theme_color_override("font_color", Color("f3d58a"))
+	root_box.add_child(title)
+
+	var controls := HBoxContainer.new()
+	controls.add_theme_constant_override("separation", 8)
+	root_box.add_child(controls)
+	_viewer_label = Label.new()
+	_viewer_label.custom_minimum_size.x = 105
+	controls.add_child(_viewer_label)
+	for player_id in [0, 1]:
+		var viewer_button := Button.new()
+		viewer_button.text = "Ver J%d" % (player_id + 1)
+		viewer_button.pressed.connect(set_viewer.bind(player_id, true))
+		controls.add_child(viewer_button)
+	var curtain_button := Button.new()
+	curtain_button.text = "Cortina"
+	curtain_button.pressed.connect(_toggle_privacy)
+	controls.add_child(curtain_button)
+	_auto_follow = CheckButton.new()
+	_auto_follow.text = "Cortina 2P"
+	_auto_follow.button_pressed = true
+	controls.add_child(_auto_follow)
+	_ai_enabled = CheckButton.new()
+	_ai_enabled.name = "AIEnabled"
+	_ai_enabled.text = "Rival IA"
+	_ai_enabled.button_pressed = DisplayServer.get_name() != "headless"
+	_ai_enabled.toggled.connect(_on_ai_toggled)
+	controls.add_child(_ai_enabled)
+	_advance_button = Button.new()
+	_advance_button.name = "AdvancePhaseButton"
+	_advance_button.pressed.connect(_advance_phase_pressed)
+	controls.add_child(_advance_button)
+	_end_turn_button = Button.new()
+	_end_turn_button.name = "EndTurnButton"
+	_end_turn_button.text = "TERMINAR TURNO"
+	_end_turn_button.pressed.connect(_end_turn_pressed)
+	controls.add_child(_end_turn_button)
+	var spacer := Control.new()
+	spacer.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	controls.add_child(spacer)
+	_seed_input = SpinBox.new()
+	_seed_input.min_value = 0
+	_seed_input.max_value = 2147483646
+	_seed_input.step = 1
+	_seed_input.value = DEFAULT_SEED
+	_seed_input.custom_minimum_size.x = 105
+	controls.add_child(_seed_input)
+	var restart_button := Button.new()
+	restart_button.name = "RestartButton"
+	restart_button.text = "Nueva partida"
+	restart_button.pressed.connect(_restart_pressed)
+	controls.add_child(restart_button)
+
+	_summary_label = Label.new()
+	_summary_label.name = "Summary"
+	_summary_label.autowrap_mode = TextServer.AUTOWRAP_OFF
+	_summary_label.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
+	_summary_label.add_theme_color_override("font_color", Color("dce7ee"))
+	root_box.add_child(_summary_label)
+	var phase_track := HBoxContainer.new()
+	phase_track.alignment = BoxContainer.ALIGNMENT_CENTER
+	phase_track.add_theme_constant_override("separation", 3)
+	for phase_id in ["START", "DRAW", "MAIN_1", "COMBAT", "MAIN_2", "END"]:
+		var phase_label := Label.new()
+		phase_label.text = _phase_name(phase_id).to_upper()
+		phase_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+		phase_label.custom_minimum_size = Vector2(82, 22)
+		phase_label.add_theme_font_size_override("font_size", 11)
+		phase_track.add_child(phase_label)
+		_phase_labels[phase_id] = phase_label
+
+	_result_panel = PanelContainer.new()
+	_result_panel.name = "ResultPanel"
+	_result_panel.visible = false
+	root_box.add_child(_result_panel)
+	_result_label = Label.new()
+	_result_label.name = "ResultLabel"
+	_result_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	_result_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	_result_label.add_theme_font_size_override("font_size", 20)
+	_result_label.add_theme_color_override("font_color", Color("f3d58a"))
+	_result_panel.add_child(_result_label)
+
+	_main_content = HSplitContainer.new()
+	_main_content.name = "MainContent"
+	_main_content.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	_main_content.split_offset = 1260
+	root_box.add_child(_main_content)
+
+	_board_surface = PanelContainer.new()
+	_board_surface.name = "BoardSurface"
+	_board_surface.custom_minimum_size = Vector2(960, 620)
+	_board_surface.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	_board_surface.add_theme_stylebox_override("panel", _style_box(Color("071014"), Color("8b7951"), 2, 10))
+	_main_content.add_child(_board_surface)
+	var board_art = DuelTableBackdrop.new()
+	board_art.name = "DuelTableBackdrop"
+	board_art.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	_board_surface.add_child(board_art)
+	var phase_overlay := CenterContainer.new()
+	phase_overlay.name = "PhaseOverlay"
+	phase_overlay.z_index = 8
+	phase_overlay.anchor_left = 0.0
+	phase_overlay.anchor_top = 0.5
+	phase_overlay.anchor_right = 1.0
+	phase_overlay.anchor_bottom = 0.5
+	phase_overlay.offset_top = -14
+	phase_overlay.offset_bottom = 14
+	phase_overlay.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_board_surface.add_child(phase_overlay)
+	phase_overlay.add_child(phase_track)
+	var board_margin := MarginContainer.new()
+	board_margin.add_theme_constant_override("margin_left", 22)
+	board_margin.add_theme_constant_override("margin_right", 22)
+	board_margin.add_theme_constant_override("margin_top", 8)
+	board_margin.add_theme_constant_override("margin_bottom", 8)
+	_board_surface.add_child(board_margin)
+	_board_box = VBoxContainer.new()
+	_board_box.name = "Board"
+	_board_box.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	_board_box.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	_board_box.add_theme_constant_override("separation", 0)
+	board_margin.add_child(_board_box)
+
+	var action_panel := PanelContainer.new()
+	action_panel.custom_minimum_size.x = 292
+	action_panel.add_theme_stylebox_override("panel", _style_box(Color("111b22"), Color("3b4b55"), 1, 7))
+	_main_content.add_child(action_panel)
+	var action_outer := VBoxContainer.new()
+	action_panel.add_child(action_outer)
+	_action_heading = Label.new()
+	_action_heading.text = "ACCIONES LEGALES"
+	_action_heading.add_theme_font_size_override("font_size", 17)
+	var action_header := HBoxContainer.new()
+	action_outer.add_child(action_header)
+	action_header.add_child(_action_heading)
+	var action_header_spacer := Control.new()
+	action_header_spacer.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	action_header.add_child(action_header_spacer)
+	var save_button := Button.new()
+	save_button.name = "SaveButton"
+	save_button.text = "Guardar"
+	save_button.pressed.connect(save_match)
+	action_header.add_child(save_button)
+	var load_button := Button.new()
+	load_button.name = "LoadButton"
+	load_button.text = "Cargar"
+	load_button.pressed.connect(load_match)
+	action_header.add_child(load_button)
+	_selection_label = Label.new()
+	_selection_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	_selection_label.add_theme_color_override("font_color", Color("f3d58a"))
+	action_outer.add_child(_selection_label)
+	_card_preview_box = CenterContainer.new()
+	_card_preview_box.name = "CardPreview"
+	_card_preview_box.visible = false
+	action_outer.add_child(_card_preview_box)
+	_card_detail = RichTextLabel.new()
+	_card_detail.name = "CardDetail"
+	_card_detail.bbcode_enabled = true
+	_card_detail.fit_content = true
+	_card_detail.custom_minimum_size.y = 92
+	_card_detail.visible = false
+	action_outer.add_child(_card_detail)
+	var action_scroll := ScrollContainer.new()
+	action_scroll.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	action_outer.add_child(action_scroll)
+	_action_list = VBoxContainer.new()
+	_action_list.name = "ActionList"
+	_action_list.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	action_scroll.add_child(_action_list)
+
+	_event_panel = PanelContainer.new()
+	_event_panel.custom_minimum_size.y = 30
+	action_outer.add_child(_event_panel)
+	var event_box := VBoxContainer.new()
+	_event_panel.add_child(event_box)
+	var event_toggle := Button.new()
+	event_toggle.name = "EventToggle"
+	event_toggle.text = "HISTORIAL DE LA PARTIDA  ▸"
+	event_toggle.alignment = HORIZONTAL_ALIGNMENT_LEFT
+	event_toggle.flat = true
+	event_toggle.pressed.connect(_toggle_event_log.bind(event_toggle))
+	event_box.add_child(event_toggle)
+	_event_log = RichTextLabel.new()
+	_event_log.name = "EventLog"
+	_event_log.bbcode_enabled = true
+	_event_log.fit_content = false
+	_event_log.scroll_active = true
+	_event_log.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	_event_log.visible = false
+	event_box.add_child(_event_log)
+
+	_end_turn_dialog = ConfirmationDialog.new()
+	_end_turn_dialog.title = "Terminar el turno"
+	_end_turn_dialog.dialog_text = "¿Terminar ahora? Se omitirán las fases que todavía no hayas jugado."
+	_end_turn_dialog.ok_button_text = "Terminar turno"
+	_end_turn_dialog.cancel_button_text = "Seguir jugando"
+	_end_turn_dialog.confirmed.connect(_confirm_end_turn)
+	add_child(_end_turn_dialog)
+	_terrain_dialog = ConfirmationDialog.new()
+	_terrain_dialog.title = "Cambiar el Territorio"
+	_terrain_dialog.ok_button_text = "Jugar Terreno"
+	_terrain_dialog.cancel_button_text = "Cancelar"
+	_terrain_dialog.confirmed.connect(_confirm_terrain)
+	add_child(_terrain_dialog)
+
+	_privacy_panel = PanelContainer.new()
+	_privacy_panel.name = "PrivacyOverlay"
+	_privacy_panel.visible = false
+	_privacy_panel.custom_minimum_size.y = 540
+	root_box.add_child(_privacy_panel)
+	var privacy_box := VBoxContainer.new()
+	privacy_box.alignment = BoxContainer.ALIGNMENT_CENTER
+	_privacy_panel.add_child(privacy_box)
+	_privacy_label = Label.new()
+	_privacy_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	_privacy_label.add_theme_font_size_override("font_size", 24)
+	privacy_box.add_child(_privacy_label)
+	var reveal_button := Button.new()
+	reveal_button.text = "Soy este jugador: revelar mesa"
+	reveal_button.custom_minimum_size = Vector2(320, 54)
+	reveal_button.pressed.connect(_toggle_privacy)
+	privacy_box.add_child(reveal_button)
+
+	_choice_overlay = PanelContainer.new()
+	_choice_overlay.name = "BoardChoiceOverlay"
+	_choice_overlay.visible = false
+	_choice_overlay.z_index = 20
+	_choice_overlay.anchor_left = 0.5
+	_choice_overlay.anchor_top = 0.5
+	_choice_overlay.anchor_right = 0.5
+	_choice_overlay.anchor_bottom = 0.5
+	_choice_overlay.offset_left = -250
+	_choice_overlay.offset_top = -115
+	_choice_overlay.offset_right = 250
+	_choice_overlay.offset_bottom = 115
+	_choice_overlay.add_theme_stylebox_override("panel", _style_box(Color("111b22f5"), Color("e2c977"), 3, 10))
+	add_child(_choice_overlay)
+	var choice_margin := MarginContainer.new()
+	choice_margin.add_theme_constant_override("margin_left", 16)
+	choice_margin.add_theme_constant_override("margin_right", 16)
+	choice_margin.add_theme_constant_override("margin_top", 12)
+	choice_margin.add_theme_constant_override("margin_bottom", 12)
+	_choice_overlay.add_child(choice_margin)
+	var choice_box := VBoxContainer.new()
+	choice_box.add_theme_constant_override("separation", 8)
+	choice_margin.add_child(choice_box)
+	_choice_overlay_title = Label.new()
+	_choice_overlay_title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	_choice_overlay_title.add_theme_font_size_override("font_size", 19)
+	_choice_overlay_title.add_theme_color_override("font_color", Color("f3d58a"))
+	choice_box.add_child(_choice_overlay_title)
+	_choice_overlay_list = VBoxContainer.new()
+	_choice_overlay_list.add_theme_constant_override("separation", 6)
+	choice_box.add_child(_choice_overlay_list)
+
+
+func _refresh() -> void:
+	if _summary_label == null:
+		return
+	_viewer_label.text = "Vista: J%d" % (_viewer_id + 1)
+	_main_content.visible = not _privacy_hidden
+	_event_panel.visible = not _privacy_hidden
+	_privacy_panel.visible = _privacy_hidden
+	_privacy_label.text = "Mesa oculta\nEntrega el control a %s" % PLAYER_NAMES[_viewer_id]
+	_clear_children(_board_box)
+	_clear_children(_action_list)
+	_clear_children(_choice_overlay_list)
+	_choice_overlay.visible = false
+	if _engine == null or not _engine.is_ready() or _engine.lifecycle_name() == "CREATED":
+		_summary_label.text = _status_message
+		return
+	var envelope: Dictionary = _engine.get_player_state(_viewer_id)
+	var game: Dictionary = envelope["game"]
+	_sync_visual_slots(game["card_table"])
+	_visible_card_locations = _visible_card_location_index(game["card_table"])
+	_update_result_panel(game)
+	var active: int = game["active_player"]
+	var response: Dictionary = game["response_window"]
+	var actor: int = response.get("priority_player_id", active) if response.get("active", false) else active
+	var energy: Dictionary = game["energy"][str(active)]
+	_summary_label.text = "Turno %d · Ronda %d · %s · Activo: %s · Prioridad: %s · Energía %d/%d · %s" % [
+		game["turn_number"], game["round_number"], _phase_name(game["phase"]), PLAYER_NAMES[active],
+		PLAYER_NAMES[actor], energy["available"], energy["maximum"], _status_message,
+	]
+	_update_advance_button(game)
+	_update_phase_track(game["phase"])
+	if _privacy_hidden:
+		return
+	_board_box.add_child(_build_player_half(game, 1 - _viewer_id, true))
+	_board_box.add_child(_build_player_half(game, _viewer_id, false))
+	var actions: Array = _engine.get_legal_actions(_viewer_id)
+	var visible_index: Dictionary = _visible_card_index(game["card_table"])
+	var visible_cards: Dictionary = _visible_cards_by_id(game["card_table"])
+	if not _selected_card_id.is_empty() and not visible_index.has(_selected_card_id):
+		_selected_card_id = ""
+	_card_detail.visible = not _selected_card_id.is_empty()
+	_card_detail.text = _card_detail_text(visible_cards.get(_selected_card_id, {})) if _card_detail.visible else ""
+	_clear_children(_card_preview_box)
+	_card_preview_box.visible = _card_detail.visible
+	if _card_preview_box.visible:
+		var preview_card: Dictionary = visible_cards.get(_selected_card_id, {})
+		if not preview_card.is_empty():
+			_card_preview_box.add_child(_preview_tile_from_card(preview_card))
+	var valid_choices: Array = []
+	for choice_action in _choice_actions:
+		if choice_action in actions:
+			valid_choices.append(choice_action)
+	_choice_actions = valid_choices
+	if not _choice_actions.is_empty():
+		_action_heading.text = "ELECCIÓN EN EL TABLERO"
+		_selection_label.text = "Confirma la postura u opción en la ventana central."
+		_choice_overlay.visible = true
+		_choice_overlay_title.text = "ELIGE EL RESULTADO DE LA FUSIÓN" if _choice_actions[0]["type"] == "fuse_creatures" else "¿CÓMO QUIERES JUGARLA?"
+		for choice_action in _choice_actions:
+			var choice_button := Button.new()
+			choice_button.text = _describe_action(choice_action, visible_index)
+			choice_button.alignment = HORIZONTAL_ALIGNMENT_LEFT
+			choice_button.custom_minimum_size.y = 48
+			choice_button.pressed.connect(_perform_choice.bind(choice_action))
+			_choice_overlay_list.add_child(choice_button)
+		var cancel_button := Button.new()
+		cancel_button.text = "Cancelar y volver al tablero"
+		cancel_button.pressed.connect(_cancel_choices)
+		_choice_overlay_list.add_child(cancel_button)
+		_render_events()
+		return
+	var related: Array = []
+	var general: Array = []
+	for index in range(actions.size()):
+		var entry := {"index": index, "action": actions[index]}
+		if _action_mentions_card(actions[index], _selected_card_id):
+			if actions[index]["type"] not in DIRECT_BOARD_ACTIONS:
+				related.append(entry)
+		elif actions[index]["type"] == "concede":
+			general.append(entry)
+	var ordered_actions: Array = related + general
+	_action_heading.text = "INFORMACIÓN Y DECISIONES · %d" % ordered_actions.size()
+	_selection_label.text = _selection_instruction(actions, visible_index)
+	if actions.is_empty():
+		var none := Label.new()
+		none.text = "El rival está decidiendo…" if _ai_is_actor(game) else "Este jugador no tiene la prioridad."
+		none.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+		_action_list.add_child(none)
+	else:
+		for group in _group_action_entries(ordered_actions):
+			var group_actions: Array = group["actions"]
+			var action: Dictionary = group_actions[0]
+			var button := Button.new()
+			button.text = _describe_action(action, visible_index) if group_actions.size() == 1 else "%s\n  Elegir entre %d objetivos u opciones" % [action["label"], group_actions.size()]
+			button.tooltip_text = JSON.stringify(action["payload"])
+			button.alignment = HORIZONTAL_ALIGNMENT_LEFT
+			if group_actions.size() == 1:
+				button.pressed.connect(_perform_action.bind(action))
+			else:
+				button.pressed.connect(_open_action_choices.bind(group_actions))
+			_action_list.add_child(button)
+	_render_events()
+
+
+func _build_player_half(game: Dictionary, player_id: int, opponent: bool) -> Control:
+	var panel := MarginContainer.new()
+	panel.name = "OpponentHalf" if opponent else "PlayerHalf"
+	panel.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	panel.size_flags_stretch_ratio = 0.84 if opponent else 1.16
+	var table: Dictionary = game["card_table"]
+	panel.add_theme_constant_override("margin_left", 55)
+	panel.add_theme_constant_override("margin_right", 55)
+	var outer := VBoxContainer.new()
+	outer.add_theme_constant_override("separation", 0)
+	outer.alignment = BoxContainer.ALIGNMENT_BEGIN if opponent else BoxContainer.ALIGNMENT_END
+	panel.add_child(outer)
+	var heading := Button.new()
+	var life: int = game["life"][str(player_id)]
+	var energy: Dictionary = game["energy"][str(player_id)]
+	heading.text = "%s%s     ❤ VIDA %d     ◆ ENERGÍA %d/%d" % [
+		PLAYER_NAMES[player_id], " · RIVAL" if opponent else " · TÚ", life,
+		energy["available"], energy["maximum"],
+	]
+	heading.alignment = HORIZONTAL_ALIGNMENT_CENTER
+	heading.custom_minimum_size.y = 27
+	heading.add_theme_stylebox_override("normal", _style_box(Color("111a20d9"), Color("867346"), 1, 14))
+	heading.add_theme_stylebox_override("hover", _style_box(Color("24302fd9"), Color("e6ca75"), 2, 14))
+	heading.add_theme_font_size_override("font_size", 16)
+	heading.add_theme_color_override("font_color", Color("9fd4a8") if player_id == _viewer_id else Color("d6a6a6"))
+	if opponent and _selected_direct_attack_available():
+		heading.text += "     ⚔ ATAQUE DIRECTO"
+		heading.tooltip_text = "El rival no tiene criaturas. Pulsa aquí para atacar directamente."
+		heading.add_theme_color_override("font_color", Color("ffe58a"))
+		heading.add_theme_stylebox_override("normal", _style_box(Color("4b351d"), Color("f0c85a"), 2, 5))
+		heading.pressed.connect(_on_direct_player_pressed)
+	else:
+		heading.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	if opponent:
+		outer.add_child(heading)
+		outer.add_child(_build_hand_row(table, player_id))
+		outer.add_child(_build_field_row(table, player_id, "support", true))
+		outer.add_child(_build_field_row(table, player_id, "creatures", true))
+	else:
+		outer.add_child(_build_field_row(table, player_id, "creatures", false))
+		outer.add_child(_build_field_row(table, player_id, "support", false))
+		outer.add_child(_build_hand_row(table, player_id))
+		outer.add_child(heading)
+	return panel
+
+
+func _territory_colors(table: Dictionary, player_id: int, opponent: bool) -> Array:
+	var zone: Dictionary = table["zones"]["terrain:%d" % player_id]
+	if zone["count"] <= 0:
+		return [Color("17211fd9") if opponent else Color("1b2925d9"), Color("8f7950")]
+	var identity: Dictionary = zone["cards"][0].get("terrain_identity", {})
+	var components: Array = identity.get("components", [])
+	var base := Color("23372b")
+	if "R03" in components:
+		base = Color("43241f")
+	elif "R02" in components:
+		base = Color("1e3441")
+	elif "R01" in components:
+		base = Color("253d28")
+	if components.size() > 1:
+		base = base.lightened(0.08)
+	base.a = 0.84
+	var border := base.lightened(0.32)
+	border.a = 1.0
+	return [base, border]
+
+
+func _build_pile_row(table: Dictionary, player_id: int) -> Control:
+	var row := HBoxContainer.new()
+	row.alignment = BoxContainer.ALIGNMENT_CENTER
+	row.custom_minimum_size.y = 22
+	row.add_theme_constant_override("separation", 14)
+	for zone_info in [["deck", "BARAJA"], ["graveyard", "CEMENTERIO"], ["attachments", "EQUIPOS"], ["fusion_materials", "MATERIALES"]]:
+		var zone_id := "%s:%d" % [zone_info[0], player_id]
+		var pile := PanelContainer.new()
+		pile.set_meta("board_role", "pile_zone")
+		pile.custom_minimum_size = Vector2(104, 20)
+		pile.add_theme_stylebox_override("panel", _style_box(Color("0a1217c8"), Color("52656b"), 1, 8))
+		var label := Label.new()
+		label.text = "%s  %d" % [zone_info[1], table["zones"][zone_id]["count"]]
+		label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+		label.add_theme_font_size_override("font_size", 10)
+		pile.add_child(label)
+		row.add_child(pile)
+	return row
+
+
+func _build_field_row(table: Dictionary, player_id: int, kind: String, opponent: bool) -> Control:
+	var row := Control.new()
+	row.name = ("Opponent" if opponent else "Player") + ("SupportRow" if kind == "support" else "CreatureRow")
+	row.custom_minimum_size.y = 98
+	row.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	var zone: Dictionary = table["zones"]["%s:%d" % [kind, player_id]]
+	var capacity: int = zone["definition"]["capacity"]
+	var envelope_size := Vector2(102, 96)
+	var gap := 15.0
+	var total_width := capacity * envelope_size.x + (capacity - 1) * gap
+	var cards_by_slot := {}
+	for slot in zone["slots"]:
+		if slot["card"] != null:
+			var card_id: String = slot["card"]["instance"]["id"]
+			cards_by_slot[_visual_slot_for(kind, player_id, card_id)] = slot["card"]
+	for slot in zone["slots"]:
+		if slot["card"] == null:
+			var hidden_slot := 0
+			while cards_by_slot.has(hidden_slot) and hidden_slot < capacity:
+				hidden_slot += 1
+			if hidden_slot < capacity:
+				cards_by_slot[hidden_slot] = {"hidden": true, "engine_slot": slot["index"]}
+	for slot_index in range(capacity):
+		var card = cards_by_slot.get(slot_index, null)
+		var left := -total_width * 0.5 + slot_index * (envelope_size.x + gap)
+		if card == null:
+			var empty := Button.new()
+			empty.name = "CreatureSlot" if kind == "creatures" else "SupportSlot"
+			empty.set_meta("board_role", "creature_slot" if kind == "creatures" else "support_slot")
+			empty.set_anchors_preset(Control.PRESET_CENTER_TOP)
+			var slot_size := Vector2(70, 94)
+			empty.offset_left = left + (envelope_size.x - slot_size.x) * 0.5
+			empty.offset_right = empty.offset_left + slot_size.x
+			empty.offset_top = 2
+			empty.offset_bottom = 2 + slot_size.y
+			var direct_attack := player_id != _viewer_id and kind == "creatures" and _selected_direct_attack_available()
+			var direct_destination := (player_id == _viewer_id and _selected_card_can_enter(kind)) or direct_attack
+			var destination_text := "ATAQUE DIRECTO" if direct_attack else ("JUGAR AQUÍ" if direct_destination else "VACÍA")
+			empty.text = ("A" if kind == "support" else "C") + "%d\n%s" % [slot_index + 1, destination_text]
+			empty.tooltip_text = "Selecciona una carta y después esta casilla."
+			empty.add_theme_font_size_override("font_size", 10)
+			empty.add_theme_color_override("font_color", Color("f2d98b") if direct_destination else Color("718781"))
+			empty.add_theme_stylebox_override("normal", _style_box(Color("263b31b8") if direct_destination else Color("09131530"), Color("e2c977") if direct_destination else Color("77908780"), 2 if direct_destination else 1, 5, true))
+			empty.add_theme_stylebox_override("hover", _style_box(Color("294139"), Color("e2c977"), 2, 5))
+			empty.pressed.connect(_on_empty_slot_pressed.bind(player_id, kind, slot_index))
+			row.add_child(empty)
+		else:
+			var holder := Control.new()
+			holder.name = "CreatureSlot" if kind == "creatures" else "SupportSlot"
+			holder.set_meta("board_role", "creature_slot" if kind == "creatures" else "support_slot")
+			holder.set_anchors_preset(Control.PRESET_CENTER_TOP)
+			holder.offset_left = left
+			holder.offset_right = left + envelope_size.x
+			holder.offset_top = 0
+			holder.offset_bottom = envelope_size.y
+			var tile: Button
+			if card is Dictionary and card.get("hidden", false):
+				var hidden_targetable := _hidden_slot_attack_available(player_id, card["engine_slot"])
+				tile = CardTile.new()
+				tile.setup("hidden-slot-%d-%d" % [player_id, card["engine_slot"]], "CARTA OCULTA", "GUARDIA", hidden_targetable, "", "", "guard", false, "opponent_field" if opponent else "field")
+				tile.set_targeted(hidden_targetable)
+				tile.card_selected.connect(_on_hidden_board_card_selected.bind(player_id, kind, card["engine_slot"]))
+				tile.add_to_group("jcp_card_tiles")
+			else:
+				tile = _tile_from_card(card, player_id, kind, slot_index)
+			tile.set_anchors_preset(Control.PRESET_CENTER)
+			var tile_size: Vector2 = tile.custom_minimum_size
+			tile.offset_left = -tile_size.x * 0.5
+			tile.offset_right = tile_size.x * 0.5
+			tile.offset_top = -tile_size.y * 0.5
+			tile.offset_bottom = tile_size.y * 0.5
+			holder.add_child(tile)
+			if kind == "creatures" and card is Dictionary and not card.get("hidden", false):
+				var equipment_names := _equipment_names_for(table, player_id, card["instance"]["id"])
+				if not equipment_names.is_empty():
+					var equipment := Label.new()
+					equipment.text = "⚒ " + ", ".join(equipment_names)
+					equipment.tooltip_text = "Equipo vinculado: " + ", ".join(equipment_names)
+					equipment.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+					equipment.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
+					equipment.add_theme_font_size_override("font_size", 9)
+					equipment.add_theme_color_override("font_color", Color("e2ca81"))
+					equipment.set_anchors_preset(Control.PRESET_CENTER_BOTTOM)
+					equipment.offset_left = -52
+					equipment.offset_right = 52
+					equipment.offset_top = -13
+					equipment.offset_bottom = 0
+					holder.add_child(equipment)
+			row.add_child(holder)
+	_add_field_side_zones(row, table, player_id, kind, opponent, capacity, envelope_size, gap)
+	return row
+
+
+func _add_field_side_zones(
+	row: Control, table: Dictionary, player_id: int, kind: String, opponent: bool,
+	capacity: int, envelope_size: Vector2, gap: float
+) -> void:
+	var total_width := capacity * envelope_size.x + (capacity - 1) * gap
+	var side_size := Vector2(68, 92)
+	var side_gap := 24.0
+	var left_x := -total_width * 0.5 - side_gap - side_size.x
+	var right_x := total_width * 0.5 + side_gap
+	if kind == "support":
+		var materials: int = table["zones"]["fusion_materials:%d" % player_id]["count"]
+		_add_side_pile(row, "FUSIÓN", materials, left_x, side_size, opponent)
+		var deck: int = table["zones"]["deck:%d" % player_id]["count"]
+		_add_side_pile(row, "BARAJA", deck, right_x, side_size, opponent)
+	else:
+		_add_terrain_side(row, table, player_id, opponent, left_x, side_size)
+		var graveyard: int = table["zones"]["graveyard:%d" % player_id]["count"]
+		_add_side_pile(row, "CEMENTERIO", graveyard, right_x, side_size, opponent)
+
+
+func _add_side_pile(row: Control, title: String, count: int, x: float, side_size: Vector2, opponent: bool) -> void:
+	var pile := Button.new()
+	pile.set_meta("board_role", "pile_zone")
+	pile.set_anchors_preset(Control.PRESET_CENTER_TOP)
+	pile.offset_left = x
+	pile.offset_right = x + side_size.x
+	pile.offset_top = 1
+	pile.offset_bottom = 1 + side_size.y
+	pile.text = "%s\n%d" % [title, count]
+	pile.tooltip_text = "%s: %d cartas" % [title.capitalize(), count]
+	pile.disabled = true
+	pile.add_theme_font_size_override("font_size", 9)
+	pile.add_theme_color_override("font_disabled_color", Color("cbd5d2"))
+	pile.add_theme_stylebox_override("disabled", _style_box(Color("121a20c8"), Color("718087"), 2, 5, true))
+	row.add_child(pile)
+
+
+func _add_terrain_side(row: Control, table: Dictionary, player_id: int, opponent: bool, x: float, side_size: Vector2) -> void:
+	var zone: Dictionary = table["zones"]["terrain:%d" % player_id]
+	var destination := player_id == _viewer_id and _has_selected_action_type("play_terrain")
+	var terrain := Button.new()
+	terrain.name = "TerrainLane"
+	terrain.set_meta("board_role", "terrain_lane")
+	terrain.set_anchors_preset(Control.PRESET_CENTER_TOP)
+	terrain.offset_left = x
+	terrain.offset_right = x + side_size.x
+	terrain.offset_top = 1
+	terrain.offset_bottom = 1 + side_size.y
+	var terrain_name := "VACÍO"
+	if zone["count"] > 0:
+		terrain_name = zone["cards"][0].get("terrain_identity", {}).get("display_name", "ACTIVO")
+	terrain.text = "TERRITORIO\n%s" % terrain_name
+	terrain.tooltip_text = "Territorio de %s" % PLAYER_NAMES[player_id]
+	terrain.add_theme_font_size_override("font_size", 9)
+	terrain.add_theme_color_override("font_color", Color("f5df91") if destination else Color("b9c9bd"))
+	terrain.add_theme_stylebox_override("normal", _style_box(Color("33412bc8") if destination else Color("17251fc8"), Color("e2c977") if destination else Color("66806c"), 3 if destination else 2, 5, true))
+	terrain.add_theme_stylebox_override("hover", _style_box(Color("3c4b32"), Color("f2d98b"), 3, 5))
+	terrain.pressed.connect(_on_terrain_pressed.bind(player_id))
+	row.add_child(terrain)
+
+
+func _equipment_names_for(table: Dictionary, player_id: int, carrier_id: String) -> Array:
+	var names: Array = []
+	for card in table["zones"]["attachments:%d" % player_id]["cards"]:
+		if card["instance"]["metadata"].get("linked_to", "") == carrier_id:
+			names.append(card["definition"]["attributes"].get("display_name", "Equipo"))
+	return names
+
+
+func _build_terrain_lane(table: Dictionary, player_id: int, opponent: bool) -> Control:
+	var lane := PanelContainer.new()
+	lane.name = "TerrainLane"
+	lane.set_meta("board_role", "terrain_lane")
+	lane.custom_minimum_size.y = 46
+	var direct_destination := player_id == _viewer_id and _has_selected_action_type("play_terrain")
+	lane.add_theme_stylebox_override("panel", _style_box(Color("3c3c2488") if direct_destination else Color("0d18163d"), Color("e2c977") if direct_destination else Color("71896f70"), 2 if direct_destination else 1, 18, true))
+	var zone: Dictionary = table["zones"]["terrain:%d" % player_id]
+	if zone["count"] <= 0:
+		var empty := Button.new()
+		empty.text = ("TERRITORIO RIVAL" if opponent else "TU TERRITORIO") + ("  ·  JUGAR AQUÍ" if direct_destination else "  ·  VACÍO")
+		empty.add_theme_color_override("font_color", Color("f2d98b") if direct_destination else Color("8fa095"))
+		empty.flat = true
+		empty.pressed.connect(_on_terrain_pressed.bind(player_id))
+		lane.add_child(empty)
+	else:
+		var card: Dictionary = zone["cards"][0]
+		var content := HBoxContainer.new()
+		content.alignment = BoxContainer.ALIGNMENT_CENTER
+		var tile := _tile_from_card(card, player_id, "terrain")
+		content.add_child(tile)
+		if player_id == _viewer_id and _has_selected_action_type("play_terrain"):
+			var replace := Button.new()
+			replace.text = "JUGAR AQUÍ"
+			replace.pressed.connect(_on_terrain_pressed.bind(player_id))
+			content.add_child(replace)
+		lane.add_child(content)
+	return lane
+
+
+func _build_hand_row(table: Dictionary, player_id: int) -> Control:
+	var zone: Dictionary = table["zones"]["hand:%d" % player_id]
+	var scroll := Control.new()
+	scroll.name = "HandFan"
+	scroll.custom_minimum_size.y = 122
+	scroll.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	var cards: Array = zone["cards"] if zone["identities_visible"] else range(zone["count"])
+	var count := cards.size()
+	var step := 90.0
+	var total := step * maxi(0, count - 1)
+	for index in range(count):
+		var tile: Button
+		if zone["identities_visible"]:
+			tile = _tile_from_card(cards[index], player_id, "hand")
+		else:
+			tile = _make_card_tile("", "CARTA", "oculta", false, -1, "", -1, "", "", "", false, "opponent_hand")
+			tile.tooltip_text = "Carta %d de la mano rival" % (index + 1)
+		var tile_size: Vector2 = tile.custom_minimum_size
+		tile.set_anchors_preset(Control.PRESET_CENTER_TOP)
+		var x := -total * 0.5 + index * step - tile_size.x * 0.5
+		var distance := float(index) - float(count - 1) * 0.5
+		tile.offset_left = x
+		tile.offset_right = x + tile_size.x
+		tile.offset_top = 2
+		tile.offset_bottom = tile.offset_top + tile_size.y
+		tile.rotation_degrees = 0
+		tile.z_index = index
+		scroll.add_child(tile)
+	return scroll
+
+
+func _tile_from_card(card: Dictionary, player_id: int = -1, kind: String = "", visual_slot: int = -1) -> Button:
+	var attributes: Dictionary = card["definition"]["attributes"]
+	var title: String = attributes["display_name"]
+	if card.has("fusion_identity"):
+		title = card["fusion_identity"].get("display_name", title)
+	var detail: Array = []
+	if card.has("effective_stats"):
+		detail.append("%d/%d" % [card["effective_stats"]["attack"], card["effective_stats"]["defense"]])
+	var metadata: Dictionary = card["instance"]["metadata"]
+	if metadata.has("position"):
+		detail.append("ATQ" if metadata["position"] == "attack" else "GUARDIA")
+	if not metadata.get("face_up", true):
+		detail.append("oculta")
+	var card_type: String = attributes.get("card_type", "")
+	if card.has("fusion_identity"):
+		card_type = "fusion"
+	var display_mode := "hand" if kind == "hand" else ("terrain" if kind == "terrain" else ("opponent_field" if player_id >= 0 and player_id != _viewer_id else "field"))
+	return _make_card_tile(
+		card["instance"]["id"], title, " · ".join(detail), true, player_id, kind, visual_slot,
+		card_type, attributes.get("element", ""), metadata.get("position", ""), metadata.get("face_up", true), display_mode
+	)
+
+
+func _preview_tile_from_card(card: Dictionary) -> Button:
+	var attributes: Dictionary = card["definition"]["attributes"]
+	var metadata: Dictionary = card["instance"]["metadata"]
+	var title: String = card.get("fusion_identity", {}).get("display_name", attributes.get("display_name", "Carta"))
+	var card_kind: String = "fusion" if card.has("fusion_identity") else attributes.get("card_type", "")
+	var detail := ""
+	if card.has("effective_stats"):
+		detail = "ATQ %d  ·  DEF %d" % [card["effective_stats"]["attack"], card["effective_stats"]["defense"]]
+	var tile = CardTile.new()
+	tile.setup(card["instance"]["id"], title, detail, true, card_kind, attributes.get("element", ""), metadata.get("position", ""), metadata.get("face_up", true), "preview")
+	tile.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	return tile
+
+
+func _make_card_tile(
+	instance_id: String, title: String, detail: String, interactive: bool,
+	player_id: int = -1, kind: String = "", visual_slot: int = -1,
+	card_type: String = "", element: String = "", position: String = "",
+	face_up: bool = true, display_mode: String = "field"
+) -> Button:
+	var tile = CardTile.new()
+	tile.setup(instance_id, title, detail, interactive, card_type, element, position, face_up, display_mode)
+	tile.set_selected(not instance_id.is_empty() and instance_id == _selected_card_id)
+	tile.set_targeted(not instance_id.is_empty() and _is_direct_target(instance_id, player_id, kind))
+	if player_id >= 0 and not kind.is_empty():
+		tile.card_selected.connect(_on_board_card_selected.bind(player_id, kind, visual_slot))
+	else:
+		tile.card_selected.connect(_select_card)
+	tile.add_to_group("jcp_card_tiles")
+	return tile
+
+
+func _is_direct_target(instance_id: String, player_id: int, kind: String) -> bool:
+	if _selected_card_id.is_empty() or instance_id == _selected_card_id or _engine == null:
+		return false
+	var location: Dictionary = _visible_card_locations.get(instance_id, {})
+	for action in _engine.get_legal_actions(_viewer_id):
+		var payload: Dictionary = action["payload"]
+		if action["type"] == "fuse_creatures" and _selected_card_id in payload.get("material_instance_ids", []) and instance_id in payload.get("material_instance_ids", []):
+			return true
+		if payload.get("instance_id", "") != _selected_card_id and payload.get("attacker_id", "") != _selected_card_id:
+			continue
+		if action["type"] == "equip_item" and payload.get("target_instance_id", "") == instance_id:
+			return true
+		if action["type"] == "play_main_spell" and not location.is_empty() and payload.get("target_player_id", -1) == player_id and payload.get("target_slot", -2) == location.get("slot", -3):
+			return true
+		if action["type"] == "attack" and kind == "creatures" and player_id != _viewer_id and not location.is_empty() and payload.get("target_slot", -2) == location.get("slot", -3):
+			return true
+	return false
+
+
+func _zone_description(table: Dictionary, player_id: int, kind: String) -> String:
+	var zone: Dictionary = table["zones"]["%s:%d" % [kind, player_id]]
+	var count: int = zone["count"]
+	if count <= 0:
+		return "—"
+	if kind == "deck":
+		return "%d cartas" % count
+	if kind == "hand" and not zone["identities_visible"]:
+		return "%d cartas ocultas" % count
+	var cards: Array = zone["cards"]
+	if cards.is_empty():
+		return "%d cartas ocultas" % count
+	var descriptions: Array = []
+	for card in cards:
+		descriptions.append(_card_description(card))
+	return " · ".join(descriptions)
+
+
+func _card_description(card: Dictionary) -> String:
+	var instance: Dictionary = card["instance"]
+	var attributes: Dictionary = card["definition"]["attributes"]
+	var name: String = attributes["display_name"]
+	if card.has("fusion_identity"):
+		name = card["fusion_identity"].get("display_name", name)
+	var details: Array = []
+	if card.has("effective_stats"):
+		details.append("%d/%d" % [card["effective_stats"]["attack"], card["effective_stats"]["defense"]])
+	if instance["metadata"].has("position"):
+		details.append("ATQ" if instance["metadata"]["position"] == "attack" else "GUARDIA")
+	if not instance["metadata"].get("face_up", true):
+		details.append("boca abajo")
+	return "%s%s" % [name, " [%s]" % ", ".join(details) if not details.is_empty() else ""]
+
+
+func _visible_card_index(table: Dictionary) -> Dictionary:
+	var result := {}
+	for zone_id in table["zones"]:
+		for card in table["zones"][zone_id]["cards"]:
+			result[card["instance"]["id"]] = _card_description(card)
+	return result
+
+
+func _visible_cards_by_id(table: Dictionary) -> Dictionary:
+	var result := {}
+	for zone_id in table["zones"]:
+		for card in table["zones"][zone_id]["cards"]:
+			result[card["instance"]["id"]] = card
+	return result
+
+
+func _card_detail_text(card: Dictionary) -> String:
+	if card.is_empty():
+		return ""
+	var attributes: Dictionary = card["definition"]["attributes"]
+	var title: String = attributes.get("display_name", "Carta")
+	var effect_text: String = attributes.get("effect_text", "")
+	var identity_lines: Array = []
+	if card.has("fusion_identity"):
+		var fusion: Dictionary = card["fusion_identity"]
+		title = fusion.get("display_name", title)
+		effect_text = fusion.get("effect_text", effect_text)
+		identity_lines.append("Fusión %s" % fusion.get("id", ""))
+	else:
+		identity_lines.append("%s · coste %d" % [_card_type_name(attributes.get("card_type", "")), int(attributes.get("cost", 0))])
+	var stat_line := ""
+	if card.has("effective_stats"):
+		stat_line = "ATQ %d · DEF %d" % [card["effective_stats"]["attack"], card["effective_stats"]["defense"]]
+	var traits: Array = []
+	var element: String = attributes.get("element", "")
+	if not element.is_empty():
+		traits.append(_element_name(element))
+	for family in attributes.get("families", []):
+		traits.append(String(family).capitalize())
+	var lines: Array = ["[b]%s[/b]" % title, " · ".join(identity_lines)]
+	if not stat_line.is_empty():
+		lines.append(stat_line)
+	if not traits.is_empty():
+		lines.append(" · ".join(traits))
+	if not effect_text.is_empty():
+		lines.append(effect_text)
+	return "\n".join(lines)
+
+
+func _card_type_name(card_type: String) -> String:
+	return {
+		"creature": "Criatura", "spell": "Magia", "trap": "Trampa",
+		"item": "Objeto", "terrain": "Terreno",
+	}.get(card_type, card_type.capitalize())
+
+
+func _element_name(element: String) -> String:
+	return {
+		"nature": "Naturaleza", "water": "Agua", "fire": "Fuego", "neutral": "Neutral",
+		"light": "Luz", "darkness": "Oscuridad", "earth": "Tierra", "air": "Aire",
+	}.get(element, element.capitalize())
+
+
+func _update_result_panel(game: Dictionary) -> void:
+	var finished: bool = _engine.lifecycle_name() == "FINISHED"
+	_result_panel.visible = finished and not _privacy_hidden
+	if not finished:
+		_result_label.text = ""
+		return
+	var winners: Array = game.get("winner_ids", [])
+	var result_text := "EMPATE" if winners.size() != 1 else "%s GANA LA PARTIDA" % PLAYER_NAMES[int(winners[0])]
+	_result_label.text = "%s\nMotivo: %s" % [result_text, _finished_reason_name(game.get("finished_reason", ""))]
+
+
+func _finished_reason_name(reason: String) -> String:
+	return {
+		"concession": "rendición", "life_zero": "vida agotada", "deck_empty": "baraja agotada al intentar robar",
+	}.get(reason, reason.replace("_", " ").to_lower())
+
+
+func _visible_card_location_index(table: Dictionary) -> Dictionary:
+	var result := {}
+	for zone_id in table["zones"]:
+		var parts: PackedStringArray = zone_id.split(":")
+		if parts.size() != 2:
+			continue
+		for slot in table["zones"][zone_id]["slots"]:
+			if slot["card"] != null:
+				result[slot["card"]["instance"]["id"]] = {"kind": parts[0], "player_id": int(parts[1]), "slot": slot["index"]}
+	return result
+
+
+func _action_mentions_card(action: Dictionary, instance_id: String) -> bool:
+	if instance_id.is_empty():
+		return false
+	for value in action["payload"].values():
+		if (value is String and value == instance_id) or (value is Array and instance_id in value):
+			return true
+	var location: Dictionary = _visible_card_locations.get(instance_id, {})
+	if location.is_empty():
+		return false
+	var payload: Dictionary = action["payload"]
+	if location["kind"] == "support" and location["player_id"] == action["actor_id"] and payload.get("support_slot", -1) == location["slot"]:
+		return true
+	if location["kind"] == "creatures" and location["player_id"] != action["actor_id"] and payload.get("target_slot", -1) == location["slot"]:
+		return true
+	return false
+
+
+func _action_family_key(action: Dictionary) -> String:
+	var payload: Dictionary = action["payload"].duplicate(true)
+	for choice_key in ["target_instance_id", "target_player_id", "target_slot", "peek_support_slot", "position", "choice", "guardian_id", "target_creature_id"]:
+		payload.erase(choice_key)
+	return "%s|%s" % [action["type"], JSON.stringify(payload)]
+
+
+func _group_action_entries(entries: Array) -> Array:
+	var groups: Array = []
+	var index_by_key: Dictionary = {}
+	for entry in entries:
+		var key := _action_family_key(entry["action"])
+		if not index_by_key.has(key):
+			index_by_key[key] = groups.size()
+			groups.append({"key": key, "actions": []})
+		groups[index_by_key[key]]["actions"].append(entry["action"])
+	return groups
+
+
+func _select_card(instance_id: String) -> void:
+	_selected_card_id = instance_id
+	_choice_actions = []
+	_pending_visual_placement = {}
+	var location: Dictionary = _visible_card_locations.get(instance_id, {})
+	var game: Dictionary = _engine.get_player_state(_viewer_id)["game"] if _engine != null else {}
+	if location.get("kind", "") == "creatures" and location.get("player_id", -1) == _viewer_id:
+		if game.get("phase", "") == "COMBAT":
+			_status_message = "Atacante seleccionado: pulsa una criatura rival iluminada o la vida rival para ataque directo."
+		else:
+			_status_message = "Criatura seleccionada. Para atacar, pulsa IR A COMBATE; para Fusionar, elige un material iluminado."
+	else:
+		_status_message = "Carta seleccionada: pulsa una casilla amarilla o una carta objetivo válida."
+	_refresh()
+
+
+func _selection_instruction(actions: Array, visible_index: Dictionary) -> String:
+	if _selected_card_id.is_empty():
+		return "1. Selecciona una carta de tu mano o campo.\n2. La mesa iluminará únicamente sus destinos legales."
+	var name: String = visible_index.get(_selected_card_id, "Carta")
+	var action_types: Array = []
+	for action in actions:
+		if _action_mentions_card(action, _selected_card_id) and action["type"] not in action_types:
+			action_types.append(action["type"])
+	if "equip_item" in action_types:
+		return "%s\nEQUIPO: elige una criatura propia iluminada. Se vincula a ella y no ocupa una casilla de Apoyo." % name
+	if "play_main_spell" in action_types:
+		return "%s\nMAGIA INSTANTÁNEA: elige el objetivo iluminado. Se resuelve y después va al Cementerio." % name
+	if "play_persistent" in action_types:
+		return "%s\nMAGIA PERSISTENTE: elige una casilla de Apoyo. Quedará boca arriba mientras siga activa." % name
+	if "set_support" in action_types:
+		return "%s\nTRAMPA O RESPUESTA: elige una casilla de Apoyo. Quedará preparada boca abajo." % name
+	if "play_terrain" in action_types:
+		return "%s\nTERRENO: pulsa tu zona central de Territorio." % name
+	if "summon_creature" in action_types or "set_creature" in action_types:
+		return "%s\nCRIATURA: elige una casilla. Después decidirás ataque visible o guardia oculta." % name
+	if "attack" in action_types:
+		return "%s\nATACANTE: pulsa una criatura rival iluminada o la Vida rival si el ataque directo está permitido." % name
+	var location: Dictionary = _visible_card_locations.get(_selected_card_id, {})
+	if location.get("kind", "") == "creatures" and location.get("player_id", -1) == _viewer_id:
+		return "%s\nCRIATURA: usa IR A COMBATE para atacar; los cambios de postura y habilidades aparecen aquí cuando son legales." % name
+	return "%s\nEsta carta no tiene ahora un destino directo legal. Consulta su ficha o cambia de fase." % name
+
+
+func _open_action_choices(actions: Array) -> void:
+	_choice_actions = actions.duplicate(true)
+	_refresh()
+
+
+func _cancel_choices() -> void:
+	_choice_actions = []
+	_pending_visual_placement = {}
+	_refresh()
+
+
+func _perform_choice(action: Dictionary) -> void:
+	_choice_actions = []
+	_perform_action(action)
+
+
+func _describe_action(action: Dictionary, cards: Dictionary) -> String:
+	var text: String = action["label"]
+	if action["type"] == "summon_creature":
+		text = "ATAQUE · Visible\n" + text
+	elif action["type"] == "set_creature":
+		text = "GUARDIA · Oculta\n" + text
+	var payload: Dictionary = action["payload"]
+	var references: Array = []
+	for key in ["instance_id", "source_instance_id", "target_instance_id", "attacker_id", "guardian_id"]:
+		if payload.has(key):
+			references.append("%s: %s" % [_payload_label(key), cards.get(payload[key], "carta visible")])
+	if payload.has("material_instance_ids"):
+		var materials: Array = []
+		for instance_id in payload["material_instance_ids"]:
+			materials.append(cards.get(instance_id, "carta visible"))
+		references.append("materiales: %s" % " + ".join(materials))
+	if payload.has("target_slot"):
+		references.append("casilla objetivo %d" % (int(payload["target_slot"]) + 1) if int(payload["target_slot"]) >= 0 else "ataque directo")
+	if payload.has("peek_support_slot"):
+		references.append("apoyo rival %d" % (int(payload["peek_support_slot"]) + 1))
+	if payload.has("support_slot"):
+		references.append("apoyo %d" % (int(payload["support_slot"]) + 1))
+	if payload.has("target_position"):
+		references.append("postura %s" % payload["target_position"])
+	if payload.has("choice"):
+		references.append("elección %s" % payload["choice"])
+	if not references.is_empty():
+		text += "\n  " + " · ".join(references)
+	return text
+
+
+func _payload_label(key: String) -> String:
+	return {
+		"instance_id": "carta", "source_instance_id": "origen", "target_instance_id": "objetivo",
+		"attacker_id": "atacante", "guardian_id": "guardián",
+	}.get(key, key)
+
+
+func _render_events() -> void:
+	var events: Array = _engine.get_events(0, _viewer_id)
+	var first: int = maxi(0, events.size() - 14)
+	var lines: Array = []
+	for index in range(first, events.size()):
+		var event: Dictionary = events[index]
+		lines.append("[color=#8fb9d4]#%d[/color] %s  [color=#aeb9c1]%s[/color]" % [event["sequence"], _event_name(event["type"]), JSON.stringify(event["payload"])])
+	_event_log.text = "\n".join(lines)
+	_event_log.scroll_to_line(maxi(0, lines.size() - 1))
+
+
+func _toggle_event_log(button: Button) -> void:
+	_event_expanded = not _event_expanded
+	_event_log.visible = _event_expanded
+	_event_panel.custom_minimum_size.y = 150 if _event_expanded else 30
+	button.text = "HISTORIAL DE LA PARTIDA  %s" % ("▾" if _event_expanded else "▸")
+
+
+func _event_name(type: String) -> String:
+	return {
+		"engine_started": "Motor iniciado", "phase_started": "Comienza fase", "turn_started": "Comienza turno",
+		"card_drawn": "Carta robada", "private_card_drawn": "Robo privado", "creature_summoned": "Criatura invocada",
+		"creature_set": "Criatura colocada", "attack_declared": "Ataque declarado", "combat_resolved": "Combate resuelto",
+		"reaction_activated": "Respuesta activada", "reaction_resolved": "Respuesta resuelta",
+		"creature_private_inspection": "Inspección realizada", "private_support_inspected": "Apoyo inspeccionado",
+		"creature_attack_redirected": "Ataque redirigido",
+	}.get(type, type.replace("_", " ").capitalize())
+
+
+func _phase_name(phase: String) -> String:
+	return {
+		"START": "Inicio", "DRAW": "Robo", "MAIN_1": "Principal 1", "COMBAT": "Combate",
+		"MAIN_2": "Principal 2", "END": "Final", "FINISHED": "Partida terminada",
+	}.get(phase, phase)
+
+
+func _perform_action(action: Dictionary, from_ai: bool = false) -> bool:
+	_request_number += 1
+	var request_id := "table-%06d" % _request_number
+	var result = _engine.perform_action(GameAction.new(action["type"], action["actor_id"], action["payload"], request_id))
+	if not result.success:
+		_status_message = "Acción rechazada: %s — %s" % [result.code, result.message]
+		_refresh()
+		return false
+	_status_message = "Aplicada: %s" % action["label"]
+	if not from_ai and not _pending_visual_placement.is_empty():
+		var placement_key := "%s:%d" % [_pending_visual_placement["kind"], _pending_visual_placement["player_id"]]
+		if not _visual_slot_assignments.has(placement_key):
+			_visual_slot_assignments[placement_key] = {}
+		_visual_slot_assignments[placement_key][_pending_visual_placement["instance_id"]] = _pending_visual_placement["slot"]
+	_selected_card_id = ""
+	_choice_actions = []
+	_pending_visual_placement = {}
+	if _engine.lifecycle_name() == "RUNNING":
+		var public_game: Dictionary = _engine.get_public_state()["game"]
+		_auto_resolve_opening(public_game["active_player"])
+	if _ai_enabled.button_pressed and _engine.lifecycle_name() == "RUNNING":
+		_viewer_id = 0
+		_privacy_hidden = false
+		_schedule_ai_if_needed()
+	elif _auto_follow.button_pressed and _engine.lifecycle_name() == "RUNNING":
+		var game: Dictionary = _engine.get_public_state()["game"]
+		var response: Dictionary = game["response_window"]
+		var next_viewer: int = response.get("priority_player_id", game["active_player"]) if response.get("active", false) else game["active_player"]
+		if next_viewer != _viewer_id:
+			_viewer_id = next_viewer
+			_privacy_hidden = true
+	_refresh()
+	return true
+
+
+func _on_action_pressed(index: int) -> void:
+	perform_legal_action(index)
+
+
+func _toggle_privacy() -> void:
+	_privacy_hidden = not _privacy_hidden
+	_refresh()
+
+
+func _restart_pressed() -> void:
+	start_match(int(_seed_input.value))
+
+
+func _on_empty_slot_pressed(player_id: int, kind: String, visual_slot: int) -> void:
+	if player_id != _viewer_id and kind == "creatures" and not _selected_card_id.is_empty():
+		for action in _engine.get_legal_actions(_viewer_id):
+			if action["type"] == "attack" and action["payload"].get("attacker_id", "") == _selected_card_id and action["payload"].get("target_slot", -2) == -1:
+				_perform_action(action)
+				return
+	if player_id != _viewer_id or _selected_card_id.is_empty() or _privacy_hidden:
+		_status_message = "Selecciona primero una carta de tu mano." if _selected_card_id.is_empty() else "Esa casilla no pertenece a tu lado."
+		_refresh()
+		return
+	var allowed_types: Array = ["summon_creature", "set_creature"] if kind == "creatures" else ["set_support", "play_persistent"]
+	var candidates: Array = []
+	for action in _engine.get_legal_actions(_viewer_id):
+		if action["type"] in allowed_types and action["payload"].get("instance_id", "") == _selected_card_id:
+			candidates.append(action)
+	if candidates.is_empty():
+		_status_message = "Esa carta no puede jugarse en esta casilla durante la fase actual."
+		_refresh()
+		return
+	_pending_visual_placement = {"kind": kind, "player_id": player_id, "slot": visual_slot, "instance_id": _selected_card_id}
+	if candidates.size() == 1:
+		_perform_action(candidates[0])
+	else:
+		_status_message = "Elige cómo entra la criatura: visible en ataque u oculta en guardia."
+		_open_action_choices(candidates)
+
+
+func _on_board_card_selected(instance_id: String, player_id: int, kind: String, _visual_slot: int) -> void:
+	if _selected_card_id.is_empty() or _selected_card_id == instance_id:
+		_select_card(instance_id)
+		return
+	var location: Dictionary = _visible_card_locations.get(instance_id, {})
+	var candidates: Array = []
+	for action in _engine.get_legal_actions(_viewer_id):
+		var payload: Dictionary = action["payload"]
+		if action["type"] == "fuse_creatures" and _selected_card_id in payload.get("material_instance_ids", []) and instance_id in payload.get("material_instance_ids", []):
+			candidates.append(action)
+			continue
+		var uses_selected: bool = payload.get("instance_id", "") == _selected_card_id or payload.get("attacker_id", "") == _selected_card_id
+		if not uses_selected:
+			continue
+		if action["type"] in ["equip_item"] and payload.get("target_instance_id", "") == instance_id:
+			candidates.append(action)
+		elif action["type"] == "play_main_spell" and not location.is_empty() and payload.get("target_player_id", -1) == player_id and payload.get("target_slot", -2) == location.get("slot", -3):
+			candidates.append(action)
+		elif action["type"] == "attack" and kind == "creatures" and player_id != _viewer_id and not location.is_empty() and payload.get("target_slot", -2) == location.get("slot", -3):
+			candidates.append(action)
+	if candidates.size() == 1:
+		_perform_action(candidates[0])
+	elif candidates.size() > 1:
+		_status_message = "Elige la acción exacta para esa carta objetivo."
+		_open_action_choices(candidates)
+	else:
+		var selected_location: Dictionary = _visible_card_locations.get(_selected_card_id, {})
+		if selected_location.get("kind", "") == "creatures" and selected_location.get("player_id", -1) == _viewer_id and kind == "creatures" and player_id != _viewer_id:
+			var phase: String = _engine.get_public_state()["game"]["phase"]
+			_status_message = "Todavía estás en %s. Mantengo tu atacante seleccionado: pulsa IR A COMBATE y después el objetivo." % _phase_name(phase) if phase != "COMBAT" else "Esa criatura no es un objetivo legal para este atacante."
+			_refresh()
+			return
+		_select_card(instance_id)
+
+
+func _on_direct_player_pressed() -> void:
+	if _selected_card_id.is_empty() or _engine == null:
+		return
+	for action in _engine.get_legal_actions(_viewer_id):
+		if action["type"] == "attack" and action["payload"].get("attacker_id", "") == _selected_card_id and action["payload"].get("target_slot", -2) == -1:
+			_perform_action(action)
+			return
+
+
+func _on_terrain_pressed(player_id: int) -> void:
+	if player_id != _viewer_id or _selected_card_id.is_empty():
+		_status_message = "Selecciona un Terreno de tu mano y después tu franja de Territorio."
+		_refresh()
+		return
+	for action in _engine.get_legal_actions(_viewer_id):
+		if action["type"] == "play_terrain" and action["payload"].get("instance_id", "") == _selected_card_id:
+			var table: Dictionary = _engine.get_player_state(_viewer_id)["game"]["card_table"]
+			var terrain_zone: Dictionary = table["zones"]["terrain:%d" % player_id]
+			if terrain_zone["count"] <= 0:
+				_perform_action(action)
+				return
+			var current: Dictionary = terrain_zone["cards"][0]
+			var incoming: Dictionary = _visible_cards_by_id(table).get(_selected_card_id, {})
+			var current_identity: Dictionary = current.get("terrain_identity", {})
+			var incoming_id: String = incoming.get("definition", {}).get("id", "")
+			var preview_key := "%s|%s" % [current_identity.get("id", ""), incoming_id]
+			var incoming_name: String = incoming.get("definition", {}).get("attributes", {}).get("display_name", "el nuevo Terreno")
+			if TERRAIN_PREVIEWS.has(preview_key):
+				var transformation_name: String = TERRAIN_PREVIEWS[preview_key]
+				if _perform_action(action):
+					_status_message = "Transformación de Territorio: %s + %s → %s." % [current_identity.get("display_name", "Terreno actual"), incoming_name, transformation_name]
+					_refresh()
+				return
+			_terrain_dialog.dialog_text = "%s sustituirá a %s.\nLa carta anterior irá al Cementerio." % [incoming_name, current_identity.get("display_name", "el Terreno actual")]
+			_pending_terrain_action = action
+			_terrain_dialog.popup_centered()
+			return
+	_status_message = "La carta seleccionada no puede jugarse como Terreno ahora."
+	_refresh()
+
+
+func _confirm_terrain() -> void:
+	if _pending_terrain_action.is_empty():
+		return
+	var action := _pending_terrain_action
+	_pending_terrain_action = {}
+	_perform_action(action)
+
+
+func _has_selected_action_type(action_type: String) -> bool:
+	if _selected_card_id.is_empty() or _engine == null:
+		return false
+	for action in _engine.get_legal_actions(_viewer_id):
+		if action["type"] == action_type and action["payload"].get("instance_id", "") == _selected_card_id:
+			return true
+	return false
+
+
+func _selected_card_can_enter(kind: String) -> bool:
+	var accepted: Array = ["summon_creature", "set_creature"] if kind == "creatures" else ["set_support", "play_persistent"]
+	for action_type in accepted:
+		if _has_selected_action_type(action_type):
+			return true
+	return false
+
+
+func _selected_direct_attack_available() -> bool:
+	if _selected_card_id.is_empty() or _engine == null:
+		return false
+	for action in _engine.get_legal_actions(_viewer_id):
+		if action["type"] == "attack" and action["payload"].get("attacker_id", "") == _selected_card_id and action["payload"].get("target_slot", -2) == -1:
+			return true
+	return false
+
+
+func _hidden_slot_attack_available(player_id: int, engine_slot: int) -> bool:
+	if player_id == _viewer_id or _selected_card_id.is_empty() or _engine == null:
+		return false
+	for action in _engine.get_legal_actions(_viewer_id):
+		if action["type"] == "attack" and action["payload"].get("attacker_id", "") == _selected_card_id and action["payload"].get("target_slot", -2) == engine_slot:
+			return true
+	return false
+
+
+func _on_hidden_board_card_selected(_ui_id: String, player_id: int, kind: String, engine_slot: int) -> void:
+	if player_id == _viewer_id or kind != "creatures":
+		return
+	for action in _engine.get_legal_actions(_viewer_id):
+		if action["type"] == "attack" and action["payload"].get("attacker_id", "") == _selected_card_id and action["payload"].get("target_slot", -2) == engine_slot:
+			_perform_action(action)
+			return
+	_status_message = "La carta está en guardia, pero todavía no existe un ataque legal contra esa casilla."
+	_refresh()
+
+
+func _sync_visual_slots(table: Dictionary) -> void:
+	for player_id in [0, 1]:
+		for kind in ["creatures", "support"]:
+			var key := "%s:%d" % [kind, player_id]
+			var assignments: Dictionary = _visual_slot_assignments.get(key, {})
+			var visible_ids: Array = []
+			for card in table["zones"][key]["cards"]:
+				visible_ids.append(card["instance"]["id"])
+			for instance_id in assignments.keys():
+				if instance_id not in visible_ids:
+					assignments.erase(instance_id)
+			var used: Array = assignments.values()
+			for instance_id in visible_ids:
+				if assignments.has(instance_id):
+					continue
+				for slot_index in range(5):
+					if slot_index not in used:
+						assignments[instance_id] = slot_index
+						used.append(slot_index)
+						break
+			_visual_slot_assignments[key] = assignments
+
+
+func _visual_slot_for(kind: String, player_id: int, instance_id: String) -> int:
+	return int(_visual_slot_assignments.get("%s:%d" % [kind, player_id], {}).get(instance_id, 0))
+
+
+func _update_advance_button(game: Dictionary) -> void:
+	var actor: int = _current_actor(game)
+	var owns_turn: bool = game["active_player"] == _viewer_id
+	var blocked: bool = actor != _viewer_id or not owns_turn or _privacy_hidden or _engine.lifecycle_name() != "RUNNING" or game["response_window"].get("active", false)
+	_advance_button.disabled = blocked
+	_end_turn_button.disabled = blocked
+	if actor != _viewer_id:
+		_advance_button.text = "Turno del rival…"
+		return
+	_advance_button.text = {
+		"START": "Comenzar robo", "DRAW": "Ir a Principal 1", "MAIN_1": "Ir a Combate",
+		"COMBAT": "Ir a Principal 2", "MAIN_2": "Ir a Final", "END": "Terminar turno",
+	}.get(game["phase"], "Fase siguiente")
+
+
+func _update_phase_track(current_phase: String) -> void:
+	for phase_id in _phase_labels:
+		var label: Label = _phase_labels[phase_id]
+		var active: bool = phase_id == current_phase
+		label.add_theme_color_override("font_color", Color("ffe291") if active else Color("66767d"))
+		label.add_theme_stylebox_override("normal", _style_box(Color("4a4026") if active else Color("101a20"), Color("d7b85f") if active else Color("293940"), 1, 3))
+
+
+func _advance_phase_pressed() -> void:
+	for action in _engine.get_legal_actions(_viewer_id):
+		if action["type"] == "advance_phase":
+			_perform_action(action)
+			return
+
+
+func _end_turn_pressed() -> void:
+	if _end_turn_dialog != null:
+		_end_turn_dialog.popup_centered()
+
+
+func _confirm_end_turn() -> void:
+	if _engine == null or _engine.lifecycle_name() != "RUNNING":
+		return
+	var starting_player: int = _engine.get_public_state()["game"]["active_player"]
+	if starting_player != _viewer_id:
+		return
+	var safety := 8
+	while safety > 0 and _engine.lifecycle_name() == "RUNNING":
+		safety -= 1
+		var game: Dictionary = _engine.get_public_state()["game"]
+		if game["active_player"] != starting_player or game["response_window"].get("active", false):
+			break
+		var advance: Dictionary = {}
+		for action in _engine.get_legal_actions(starting_player):
+			if action["type"] == "advance_phase":
+				advance = action
+				break
+		if advance.is_empty() or not _perform_action(advance):
+			break
+
+
+func _auto_resolve_opening(player_id: int) -> void:
+	var safety := 3
+	while safety > 0 and _engine != null and _engine.lifecycle_name() == "RUNNING":
+		safety -= 1
+		var game: Dictionary = _engine.get_public_state()["game"]
+		if game["active_player"] != player_id or game["phase"] not in ["START", "DRAW"] or game["response_window"].get("active", false):
+			break
+		var advance: Dictionary = {}
+		for action in _engine.get_legal_actions(player_id):
+			if action["type"] == "advance_phase":
+				advance = action
+				break
+		if advance.is_empty():
+			break
+		_request_number += 1
+		var result = _engine.perform_action(GameAction.new(advance["type"], player_id, advance["payload"], "table-auto-%06d" % _request_number))
+		if not result.success:
+			_status_message = "No se pudo resolver automáticamente %s." % _phase_name(game["phase"])
+			break
+
+
+func _current_actor(game: Dictionary) -> int:
+	var response: Dictionary = game["response_window"]
+	return int(response.get("priority_player_id", game["active_player"])) if response.get("active", false) else int(game["active_player"])
+
+
+func _ai_is_actor(game: Dictionary) -> bool:
+	return _ai_enabled != null and _ai_enabled.button_pressed and _current_actor(game) == 1
+
+
+func _on_ai_toggled(enabled: bool) -> void:
+	if enabled:
+		_viewer_id = 0
+		_privacy_hidden = false
+		_status_message = "Rival automático activado. Tú juegas como Jugador 1."
+		_schedule_ai_if_needed()
+	else:
+		_status_message = "Modo local para dos personas activado."
+	_refresh()
+
+
+func _schedule_ai_if_needed() -> void:
+	if _ai_running or not _ai_enabled.button_pressed or _engine == null or _engine.lifecycle_name() != "RUNNING":
+		return
+	var game: Dictionary = _engine.get_public_state()["game"]
+	if _current_actor(game) == 1:
+		call_deferred("_run_ai_until_human")
+
+
+func _run_ai_until_human() -> void:
+	if _ai_running:
+		return
+	_ai_running = true
+	var safety := 80
+	while safety > 0 and _engine.lifecycle_name() == "RUNNING":
+		safety -= 1
+		var game: Dictionary = _engine.get_public_state()["game"]
+		if _current_actor(game) != 1:
+			break
+		var actions: Array = _engine.get_legal_actions(1)
+		var choice := _choose_ai_action(actions, game["phase"], game["response_window"].get("active", false))
+		if choice.is_empty() or not _perform_action(choice, true):
+			break
+		await get_tree().create_timer(0.001 if DisplayServer.get_name() == "headless" else 0.18).timeout
+	_ai_running = false
+	if _engine.lifecycle_name() == "RUNNING":
+		_auto_resolve_opening(0)
+	_refresh()
+
+
+func _choose_ai_action(actions: Array, phase: String, response_active: bool) -> Dictionary:
+	if actions.is_empty():
+		return {}
+	if response_active:
+		for preferred in ["activate_reaction", "redirect_attack", "decline_redirect", "choose_fusion_combat_bonus", "pass_reaction"]:
+			for action in actions:
+				if action["type"] == preferred:
+					return action
+	var priorities: Array = [
+		"fuse_creatures", "summon_creature", "set_support", "play_persistent", "equip_item",
+		"play_main_spell", "play_terrain", "activate_creature_ability", "activate_fusion_ability",
+		"attack", "change_position", "advance_phase",
+	]
+	if phase == "COMBAT":
+		priorities.erase("attack")
+		priorities.push_front("attack")
+	for action_type in priorities:
+		for action in actions:
+			if action["type"] == action_type:
+				return action
+	return actions[0]
+
+
+func _clear_children(node: Node) -> void:
+	for child in node.get_children():
+		node.remove_child(child)
+		child.queue_free()
+
+
+func _count_card_tiles(node: Node) -> int:
+	var count := 1 if node is CardTile else 0
+	for child in node.get_children():
+		count += _count_card_tiles(child)
+	return count
+
+
+func _count_nodes_with_role(node: Node, role: String) -> int:
+	var count := 1 if node.get_meta("board_role", "") == role else 0
+	for child in node.get_children():
+		count += _count_nodes_with_role(child, role)
+	return count
+
+
+func _style_box(fill: Color, border: Color, width: int = 1, radius: int = 4, dashed: bool = false) -> StyleBoxFlat:
+	var style := StyleBoxFlat.new()
+	style.bg_color = fill
+	style.border_color = border
+	style.set_border_width_all(width)
+	style.set_corner_radius_all(radius)
+	style.content_margin_left = 5
+	style.content_margin_right = 5
+	style.content_margin_top = 3
+	style.content_margin_bottom = 3
+	if dashed:
+		style.border_blend = true
+	return style

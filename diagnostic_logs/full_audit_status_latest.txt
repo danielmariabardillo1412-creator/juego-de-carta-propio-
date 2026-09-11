@@ -1,0 +1,20 @@
+UNIVERSAL CARD ENGINE FULL AUDIT
+Project: C:\Users\danie\OneDrive\Documentos\zapity\juego_cartas_propio\engine
+Godot command: godot
+Started: 08/09/2026  3:31:46,67
+package_integrity=1
+static_audit=0
+diagnostic=9009
+uce_01=9009
+uce_02=9009
+uce_03=9009
+uce_f01=9009
+uce_f02=9009
+uce_f03=9009
+uce_f04=9009
+uce_f05=9009
+complete=9009
+main_scene=9009
+Finished: 08/09/2026  3:31:49,12
+FINAL=FAIL
+Failure count: 12

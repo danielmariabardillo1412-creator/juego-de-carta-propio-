@@ -1,0 +1,13 @@
+{
+  "schema_version": 1,
+  "drive_folder_id": "1m54Q-WmufRhdVleWMq6mTwUbP3Nzxqcl",
+  "synced_at": "2026-09-08",
+  "sources": [
+    {"key":"S00","title":"00_ESTADO_Y_METODO_DE_TRABAJO","type":"document","id":"1zj5HK8ZTlIjGlBPezB-AdAufm2VI83e-Xv_mBNZnS34","modified_time":"2026-08-06T18:13:32.228Z","local_file":"00_ESTADO_Y_METODO_DE_TRABAJO.md"},
+    {"key":"S01","title":"01_MECANICAS_BASICAS_EN_DISCUSION","type":"document","id":"1xpD7h8yYE-KiSRHxJ_MADk5J3fwG1HeJ5yftbre-RPs","modified_time":"2026-08-07T03:17:05.104Z","local_file":"01_MECANICAS_BASICAS_EN_DISCUSION.md"},
+    {"key":"S02","title":"02_TABLA_PRESUPUESTO_DE_CARTAS_V0_1","type":"spreadsheet","id":"1_IQTmvl9pOBa3erD9jsuEA0XaJJ5y2vgDSfosndaEU8","modified_time":"2026-08-06T20:30:27.115Z","local_file":"02_TABLA_PRESUPUESTO_DE_CARTAS_V0_1.md"},
+    {"key":"S03","title":"03_BIBLIA_DE_FAMILIAS_Y_COMBINACIONES_V0_1","type":"document","id":"1TVwhTVJsh05xG_Zf8HGxG11apnLkm7G01ylIe3Py_as","modified_time":"2026-08-07T15:21:31.840Z","local_file":"03_BIBLIA_DE_FAMILIAS_Y_COMBINACIONES_V0_1.md"},
+    {"key":"S04","title":"04_LIBRO_DE_FUSIONES_V0_1","type":"document","id":"1Gu55n80M9Nk7c4t8h73ygAltNZttdu5Tnk8Glr3vvf4","modified_time":"2026-08-07T15:21:19.645Z","local_file":"04_LIBRO_DE_FUSIONES_V0_1.md"},
+    {"key":"S05","title":"05_PERSONAJES_ESPECIALES_Y_CARTAS_DE_AMIGOS_V0_1","type":"document","id":"1rnWDSLhZMo1C2EImQzRnw75h1WG9i4C-3l8IyiK60iE","modified_time":"2026-08-07T16:14:47.320Z","local_file":"05_PERSONAJES_ESPECIALES_Y_CARTAS_DE_AMIGOS_V0_1.md"}
+  ]
+}

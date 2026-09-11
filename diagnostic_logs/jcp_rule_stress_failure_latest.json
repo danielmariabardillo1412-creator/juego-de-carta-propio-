@@ -1,0 +1,4202 @@
+{
+	"action": {
+		"actor_id": 1,
+		"label": "Fusionar en attack: Elemental Mayor de Agua",
+		"metadata": {},
+		"payload": {
+			"material_instance_ids": [
+				"jcp-00004",
+				"jcp-00016"
+			],
+			"position": "attack"
+		},
+		"type": "fuse_creatures"
+	},
+	"actions": [
+		{
+			"actor_id": 1,
+			"payload": {},
+			"request_id": "rule-9-0",
+			"type": "advance_phase"
+		},
+		{
+			"actor_id": 1,
+			"payload": {},
+			"request_id": "rule-9-1",
+			"type": "advance_phase"
+		},
+		{
+			"actor_id": 1,
+			"payload": {
+				"instance_id": "jcp-00004"
+			},
+			"request_id": "rule-9-2",
+			"type": "summon_creature"
+		},
+		{
+			"actor_id": 1,
+			"payload": {
+				"instance_id": "jcp-00080"
+			},
+			"request_id": "rule-9-3",
+			"type": "play_terrain"
+		},
+		{
+			"actor_id": 1,
+			"payload": {
+				"instance_id": "jcp-00044"
+			},
+			"request_id": "rule-9-4",
+			"type": "play_persistent"
+		},
+		{
+			"actor_id": 1,
+			"payload": {},
+			"request_id": "rule-9-5",
+			"type": "advance_phase"
+		},
+		{
+			"actor_id": 1,
+			"payload": {},
+			"request_id": "rule-9-6",
+			"type": "advance_phase"
+		},
+		{
+			"actor_id": 1,
+			"payload": {},
+			"request_id": "rule-9-7",
+			"type": "advance_phase"
+		},
+		{
+			"actor_id": 1,
+			"payload": {},
+			"request_id": "rule-9-8",
+			"type": "advance_phase"
+		},
+		{
+			"actor_id": 0,
+			"payload": {},
+			"request_id": "rule-9-9",
+			"type": "advance_phase"
+		},
+		{
+			"actor_id": 0,
+			"payload": {},
+			"request_id": "rule-9-10",
+			"type": "advance_phase"
+		},
+		{
+			"actor_id": 0,
+			"payload": {
+				"instance_id": "jcp-00011"
+			},
+			"request_id": "rule-9-11",
+			"type": "summon_creature"
+		},
+		{
+			"actor_id": 0,
+			"payload": {
+				"instance_id": "jcp-00077"
+			},
+			"request_id": "rule-9-12",
+			"type": "play_terrain"
+		},
+		{
+			"actor_id": 0,
+			"payload": {},
+			"request_id": "rule-9-13",
+			"type": "advance_phase"
+		},
+		{
+			"actor_id": 0,
+			"payload": {
+				"attacker_id": "jcp-00011",
+				"target_slot": 0
+			},
+			"request_id": "rule-9-14",
+			"type": "attack"
+		},
+		{
+			"actor_id": 0,
+			"payload": {},
+			"request_id": "rule-9-15",
+			"type": "advance_phase"
+		},
+		{
+			"actor_id": 0,
+			"payload": {
+				"instance_id": "jcp-00037",
+				"target_player_id": 0,
+				"target_slot": 0
+			},
+			"request_id": "rule-9-16",
+			"type": "play_main_spell"
+		},
+		{
+			"actor_id": 0,
+			"payload": {},
+			"request_id": "rule-9-17",
+			"type": "advance_phase"
+		},
+		{
+			"actor_id": 0,
+			"payload": {},
+			"request_id": "rule-9-18",
+			"type": "advance_phase"
+		},
+		{
+			"actor_id": 1,
+			"payload": {},
+			"request_id": "rule-9-19",
+			"type": "advance_phase"
+		},
+		{
+			"actor_id": 1,
+			"payload": {},
+			"request_id": "rule-9-20",
+			"type": "advance_phase"
+		},
+		{
+			"actor_id": 1,
+			"payload": {},
+			"request_id": "rule-9-21",
+			"type": "advance_phase"
+		},
+		{
+			"actor_id": 1,
+			"payload": {},
+			"request_id": "rule-9-22",
+			"type": "advance_phase"
+		},
+		{
+			"actor_id": 1,
+			"payload": {
+				"instance_id": "jcp-00004",
+				"target_position": "guard"
+			},
+			"request_id": "rule-9-23",
+			"type": "change_position"
+		},
+		{
+			"actor_id": 1,
+			"payload": {},
+			"request_id": "rule-9-24",
+			"type": "advance_phase"
+		},
+		{
+			"actor_id": 1,
+			"payload": {},
+			"request_id": "rule-9-25",
+			"type": "advance_phase"
+		},
+		{
+			"actor_id": 0,
+			"payload": {},
+			"request_id": "rule-9-26",
+			"type": "advance_phase"
+		},
+		{
+			"actor_id": 0,
+			"payload": {},
+			"request_id": "rule-9-27",
+			"type": "advance_phase"
+		},
+		{
+			"actor_id": 0,
+			"payload": {
+				"instance_id": "jcp-00009"
+			},
+			"request_id": "rule-9-28",
+			"type": "summon_creature"
+		},
+		{
+			"actor_id": 0,
+			"payload": {
+				"instance_id": "jcp-00011",
+				"target_position": "guard"
+			},
+			"request_id": "rule-9-29",
+			"type": "change_position"
+		},
+		{
+			"actor_id": 0,
+			"payload": {
+				"instance_id": "jcp-00073",
+				"target_instance_id": "jcp-00009"
+			},
+			"request_id": "rule-9-30",
+			"type": "equip_item"
+		},
+		{
+			"actor_id": 0,
+			"payload": {},
+			"request_id": "rule-9-31",
+			"type": "advance_phase"
+		},
+		{
+			"actor_id": 0,
+			"payload": {
+				"attacker_id": "jcp-00009",
+				"target_slot": 0
+			},
+			"request_id": "rule-9-32",
+			"type": "attack"
+		},
+		{
+			"actor_id": 0,
+			"payload": {},
+			"request_id": "rule-9-33",
+			"type": "advance_phase"
+		},
+		{
+			"actor_id": 0,
+			"payload": {},
+			"request_id": "rule-9-34",
+			"type": "advance_phase"
+		},
+		{
+			"actor_id": 0,
+			"payload": {},
+			"request_id": "rule-9-35",
+			"type": "advance_phase"
+		},
+		{
+			"actor_id": 1,
+			"payload": {},
+			"request_id": "rule-9-36",
+			"type": "advance_phase"
+		},
+		{
+			"actor_id": 1,
+			"payload": {},
+			"request_id": "rule-9-37",
+			"type": "advance_phase"
+		},
+		{
+			"actor_id": 1,
+			"payload": {
+				"instance_id": "jcp-00012"
+			},
+			"request_id": "rule-9-38",
+			"type": "summon_creature"
+		},
+		{
+			"actor_id": 1,
+			"payload": {
+				"material_instance_ids": [
+					"jcp-00004",
+					"jcp-00012"
+				],
+				"position": "guard"
+			},
+			"request_id": "rule-9-39",
+			"type": "fuse_creatures"
+		},
+		{
+			"actor_id": 1,
+			"payload": {},
+			"request_id": "rule-9-40",
+			"type": "advance_phase"
+		},
+		{
+			"actor_id": 1,
+			"payload": {},
+			"request_id": "rule-9-41",
+			"type": "advance_phase"
+		},
+		{
+			"actor_id": 1,
+			"payload": {},
+			"request_id": "rule-9-42",
+			"type": "advance_phase"
+		},
+		{
+			"actor_id": 1,
+			"payload": {},
+			"request_id": "rule-9-43",
+			"type": "advance_phase"
+		},
+		{
+			"actor_id": 0,
+			"payload": {},
+			"request_id": "rule-9-44",
+			"type": "advance_phase"
+		},
+		{
+			"actor_id": 0,
+			"payload": {},
+			"request_id": "rule-9-45",
+			"type": "advance_phase"
+		},
+		{
+			"actor_id": 0,
+			"payload": {
+				"instance_id": "jcp-00009",
+				"target_position": "guard"
+			},
+			"request_id": "rule-9-46",
+			"type": "change_position"
+		},
+		{
+			"actor_id": 0,
+			"payload": {
+				"instance_id": "jcp-00007"
+			},
+			"request_id": "rule-9-47",
+			"type": "summon_creature"
+		},
+		{
+			"actor_id": 0,
+			"payload": {
+				"material_instance_ids": [
+					"jcp-00009",
+					"jcp-00007"
+				],
+				"position": "attack"
+			},
+			"request_id": "rule-9-48",
+			"type": "fuse_creatures"
+		},
+		{
+			"actor_id": 0,
+			"payload": {
+				"instance_id": "jcp-00011",
+				"target_position": "attack"
+			},
+			"request_id": "rule-9-49",
+			"type": "change_position"
+		},
+		{
+			"actor_id": 0,
+			"payload": {},
+			"request_id": "rule-9-50",
+			"type": "advance_phase"
+		},
+		{
+			"actor_id": 0,
+			"payload": {
+				"attacker_id": "jcp-00011",
+				"target_slot": 0
+			},
+			"request_id": "rule-9-51",
+			"type": "attack"
+		},
+		{
+			"actor_id": 1,
+			"payload": {
+				"choice": "defense"
+			},
+			"request_id": "rule-9-52",
+			"type": "choose_fusion_combat_bonus"
+		},
+		{
+			"actor_id": 0,
+			"payload": {},
+			"request_id": "rule-9-53",
+			"type": "advance_phase"
+		},
+		{
+			"actor_id": 0,
+			"payload": {},
+			"request_id": "rule-9-54",
+			"type": "advance_phase"
+		},
+		{
+			"actor_id": 0,
+			"payload": {},
+			"request_id": "rule-9-55",
+			"type": "advance_phase"
+		},
+		{
+			"actor_id": 1,
+			"payload": {},
+			"request_id": "rule-9-56",
+			"type": "advance_phase"
+		},
+		{
+			"actor_id": 1,
+			"payload": {},
+			"request_id": "rule-9-57",
+			"type": "advance_phase"
+		},
+		{
+			"actor_id": 1,
+			"payload": {
+				"instance_id": "jcp-00020"
+			},
+			"request_id": "rule-9-58",
+			"type": "summon_creature"
+		},
+		{
+			"actor_id": 1,
+			"payload": {
+				"instance_id": "jcp-00004",
+				"target_position": "attack"
+			},
+			"request_id": "rule-9-59",
+			"type": "change_position"
+		},
+		{
+			"actor_id": 1,
+			"payload": {},
+			"request_id": "rule-9-60",
+			"type": "advance_phase"
+		},
+		{
+			"actor_id": 1,
+			"payload": {
+				"attacker_id": "jcp-00004",
+				"target_slot": 0
+			},
+			"request_id": "rule-9-61",
+			"type": "attack"
+		},
+		{
+			"actor_id": 1,
+			"payload": {
+				"choice": "defense"
+			},
+			"request_id": "rule-9-62",
+			"type": "choose_fusion_combat_bonus"
+		},
+		{
+			"actor_id": 1,
+			"payload": {
+				"attacker_id": "jcp-00020",
+				"target_slot": -1
+			},
+			"request_id": "rule-9-63",
+			"type": "attack"
+		},
+		{
+			"actor_id": 1,
+			"payload": {},
+			"request_id": "rule-9-64",
+			"type": "advance_phase"
+		},
+		{
+			"actor_id": 1,
+			"payload": {},
+			"request_id": "rule-9-65",
+			"type": "advance_phase"
+		},
+		{
+			"actor_id": 1,
+			"payload": {},
+			"request_id": "rule-9-66",
+			"type": "advance_phase"
+		},
+		{
+			"actor_id": 0,
+			"payload": {},
+			"request_id": "rule-9-67",
+			"type": "advance_phase"
+		},
+		{
+			"actor_id": 0,
+			"payload": {},
+			"request_id": "rule-9-68",
+			"type": "advance_phase"
+		},
+		{
+			"actor_id": 0,
+			"payload": {
+				"instance_id": "jcp-00027"
+			},
+			"request_id": "rule-9-69",
+			"type": "summon_creature"
+		},
+		{
+			"actor_id": 0,
+			"payload": {},
+			"request_id": "rule-9-70",
+			"type": "advance_phase"
+		},
+		{
+			"actor_id": 0,
+			"payload": {},
+			"request_id": "rule-9-71",
+			"type": "advance_phase"
+		},
+		{
+			"actor_id": 0,
+			"payload": {},
+			"request_id": "rule-9-72",
+			"type": "advance_phase"
+		},
+		{
+			"actor_id": 0,
+			"payload": {},
+			"request_id": "rule-9-73",
+			"type": "advance_phase"
+		},
+		{
+			"actor_id": 1,
+			"payload": {},
+			"request_id": "rule-9-74",
+			"type": "advance_phase"
+		},
+		{
+			"actor_id": 1,
+			"payload": {},
+			"request_id": "rule-9-75",
+			"type": "advance_phase"
+		},
+		{
+			"actor_id": 1,
+			"payload": {
+				"instance_id": "jcp-00022"
+			},
+			"request_id": "rule-9-76",
+			"type": "summon_creature"
+		},
+		{
+			"actor_id": 1,
+			"payload": {
+				"instance_id": "jcp-00020",
+				"target_position": "guard"
+			},
+			"request_id": "rule-9-77",
+			"type": "change_position"
+		},
+		{
+			"actor_id": 1,
+			"payload": {
+				"instance_id": "jcp-00052"
+			},
+			"request_id": "rule-9-78",
+			"type": "set_support"
+		},
+		{
+			"actor_id": 1,
+			"payload": {},
+			"request_id": "rule-9-79",
+			"type": "advance_phase"
+		},
+		{
+			"actor_id": 1,
+			"payload": {},
+			"request_id": "rule-9-80",
+			"type": "advance_phase"
+		},
+		{
+			"actor_id": 1,
+			"payload": {
+				"instance_id": "jcp-00004",
+				"target_position": "guard"
+			},
+			"request_id": "rule-9-81",
+			"type": "change_position"
+		},
+		{
+			"actor_id": 1,
+			"payload": {},
+			"request_id": "rule-9-82",
+			"type": "advance_phase"
+		},
+		{
+			"actor_id": 1,
+			"payload": {},
+			"request_id": "rule-9-83",
+			"type": "advance_phase"
+		},
+		{
+			"actor_id": 0,
+			"payload": {},
+			"request_id": "rule-9-84",
+			"type": "advance_phase"
+		},
+		{
+			"actor_id": 0,
+			"payload": {},
+			"request_id": "rule-9-85",
+			"type": "advance_phase"
+		},
+		{
+			"actor_id": 0,
+			"payload": {
+				"instance_id": "jcp-00069"
+			},
+			"request_id": "rule-9-86",
+			"type": "play_persistent"
+		},
+		{
+			"actor_id": 0,
+			"payload": {
+				"instance_id": "jcp-00013"
+			},
+			"request_id": "rule-9-87",
+			"type": "summon_creature"
+		},
+		{
+			"actor_id": 0,
+			"payload": {},
+			"request_id": "rule-9-88",
+			"type": "advance_phase"
+		},
+		{
+			"actor_id": 0,
+			"payload": {
+				"attacker_id": "jcp-00013",
+				"target_slot": 1
+			},
+			"request_id": "rule-9-89",
+			"type": "attack"
+		},
+		{
+			"actor_id": 1,
+			"payload": {},
+			"request_id": "rule-9-90",
+			"type": "pass_reaction"
+		},
+		{
+			"actor_id": 0,
+			"payload": {},
+			"request_id": "rule-9-91",
+			"type": "pass_reaction"
+		},
+		{
+			"actor_id": 0,
+			"payload": {
+				"attacker_id": "jcp-00027",
+				"target_slot": 1
+			},
+			"request_id": "rule-9-92",
+			"type": "attack"
+		},
+		{
+			"actor_id": 0,
+			"payload": {},
+			"request_id": "rule-9-93",
+			"type": "advance_phase"
+		},
+		{
+			"actor_id": 0,
+			"payload": {
+				"instance_id": "jcp-00041",
+				"target_player_id": 1,
+				"target_slot": 1
+			},
+			"request_id": "rule-9-94",
+			"type": "play_main_spell"
+		},
+		{
+			"actor_id": 0,
+			"payload": {},
+			"request_id": "rule-9-95",
+			"type": "advance_phase"
+		},
+		{
+			"actor_id": 0,
+			"payload": {},
+			"request_id": "rule-9-96",
+			"type": "advance_phase"
+		},
+		{
+			"actor_id": 1,
+			"payload": {},
+			"request_id": "rule-9-97",
+			"type": "advance_phase"
+		},
+		{
+			"actor_id": 1,
+			"payload": {},
+			"request_id": "rule-9-98",
+			"type": "advance_phase"
+		},
+		{
+			"actor_id": 1,
+			"payload": {
+				"instance_id": "jcp-00054"
+			},
+			"request_id": "rule-9-99",
+			"type": "set_support"
+		},
+		{
+			"actor_id": 1,
+			"payload": {
+				"instance_id": "jcp-00026"
+			},
+			"request_id": "rule-9-100",
+			"type": "summon_creature"
+		},
+		{
+			"actor_id": 1,
+			"payload": {
+				"material_instance_ids": [
+					"jcp-00022",
+					"jcp-00026"
+				],
+				"position": "attack"
+			},
+			"request_id": "rule-9-101",
+			"type": "fuse_creatures"
+		},
+		{
+			"actor_id": 1,
+			"payload": {},
+			"request_id": "rule-9-102",
+			"type": "advance_phase"
+		},
+		{
+			"actor_id": 1,
+			"payload": {},
+			"request_id": "rule-9-103",
+			"type": "advance_phase"
+		},
+		{
+			"actor_id": 1,
+			"payload": {
+				"instance_id": "jcp-00004",
+				"target_position": "attack"
+			},
+			"request_id": "rule-9-104",
+			"type": "change_position"
+		},
+		{
+			"actor_id": 1,
+			"payload": {},
+			"request_id": "rule-9-105",
+			"type": "advance_phase"
+		},
+		{
+			"actor_id": 1,
+			"payload": {},
+			"request_id": "rule-9-106",
+			"type": "advance_phase"
+		},
+		{
+			"actor_id": 0,
+			"payload": {},
+			"request_id": "rule-9-107",
+			"type": "advance_phase"
+		},
+		{
+			"actor_id": 0,
+			"payload": {},
+			"request_id": "rule-9-108",
+			"type": "advance_phase"
+		},
+		{
+			"actor_id": 0,
+			"payload": {
+				"instance_id": "jcp-00033"
+			},
+			"request_id": "rule-9-109",
+			"type": "summon_creature"
+		},
+		{
+			"actor_id": 0,
+			"payload": {
+				"instance_id": "jcp-00027",
+				"target_position": "guard"
+			},
+			"request_id": "rule-9-110",
+			"type": "change_position"
+		},
+		{
+			"actor_id": 0,
+			"payload": {},
+			"request_id": "rule-9-111",
+			"type": "advance_phase"
+		},
+		{
+			"actor_id": 0,
+			"payload": {
+				"attacker_id": "jcp-00033",
+				"target_slot": 0
+			},
+			"request_id": "rule-9-112",
+			"type": "attack"
+		},
+		{
+			"actor_id": 1,
+			"payload": {
+				"choice": "defense"
+			},
+			"request_id": "rule-9-113",
+			"type": "choose_fusion_combat_bonus"
+		},
+		{
+			"actor_id": 1,
+			"payload": {
+				"support_slot": 2
+			},
+			"request_id": "rule-9-114",
+			"type": "activate_reaction"
+		},
+		{
+			"actor_id": 0,
+			"payload": {},
+			"request_id": "rule-9-115",
+			"type": "pass_reaction"
+		},
+		{
+			"actor_id": 1,
+			"payload": {},
+			"request_id": "rule-9-116",
+			"type": "pass_reaction"
+		},
+		{
+			"actor_id": 0,
+			"payload": {},
+			"request_id": "rule-9-117",
+			"type": "advance_phase"
+		},
+		{
+			"actor_id": 0,
+			"payload": {},
+			"request_id": "rule-9-118",
+			"type": "advance_phase"
+		},
+		{
+			"actor_id": 0,
+			"payload": {},
+			"request_id": "rule-9-119",
+			"type": "advance_phase"
+		},
+		{
+			"actor_id": 1,
+			"payload": {},
+			"request_id": "rule-9-120",
+			"type": "advance_phase"
+		},
+		{
+			"actor_id": 1,
+			"payload": {},
+			"request_id": "rule-9-121",
+			"type": "advance_phase"
+		},
+		{
+			"actor_id": 1,
+			"payload": {
+				"instance_id": "jcp-00072",
+				"target_instance_id": "jcp-00022"
+			},
+			"request_id": "rule-9-122",
+			"type": "equip_item"
+		},
+		{
+			"actor_id": 1,
+			"payload": {
+				"instance_id": "jcp-00022",
+				"target_position": "guard"
+			},
+			"request_id": "rule-9-123",
+			"type": "change_position"
+		},
+		{
+			"actor_id": 1,
+			"payload": {
+				"instance_id": "jcp-00004",
+				"target_position": "guard"
+			},
+			"request_id": "rule-9-124",
+			"type": "change_position"
+		},
+		{
+			"actor_id": 1,
+			"payload": {
+				"instance_id": "jcp-00034"
+			},
+			"request_id": "rule-9-125",
+			"type": "summon_creature"
+		},
+		{
+			"actor_id": 1,
+			"payload": {},
+			"request_id": "rule-9-126",
+			"type": "advance_phase"
+		},
+		{
+			"actor_id": 1,
+			"payload": {
+				"attacker_id": "jcp-00034",
+				"target_slot": 1
+			},
+			"request_id": "rule-9-127",
+			"type": "attack"
+		},
+		{
+			"actor_id": 1,
+			"payload": {},
+			"request_id": "rule-9-128",
+			"type": "advance_phase"
+		},
+		{
+			"actor_id": 1,
+			"payload": {},
+			"request_id": "rule-9-129",
+			"type": "advance_phase"
+		},
+		{
+			"actor_id": 1,
+			"payload": {},
+			"request_id": "rule-9-130",
+			"type": "advance_phase"
+		},
+		{
+			"actor_id": 0,
+			"payload": {},
+			"request_id": "rule-9-131",
+			"type": "advance_phase"
+		},
+		{
+			"actor_id": 0,
+			"payload": {},
+			"request_id": "rule-9-132",
+			"type": "advance_phase"
+		},
+		{
+			"actor_id": 0,
+			"payload": {
+				"instance_id": "jcp-00005"
+			},
+			"request_id": "rule-9-133",
+			"type": "summon_creature"
+		},
+		{
+			"actor_id": 0,
+			"payload": {
+				"instance_id": "jcp-00027",
+				"target_position": "attack"
+			},
+			"request_id": "rule-9-134",
+			"type": "change_position"
+		},
+		{
+			"actor_id": 0,
+			"payload": {},
+			"request_id": "rule-9-135",
+			"type": "advance_phase"
+		},
+		{
+			"actor_id": 0,
+			"payload": {
+				"attacker_id": "jcp-00005",
+				"target_slot": 0
+			},
+			"request_id": "rule-9-136",
+			"type": "attack"
+		},
+		{
+			"actor_id": 1,
+			"payload": {
+				"choice": "attack"
+			},
+			"request_id": "rule-9-137",
+			"type": "choose_fusion_combat_bonus"
+		},
+		{
+			"actor_id": 1,
+			"payload": {},
+			"request_id": "rule-9-138",
+			"type": "pass_reaction"
+		},
+		{
+			"actor_id": 0,
+			"payload": {},
+			"request_id": "rule-9-139",
+			"type": "pass_reaction"
+		},
+		{
+			"actor_id": 0,
+			"payload": {
+				"attacker_id": "jcp-00027",
+				"target_slot": 1
+			},
+			"request_id": "rule-9-140",
+			"type": "attack"
+		},
+		{
+			"actor_id": 0,
+			"payload": {},
+			"request_id": "rule-9-141",
+			"type": "advance_phase"
+		},
+		{
+			"actor_id": 0,
+			"payload": {},
+			"request_id": "rule-9-142",
+			"type": "advance_phase"
+		},
+		{
+			"actor_id": 0,
+			"payload": {},
+			"request_id": "rule-9-143",
+			"type": "advance_phase"
+		},
+		{
+			"actor_id": 1,
+			"payload": {},
+			"request_id": "rule-9-144",
+			"type": "advance_phase"
+		},
+		{
+			"actor_id": 1,
+			"payload": {},
+			"request_id": "rule-9-145",
+			"type": "advance_phase"
+		},
+		{
+			"actor_id": 1,
+			"payload": {
+				"instance_id": "jcp-00022",
+				"target_position": "attack"
+			},
+			"request_id": "rule-9-146",
+			"type": "change_position"
+		},
+		{
+			"actor_id": 1,
+			"payload": {
+				"instance_id": "jcp-00020"
+			},
+			"request_id": "rule-9-147",
+			"type": "summon_creature"
+		},
+		{
+			"actor_id": 1,
+			"payload": {
+				"instance_id": "jcp-00050"
+			},
+			"request_id": "rule-9-148",
+			"type": "set_support"
+		},
+		{
+			"actor_id": 1,
+			"payload": {},
+			"request_id": "rule-9-149",
+			"type": "advance_phase"
+		},
+		{
+			"actor_id": 1,
+			"payload": {
+				"attacker_id": "jcp-00020",
+				"target_slot": -1
+			},
+			"request_id": "rule-9-150",
+			"type": "attack"
+		},
+		{
+			"actor_id": 1,
+			"payload": {
+				"attacker_id": "jcp-00022",
+				"target_slot": -1
+			},
+			"request_id": "rule-9-151",
+			"type": "attack"
+		},
+		{
+			"actor_id": 1,
+			"payload": {},
+			"request_id": "rule-9-152",
+			"type": "advance_phase"
+		},
+		{
+			"actor_id": 1,
+			"payload": {
+				"instance_id": "jcp-00004",
+				"target_position": "attack"
+			},
+			"request_id": "rule-9-153",
+			"type": "change_position"
+		},
+		{
+			"actor_id": 1,
+			"payload": {},
+			"request_id": "rule-9-154",
+			"type": "advance_phase"
+		},
+		{
+			"actor_id": 1,
+			"payload": {},
+			"request_id": "rule-9-155",
+			"type": "advance_phase"
+		},
+		{
+			"actor_id": 0,
+			"payload": {},
+			"request_id": "rule-9-156",
+			"type": "advance_phase"
+		},
+		{
+			"actor_id": 0,
+			"payload": {},
+			"request_id": "rule-9-157",
+			"type": "advance_phase"
+		},
+		{
+			"actor_id": 0,
+			"payload": {
+				"instance_id": "jcp-00015"
+			},
+			"request_id": "rule-9-158",
+			"type": "set_creature"
+		},
+		{
+			"actor_id": 0,
+			"payload": {},
+			"request_id": "rule-9-159",
+			"type": "advance_phase"
+		},
+		{
+			"actor_id": 0,
+			"payload": {},
+			"request_id": "rule-9-160",
+			"type": "advance_phase"
+		},
+		{
+			"actor_id": 0,
+			"payload": {},
+			"request_id": "rule-9-161",
+			"type": "advance_phase"
+		},
+		{
+			"actor_id": 0,
+			"payload": {},
+			"request_id": "rule-9-162",
+			"type": "advance_phase"
+		},
+		{
+			"actor_id": 1,
+			"payload": {},
+			"request_id": "rule-9-163",
+			"type": "advance_phase"
+		},
+		{
+			"actor_id": 1,
+			"payload": {},
+			"request_id": "rule-9-164",
+			"type": "advance_phase"
+		},
+		{
+			"actor_id": 1,
+			"payload": {
+				"instance_id": "jcp-00068",
+				"target_instance_id": "jcp-00022"
+			},
+			"request_id": "rule-9-165",
+			"type": "equip_item"
+		},
+		{
+			"actor_id": 1,
+			"payload": {},
+			"request_id": "rule-9-166",
+			"type": "advance_phase"
+		},
+		{
+			"actor_id": 1,
+			"payload": {
+				"attacker_id": "jcp-00004",
+				"target_slot": 0
+			},
+			"request_id": "rule-9-167",
+			"type": "attack"
+		},
+		{
+			"actor_id": 1,
+			"payload": {
+				"choice": "defense"
+			},
+			"request_id": "rule-9-168",
+			"type": "choose_fusion_combat_bonus"
+		},
+		{
+			"actor_id": 1,
+			"payload": {
+				"attacker_id": "jcp-00022",
+				"target_slot": -1
+			},
+			"request_id": "rule-9-169",
+			"type": "attack"
+		},
+		{
+			"actor_id": 1,
+			"payload": {},
+			"request_id": "rule-9-170",
+			"type": "advance_phase"
+		},
+		{
+			"actor_id": 1,
+			"payload": {},
+			"request_id": "rule-9-171",
+			"type": "advance_phase"
+		},
+		{
+			"actor_id": 1,
+			"payload": {},
+			"request_id": "rule-9-172",
+			"type": "advance_phase"
+		},
+		{
+			"actor_id": 0,
+			"payload": {},
+			"request_id": "rule-9-173",
+			"type": "advance_phase"
+		},
+		{
+			"actor_id": 0,
+			"payload": {},
+			"request_id": "rule-9-174",
+			"type": "advance_phase"
+		},
+		{
+			"actor_id": 0,
+			"payload": {},
+			"request_id": "rule-9-175",
+			"type": "advance_phase"
+		},
+		{
+			"actor_id": 0,
+			"payload": {},
+			"request_id": "rule-9-176",
+			"type": "advance_phase"
+		},
+		{
+			"actor_id": 0,
+			"payload": {
+				"instance_id": "jcp-00035"
+			},
+			"request_id": "rule-9-177",
+			"type": "set_creature"
+		},
+		{
+			"actor_id": 0,
+			"payload": {
+				"instance_id": "jcp-00055"
+			},
+			"request_id": "rule-9-178",
+			"type": "set_support"
+		},
+		{
+			"actor_id": 0,
+			"payload": {},
+			"request_id": "rule-9-179",
+			"type": "advance_phase"
+		},
+		{
+			"actor_id": 0,
+			"payload": {},
+			"request_id": "rule-9-180",
+			"type": "advance_phase"
+		},
+		{
+			"actor_id": 1,
+			"payload": {},
+			"request_id": "rule-9-181",
+			"type": "advance_phase"
+		},
+		{
+			"actor_id": 1,
+			"payload": {},
+			"request_id": "rule-9-182",
+			"type": "advance_phase"
+		},
+		{
+			"actor_id": 1,
+			"payload": {
+				"instance_id": "jcp-00022",
+				"target_position": "guard"
+			},
+			"request_id": "rule-9-183",
+			"type": "change_position"
+		},
+		{
+			"actor_id": 1,
+			"payload": {
+				"instance_id": "jcp-00030",
+				"target_instance_id": "jcp-00022"
+			},
+			"request_id": "rule-9-184",
+			"type": "summon_creature"
+		},
+		{
+			"actor_id": 1,
+			"payload": {
+				"instance_id": "jcp-00020",
+				"target_position": "guard"
+			},
+			"request_id": "rule-9-185",
+			"type": "change_position"
+		},
+		{
+			"actor_id": 1,
+			"payload": {
+				"instance_id": "jcp-00004",
+				"target_position": "guard"
+			},
+			"request_id": "rule-9-186",
+			"type": "change_position"
+		},
+		{
+			"actor_id": 1,
+			"payload": {},
+			"request_id": "rule-9-187",
+			"type": "advance_phase"
+		},
+		{
+			"actor_id": 1,
+			"payload": {},
+			"request_id": "rule-9-188",
+			"type": "advance_phase"
+		},
+		{
+			"actor_id": 1,
+			"payload": {},
+			"request_id": "rule-9-189",
+			"type": "advance_phase"
+		},
+		{
+			"actor_id": 1,
+			"payload": {},
+			"request_id": "rule-9-190",
+			"type": "advance_phase"
+		},
+		{
+			"actor_id": 0,
+			"payload": {},
+			"request_id": "rule-9-191",
+			"type": "advance_phase"
+		},
+		{
+			"actor_id": 0,
+			"payload": {},
+			"request_id": "rule-9-192",
+			"type": "advance_phase"
+		},
+		{
+			"actor_id": 0,
+			"payload": {
+				"instance_id": "jcp-00035",
+				"target_position": "attack"
+			},
+			"request_id": "rule-9-193",
+			"type": "change_position"
+		},
+		{
+			"actor_id": 0,
+			"payload": {
+				"instance_id": "jcp-00023",
+				"peek_support_slot": 1
+			},
+			"request_id": "rule-9-194",
+			"type": "summon_creature"
+		},
+		{
+			"actor_id": 0,
+			"payload": {},
+			"request_id": "rule-9-195",
+			"type": "advance_phase"
+		},
+		{
+			"actor_id": 0,
+			"payload": {
+				"attacker_id": "jcp-00035",
+				"target_slot": 1
+			},
+			"request_id": "rule-9-196",
+			"type": "attack"
+		},
+		{
+			"actor_id": 1,
+			"payload": {
+				"support_slot": 2
+			},
+			"request_id": "rule-9-197",
+			"type": "activate_reaction"
+		},
+		{
+			"actor_id": 0,
+			"payload": {},
+			"request_id": "rule-9-198",
+			"type": "pass_reaction"
+		},
+		{
+			"actor_id": 1,
+			"payload": {},
+			"request_id": "rule-9-199",
+			"type": "pass_reaction"
+		},
+		{
+			"actor_id": 0,
+			"payload": {},
+			"request_id": "rule-9-200",
+			"type": "advance_phase"
+		},
+		{
+			"actor_id": 0,
+			"payload": {},
+			"request_id": "rule-9-201",
+			"type": "advance_phase"
+		},
+		{
+			"actor_id": 0,
+			"payload": {},
+			"request_id": "rule-9-202",
+			"type": "advance_phase"
+		},
+		{
+			"actor_id": 1,
+			"payload": {},
+			"request_id": "rule-9-203",
+			"type": "advance_phase"
+		},
+		{
+			"actor_id": 1,
+			"payload": {},
+			"request_id": "rule-9-204",
+			"type": "advance_phase"
+		},
+		{
+			"actor_id": 1,
+			"payload": {},
+			"request_id": "rule-9-205",
+			"type": "advance_phase"
+		},
+		{
+			"actor_id": 1,
+			"payload": {
+				"attacker_id": "jcp-00030",
+				"target_slot": 0
+			},
+			"request_id": "rule-9-206",
+			"type": "attack"
+		},
+		{
+			"actor_id": 1,
+			"payload": {},
+			"request_id": "rule-9-207",
+			"type": "advance_phase"
+		},
+		{
+			"actor_id": 1,
+			"payload": {
+				"instance_id": "jcp-00022"
+			},
+			"request_id": "rule-9-208",
+			"type": "summon_creature"
+		},
+		{
+			"actor_id": 1,
+			"payload": {
+				"instance_id": "jcp-00020",
+				"target_position": "attack"
+			},
+			"request_id": "rule-9-209",
+			"type": "change_position"
+		},
+		{
+			"actor_id": 1,
+			"payload": {},
+			"request_id": "rule-9-210",
+			"type": "advance_phase"
+		},
+		{
+			"actor_id": 1,
+			"payload": {},
+			"request_id": "rule-9-211",
+			"type": "advance_phase"
+		},
+		{
+			"actor_id": 0,
+			"payload": {},
+			"request_id": "rule-9-212",
+			"type": "advance_phase"
+		},
+		{
+			"actor_id": 0,
+			"payload": {},
+			"request_id": "rule-9-213",
+			"type": "advance_phase"
+		},
+		{
+			"actor_id": 0,
+			"payload": {
+				"instance_id": "jcp-00063",
+				"target_instance_id": "jcp-00023"
+			},
+			"request_id": "rule-9-214",
+			"type": "equip_item"
+		},
+		{
+			"actor_id": 0,
+			"payload": {
+				"instance_id": "jcp-00023",
+				"target_position": "guard"
+			},
+			"request_id": "rule-9-215",
+			"type": "change_position"
+		},
+		{
+			"actor_id": 0,
+			"payload": {},
+			"request_id": "rule-9-216",
+			"type": "advance_phase"
+		},
+		{
+			"actor_id": 0,
+			"payload": {
+				"attacker_id": "jcp-00035",
+				"target_slot": 2
+			},
+			"request_id": "rule-9-217",
+			"type": "attack"
+		},
+		{
+			"actor_id": 0,
+			"payload": {
+				"attacker_id": "jcp-00035",
+				"target_slot": 1
+			},
+			"request_id": "rule-9-218",
+			"type": "attack"
+		},
+		{
+			"actor_id": 0,
+			"payload": {},
+			"request_id": "rule-9-219",
+			"type": "advance_phase"
+		},
+		{
+			"actor_id": 0,
+			"payload": {},
+			"request_id": "rule-9-220",
+			"type": "advance_phase"
+		},
+		{
+			"actor_id": 0,
+			"payload": {},
+			"request_id": "rule-9-221",
+			"type": "advance_phase"
+		},
+		{
+			"actor_id": 1,
+			"payload": {},
+			"request_id": "rule-9-222",
+			"type": "advance_phase"
+		},
+		{
+			"actor_id": 1,
+			"payload": {},
+			"request_id": "rule-9-223",
+			"type": "advance_phase"
+		},
+		{
+			"actor_id": 1,
+			"payload": {
+				"instance_id": "jcp-00026"
+			},
+			"request_id": "rule-9-224",
+			"type": "summon_creature"
+		},
+		{
+			"actor_id": 1,
+			"payload": {
+				"instance_id": "jcp-00004",
+				"target_position": "attack"
+			},
+			"request_id": "rule-9-225",
+			"type": "change_position"
+		},
+		{
+			"actor_id": 1,
+			"payload": {},
+			"request_id": "rule-9-226",
+			"type": "advance_phase"
+		},
+		{
+			"actor_id": 1,
+			"payload": {
+				"attacker_id": "jcp-00004",
+				"target_slot": 1
+			},
+			"request_id": "rule-9-227",
+			"type": "attack"
+		},
+		{
+			"actor_id": 1,
+			"payload": {
+				"choice": "attack"
+			},
+			"request_id": "rule-9-228",
+			"type": "choose_fusion_combat_bonus"
+		},
+		{
+			"actor_id": 1,
+			"payload": {
+				"attacker_id": "jcp-00026",
+				"target_slot": 0
+			},
+			"request_id": "rule-9-229",
+			"type": "attack"
+		},
+		{
+			"actor_id": 1,
+			"payload": {},
+			"request_id": "rule-9-230",
+			"type": "advance_phase"
+		},
+		{
+			"actor_id": 1,
+			"payload": {},
+			"request_id": "rule-9-231",
+			"type": "advance_phase"
+		},
+		{
+			"actor_id": 1,
+			"payload": {},
+			"request_id": "rule-9-232",
+			"type": "advance_phase"
+		},
+		{
+			"actor_id": 0,
+			"payload": {},
+			"request_id": "rule-9-233",
+			"type": "advance_phase"
+		},
+		{
+			"actor_id": 0,
+			"payload": {},
+			"request_id": "rule-9-234",
+			"type": "advance_phase"
+		},
+		{
+			"actor_id": 0,
+			"payload": {
+				"instance_id": "jcp-00025"
+			},
+			"request_id": "rule-9-235",
+			"type": "summon_creature"
+		},
+		{
+			"actor_id": 0,
+			"payload": {
+				"instance_id": "jcp-00035",
+				"target_position": "guard"
+			},
+			"request_id": "rule-9-236",
+			"type": "change_position"
+		},
+		{
+			"actor_id": 0,
+			"payload": {},
+			"request_id": "rule-9-237",
+			"type": "advance_phase"
+		},
+		{
+			"actor_id": 0,
+			"payload": {
+				"attacker_id": "jcp-00025",
+				"target_slot": 0
+			},
+			"request_id": "rule-9-238",
+			"type": "attack"
+		},
+		{
+			"actor_id": 1,
+			"payload": {
+				"choice": "attack"
+			},
+			"request_id": "rule-9-239",
+			"type": "choose_fusion_combat_bonus"
+		},
+		{
+			"actor_id": 0,
+			"payload": {},
+			"request_id": "rule-9-240",
+			"type": "advance_phase"
+		},
+		{
+			"actor_id": 0,
+			"payload": {},
+			"request_id": "rule-9-241",
+			"type": "advance_phase"
+		},
+		{
+			"actor_id": 0,
+			"payload": {},
+			"request_id": "rule-9-242",
+			"type": "advance_phase"
+		},
+		{
+			"actor_id": 1,
+			"payload": {},
+			"request_id": "rule-9-243",
+			"type": "advance_phase"
+		},
+		{
+			"actor_id": 1,
+			"payload": {},
+			"request_id": "rule-9-244",
+			"type": "advance_phase"
+		},
+		{
+			"actor_id": 1,
+			"payload": {},
+			"request_id": "rule-9-245",
+			"type": "advance_phase"
+		},
+		{
+			"actor_id": 1,
+			"payload": {},
+			"request_id": "rule-9-246",
+			"type": "advance_phase"
+		},
+		{
+			"actor_id": 1,
+			"payload": {
+				"instance_id": "jcp-00036"
+			},
+			"request_id": "rule-9-247",
+			"type": "set_creature"
+		},
+		{
+			"actor_id": 1,
+			"payload": {},
+			"request_id": "rule-9-248",
+			"type": "advance_phase"
+		},
+		{
+			"actor_id": 1,
+			"payload": {},
+			"request_id": "rule-9-249",
+			"type": "advance_phase"
+		},
+		{
+			"actor_id": 0,
+			"payload": {},
+			"request_id": "rule-9-250",
+			"type": "advance_phase"
+		},
+		{
+			"actor_id": 0,
+			"payload": {},
+			"request_id": "rule-9-251",
+			"type": "advance_phase"
+		},
+		{
+			"actor_id": 0,
+			"payload": {
+				"instance_id": "jcp-00047"
+			},
+			"request_id": "rule-9-252",
+			"type": "set_support"
+		},
+		{
+			"actor_id": 0,
+			"payload": {
+				"instance_id": "jcp-00035",
+				"target_position": "attack"
+			},
+			"request_id": "rule-9-253",
+			"type": "change_position"
+		},
+		{
+			"actor_id": 0,
+			"payload": {},
+			"request_id": "rule-9-254",
+			"type": "advance_phase"
+		},
+		{
+			"actor_id": 0,
+			"payload": {
+				"attacker_id": "jcp-00035",
+				"target_slot": 1
+			},
+			"request_id": "rule-9-255",
+			"type": "attack"
+		},
+		{
+			"actor_id": 0,
+			"payload": {},
+			"request_id": "rule-9-256",
+			"type": "advance_phase"
+		},
+		{
+			"actor_id": 0,
+			"payload": {},
+			"request_id": "rule-9-257",
+			"type": "advance_phase"
+		},
+		{
+			"actor_id": 0,
+			"payload": {},
+			"request_id": "rule-9-258",
+			"type": "advance_phase"
+		},
+		{
+			"actor_id": 1,
+			"payload": {},
+			"request_id": "rule-9-259",
+			"type": "advance_phase"
+		},
+		{
+			"actor_id": 1,
+			"payload": {},
+			"request_id": "rule-9-260",
+			"type": "advance_phase"
+		},
+		{
+			"actor_id": 1,
+			"payload": {
+				"instance_id": "jcp-00046"
+			},
+			"request_id": "rule-9-261",
+			"type": "play_persistent"
+		},
+		{
+			"actor_id": 1,
+			"payload": {
+				"instance_id": "jcp-00032"
+			},
+			"request_id": "rule-9-262",
+			"type": "summon_creature"
+		},
+		{
+			"actor_id": 1,
+			"payload": {
+				"instance_id": "jcp-00064",
+				"target_instance_id": "jcp-00032"
+			},
+			"request_id": "rule-9-263",
+			"type": "equip_item"
+		},
+		{
+			"actor_id": 1,
+			"payload": {
+				"instance_id": "jcp-00004",
+				"target_position": "guard"
+			},
+			"request_id": "rule-9-264",
+			"type": "change_position"
+		},
+		{
+			"actor_id": 1,
+			"payload": {
+				"instance_id": "jcp-00036",
+				"target_position": "attack"
+			},
+			"request_id": "rule-9-265",
+			"type": "change_position"
+		},
+		{
+			"actor_id": 1,
+			"payload": {},
+			"request_id": "rule-9-266",
+			"type": "advance_phase"
+		},
+		{
+			"actor_id": 1,
+			"payload": {},
+			"request_id": "rule-9-267",
+			"type": "advance_phase"
+		},
+		{
+			"actor_id": 1,
+			"payload": {},
+			"request_id": "rule-9-268",
+			"type": "advance_phase"
+		},
+		{
+			"actor_id": 1,
+			"payload": {},
+			"request_id": "rule-9-269",
+			"type": "advance_phase"
+		},
+		{
+			"actor_id": 0,
+			"payload": {},
+			"request_id": "rule-9-270",
+			"type": "advance_phase"
+		},
+		{
+			"actor_id": 0,
+			"payload": {},
+			"request_id": "rule-9-271",
+			"type": "advance_phase"
+		},
+		{
+			"actor_id": 0,
+			"payload": {
+				"instance_id": "jcp-00049"
+			},
+			"request_id": "rule-9-272",
+			"type": "set_support"
+		},
+		{
+			"actor_id": 0,
+			"payload": {
+				"instance_id": "jcp-00035",
+				"target_position": "guard"
+			},
+			"request_id": "rule-9-273",
+			"type": "change_position"
+		},
+		{
+			"actor_id": 0,
+			"payload": {},
+			"request_id": "rule-9-274",
+			"type": "advance_phase"
+		},
+		{
+			"actor_id": 0,
+			"payload": {},
+			"request_id": "rule-9-275",
+			"type": "advance_phase"
+		},
+		{
+			"actor_id": 0,
+			"payload": {},
+			"request_id": "rule-9-276",
+			"type": "advance_phase"
+		},
+		{
+			"actor_id": 0,
+			"payload": {},
+			"request_id": "rule-9-277",
+			"type": "advance_phase"
+		},
+		{
+			"actor_id": 1,
+			"payload": {},
+			"request_id": "rule-9-278",
+			"type": "advance_phase"
+		},
+		{
+			"actor_id": 1,
+			"payload": {},
+			"request_id": "rule-9-279",
+			"type": "advance_phase"
+		},
+		{
+			"actor_id": 1,
+			"payload": {
+				"instance_id": "jcp-00032",
+				"target_position": "guard"
+			},
+			"request_id": "rule-9-280",
+			"type": "change_position"
+		},
+		{
+			"actor_id": 1,
+			"payload": {
+				"instance_id": "jcp-00016"
+			},
+			"request_id": "rule-9-281",
+			"type": "summon_creature"
+		}
+	],
+	"detail": {
+		"code": "JCP_FUSION_CHAIN_NOT_ENABLED",
+		"message": "Esta primera accion no admite una Fusion previa como material.",
+		"ok": false
+	},
+	"ok": false,
+	"seed": 9,
+	"stage": "advertised_action_rejected",
+	"state": {
+		"cards": {
+			"definitions": {
+				"E01": {
+					"attributes": {
+						"allowed_anatomies": [],
+						"attack": 0,
+						"card_type": "item",
+						"cost": 0,
+						"defense": 0,
+						"display_name": "Objeto E01",
+						"effect_text": "Equipo. El portador obtiene +1 ATQ. Requiere Manipulador.",
+						"item_mode": "equipment",
+						"required_aptitudes": [
+							"manipulator"
+						]
+					},
+					"id": "E01",
+					"tags": [
+						"item",
+						"prototype"
+					]
+				},
+				"E02": {
+					"attributes": {
+						"allowed_anatomies": [],
+						"attack": 0,
+						"card_type": "item",
+						"cost": 0,
+						"defense": 0,
+						"display_name": "Objeto E02",
+						"effect_text": "Equipo. El portador obtiene +1 DEF.",
+						"item_mode": "equipment",
+						"required_aptitudes": []
+					},
+					"id": "E02",
+					"tags": [
+						"item",
+						"prototype"
+					]
+				},
+				"E03": {
+					"attributes": {
+						"allowed_anatomies": [],
+						"attack": 0,
+						"card_type": "item",
+						"cost": 0,
+						"defense": 0,
+						"display_name": "Objeto E03",
+						"effect_text": "Equipo. En guardia, el portador obtiene +1 ATQ y +1 DEF. Requiere Manipulador.",
+						"item_mode": "equipment",
+						"required_aptitudes": [
+							"manipulator"
+						]
+					},
+					"id": "E03",
+					"tags": [
+						"item",
+						"prototype"
+					]
+				},
+				"E04": {
+					"attributes": {
+						"allowed_anatomies": [],
+						"attack": 0,
+						"card_type": "item",
+						"cost": 0,
+						"defense": 0,
+						"display_name": "Objeto E04",
+						"effect_text": "Artefacto. Una vez por turno, permite trasladar un equipo entre criaturas propias compatibles.",
+						"item_mode": "artifact",
+						"required_aptitudes": []
+					},
+					"id": "E04",
+					"tags": [
+						"item",
+						"prototype"
+					]
+				},
+				"E05": {
+					"attributes": {
+						"allowed_anatomies": [],
+						"attack": 0,
+						"card_type": "item",
+						"cost": 0,
+						"defense": 0,
+						"display_name": "Objeto E05",
+						"effect_text": "Equipo del Bastion. El portador obtiene +1 DEF.",
+						"item_mode": "equipment",
+						"required_aptitudes": []
+					},
+					"id": "E05",
+					"tags": [
+						"item",
+						"prototype"
+					]
+				},
+				"E06": {
+					"attributes": {
+						"allowed_anatomies": [],
+						"attack": 0,
+						"card_type": "item",
+						"cost": 0,
+						"defense": 0,
+						"display_name": "Objeto E06",
+						"effect_text": "Equipo del Bastion. El portador obtiene +1 ATQ. Requiere Manipulador.",
+						"item_mode": "equipment",
+						"required_aptitudes": [
+							"manipulator"
+						]
+					},
+					"id": "E06",
+					"tags": [
+						"item",
+						"prototype"
+					]
+				},
+				"G01": {
+					"attributes": {
+						"attack": 0,
+						"card_type": "spell",
+						"cost": 0,
+						"defense": 0,
+						"display_name": "Magia G01",
+						"effect_text": "Una criatura que controlas obtiene +2 ATQ hasta el final del turno.",
+						"spell_mode": "main"
+					},
+					"id": "G01",
+					"tags": [
+						"spell",
+						"prototype"
+					]
+				},
+				"G02": {
+					"attributes": {
+						"attack": 0,
+						"card_type": "spell",
+						"cost": 0,
+						"defense": 0,
+						"display_name": "Magia G02",
+						"effect_text": "Una criatura que controlas obtiene +2 DEF hasta el final del turno.",
+						"spell_mode": "main"
+					},
+					"id": "G02",
+					"tags": [
+						"spell",
+						"prototype"
+					]
+				},
+				"G03": {
+					"attributes": {
+						"attack": 0,
+						"card_type": "spell",
+						"cost": 0,
+						"defense": 0,
+						"display_name": "Magia G03",
+						"effect_text": "Devuelve a la mano una criatura enemiga visible de coste impreso 2 o menos.",
+						"spell_mode": "main"
+					},
+					"id": "G03",
+					"tags": [
+						"spell",
+						"prototype"
+					]
+				},
+				"G04": {
+					"attributes": {
+						"attack": 0,
+						"card_type": "spell",
+						"cost": 0,
+						"defense": 0,
+						"display_name": "Magia G04",
+						"effect_text": "Tus criaturas en postura de guardia obtienen +1 DEF.",
+						"spell_mode": "persistent"
+					},
+					"id": "G04",
+					"tags": [
+						"spell",
+						"prototype"
+					]
+				},
+				"G05": {
+					"attributes": {
+						"attack": 0,
+						"card_type": "spell",
+						"cost": 0,
+						"defense": 0,
+						"display_name": "Magia G05",
+						"effect_text": "La primera criatura que pase de guardia a ataque en tu turno obtiene +1 ATQ hasta el final del turno.",
+						"spell_mode": "persistent"
+					},
+					"id": "G05",
+					"tags": [
+						"spell",
+						"prototype"
+					]
+				},
+				"G06": {
+					"attributes": {
+						"attack": 0,
+						"card_type": "spell",
+						"cost": 0,
+						"defense": 0,
+						"display_name": "Magia G06",
+						"effect_text": "Cuando una criatura que controlas sea atacada, obtiene +2 DEF durante ese combate.",
+						"spell_mode": "reactive"
+					},
+					"id": "G06",
+					"tags": [
+						"spell",
+						"prototype"
+					]
+				},
+				"G07": {
+					"attributes": {
+						"attack": 0,
+						"card_type": "spell",
+						"cost": 0,
+						"defense": 0,
+						"display_name": "Magia G07",
+						"effect_text": "Cuando una criatura que controlas sea atacada, devuelvela a tu mano.",
+						"spell_mode": "reactive"
+					},
+					"id": "G07",
+					"tags": [
+						"spell",
+						"prototype"
+					]
+				},
+				"M01": {
+					"attributes": {
+						"anatomy": "quadruped",
+						"aptitudes": [
+							"bestial"
+						],
+						"attack": 2,
+						"card_type": "creature",
+						"cost": 1,
+						"defense": 0,
+						"display_name": "Lobo de Zarza",
+						"effect_text": "Sin habilidad.",
+						"element": "nature",
+						"families": [
+							"wolf"
+						],
+						"properties": [],
+						"superfamilies": [
+							"bestial"
+						]
+					},
+					"id": "M01",
+					"tags": [
+						"creature",
+						"prototype"
+					]
+				},
+				"M02": {
+					"attributes": {
+						"anatomy": "humanoid",
+						"aptitudes": [
+							"sapient",
+							"manipulator"
+						],
+						"attack": 1,
+						"card_type": "creature",
+						"cost": 1,
+						"defense": 2,
+						"display_name": "Ondina del Remanso",
+						"effect_text": "Sin habilidad.",
+						"element": "water",
+						"families": [
+							"elemental"
+						],
+						"properties": [],
+						"superfamilies": []
+					},
+					"id": "M02",
+					"tags": [
+						"creature",
+						"prototype"
+					]
+				},
+				"M03": {
+					"attributes": {
+						"anatomy": "amorphous",
+						"aptitudes": [],
+						"attack": 0,
+						"card_type": "creature",
+						"cost": 1,
+						"defense": 3,
+						"display_name": "Núcleo de Escoria",
+						"effect_text": "Sin habilidad.",
+						"element": "fire",
+						"families": [
+							"elemental"
+						],
+						"properties": [],
+						"superfamilies": []
+					},
+					"id": "M03",
+					"tags": [
+						"creature",
+						"prototype"
+					]
+				},
+				"M04": {
+					"attributes": {
+						"anatomy": "humanoid",
+						"aptitudes": [
+							"sapient",
+							"manipulator"
+						],
+						"attack": 1,
+						"card_type": "creature",
+						"cost": 1,
+						"defense": 1,
+						"display_name": "Goblin Rebuscador",
+						"effect_text": "Sin habilidad.",
+						"element": "neutral",
+						"families": [
+							"goblin"
+						],
+						"properties": [],
+						"superfamilies": [
+							"humanoid"
+						]
+					},
+					"id": "M04",
+					"tags": [
+						"creature",
+						"prototype"
+					]
+				},
+				"M05": {
+					"attributes": {
+						"anatomy": "humanoid",
+						"aptitudes": [
+							"sapient",
+							"manipulator"
+						],
+						"attack": 1,
+						"card_type": "creature",
+						"cost": 1,
+						"defense": 1,
+						"display_name": "Goblin Portaantorchas",
+						"effect_text": "Al declarar un ataque, obtiene +1 ATQ durante ese combate.",
+						"element": "fire",
+						"families": [
+							"goblin"
+						],
+						"properties": [],
+						"superfamilies": [
+							"humanoid"
+						]
+					},
+					"id": "M05",
+					"tags": [
+						"creature",
+						"prototype"
+					]
+				},
+				"M06": {
+					"attributes": {
+						"anatomy": "amorphous",
+						"aptitudes": [],
+						"attack": 0,
+						"card_type": "creature",
+						"cost": 1,
+						"defense": 2,
+						"display_name": "Muro de Marea",
+						"effect_text": "Cuando sea revelada al recibir un ataque, obtiene +1 DEF durante ese combate.",
+						"element": "water",
+						"families": [
+							"elemental"
+						],
+						"properties": [],
+						"superfamilies": []
+					},
+					"id": "M06",
+					"tags": [
+						"creature",
+						"prototype"
+					]
+				},
+				"M07": {
+					"attributes": {
+						"anatomy": "quadruped",
+						"aptitudes": [
+							"bestial"
+						],
+						"attack": 0,
+						"card_type": "creature",
+						"cost": 1,
+						"defense": 1,
+						"display_name": "Cachorro de la Senda Verde",
+						"effect_text": "Cuando sea destruida, roba 1 carta.",
+						"element": "nature",
+						"families": [
+							"wolf"
+						],
+						"properties": [],
+						"superfamilies": [
+							"bestial"
+						]
+					},
+					"id": "M07",
+					"tags": [
+						"creature",
+						"prototype"
+					]
+				},
+				"M08": {
+					"attributes": {
+						"anatomy": "amorphous",
+						"aptitudes": [],
+						"attack": 3,
+						"card_type": "creature",
+						"cost": 2,
+						"defense": 1,
+						"display_name": "Oleada Errante",
+						"effect_text": "Sin habilidad.",
+						"element": "water",
+						"families": [
+							"elemental"
+						],
+						"properties": [],
+						"superfamilies": []
+					},
+					"id": "M08",
+					"tags": [
+						"creature",
+						"prototype"
+					]
+				},
+				"M09": {
+					"attributes": {
+						"anatomy": "humanoid",
+						"aptitudes": [
+							"sapient",
+							"manipulator"
+						],
+						"attack": 2,
+						"card_type": "creature",
+						"cost": 2,
+						"defense": 2,
+						"display_name": "Goblin Pendenciero",
+						"effect_text": "Una vez por turno, durante una fase principal propia, puede pagar 1 de Energia para obtener +1 ATQ hasta el final del turno.",
+						"element": "neutral",
+						"families": [
+							"goblin"
+						],
+						"properties": [],
+						"superfamilies": [
+							"humanoid"
+						]
+					},
+					"id": "M09",
+					"tags": [
+						"creature",
+						"prototype"
+					]
+				},
+				"M10": {
+					"attributes": {
+						"anatomy": "humanoid",
+						"aptitudes": [
+							"sapient",
+							"manipulator"
+						],
+						"attack": 1,
+						"card_type": "creature",
+						"cost": 2,
+						"defense": 3,
+						"display_name": "Goblin Trampero del Matorral",
+						"effect_text": "Mientras este en postura de guardia, obtiene +1 ATQ.",
+						"element": "nature",
+						"families": [
+							"goblin"
+						],
+						"properties": [],
+						"superfamilies": [
+							"humanoid"
+						]
+					},
+					"id": "M10",
+					"tags": [
+						"creature",
+						"prototype"
+					]
+				},
+				"M11": {
+					"attributes": {
+						"anatomy": "humanoid",
+						"aptitudes": [
+							"sapient",
+							"manipulator"
+						],
+						"attack": 4,
+						"card_type": "creature",
+						"cost": 3,
+						"defense": 2,
+						"display_name": "Troll Quebrapuertas",
+						"effect_text": "Sin habilidad.",
+						"element": "neutral",
+						"families": [
+							"troll"
+						],
+						"properties": [],
+						"superfamilies": [
+							"humanoid"
+						]
+					},
+					"id": "M11",
+					"tags": [
+						"creature",
+						"prototype"
+					]
+				},
+				"M12": {
+					"attributes": {
+						"anatomy": "humanoid",
+						"aptitudes": [
+							"sapient",
+							"manipulator",
+							"channeler"
+						],
+						"attack": 3,
+						"card_type": "creature",
+						"cost": 3,
+						"defense": 2,
+						"display_name": "Oráculo del Espejo de Agua",
+						"effect_text": "Al entrar boca arriba, su controlador mira una carta de apoyo boca abajo del rival sin revelarla publicamente.",
+						"element": "water",
+						"families": [
+							"elemental"
+						],
+						"properties": [],
+						"superfamilies": []
+					},
+					"id": "M12",
+					"tags": [
+						"creature",
+						"prototype"
+					]
+				},
+				"M13": {
+					"attributes": {
+						"anatomy": "humanoid",
+						"aptitudes": [
+							"sapient",
+							"manipulator"
+						],
+						"attack": 2,
+						"card_type": "creature",
+						"cost": 3,
+						"defense": 2,
+						"display_name": "Troll Guarda del Puente",
+						"effect_text": "Una vez por turno, cuando otra criatura propia sea atacada, puede pasar a ser el objetivo de ese ataque.",
+						"element": "neutral",
+						"families": [
+							"troll"
+						],
+						"properties": [],
+						"superfamilies": [
+							"humanoid"
+						]
+					},
+					"id": "M13",
+					"tags": [
+						"creature",
+						"prototype"
+					]
+				},
+				"M14": {
+					"attributes": {
+						"anatomy": "quadruped",
+						"aptitudes": [
+							"bestial"
+						],
+						"attack": 4,
+						"card_type": "creature",
+						"cost": 4,
+						"defense": 4,
+						"display_name": "Lobo Gris del Páramo",
+						"effect_text": "Sin habilidad.",
+						"element": "neutral",
+						"families": [
+							"wolf"
+						],
+						"properties": [],
+						"superfamilies": [
+							"bestial"
+						]
+					},
+					"id": "M14",
+					"tags": [
+						"creature",
+						"prototype"
+					]
+				},
+				"M15": {
+					"attributes": {
+						"anatomy": "humanoid",
+						"aptitudes": [
+							"sapient",
+							"manipulator",
+							"channeler"
+						],
+						"attack": 3,
+						"card_type": "creature",
+						"cost": 4,
+						"defense": 3,
+						"display_name": "Troll Chamán del Musgo",
+						"effect_text": "Al entrar boca arriba, otra criatura propia obtiene +1 ATQ y +1 DEF hasta el final del turno.",
+						"element": "nature",
+						"families": [
+							"troll"
+						],
+						"properties": [],
+						"superfamilies": [
+							"humanoid"
+						]
+					},
+					"id": "M15",
+					"tags": [
+						"creature",
+						"prototype"
+					]
+				},
+				"M16": {
+					"attributes": {
+						"anatomy": "humanoid",
+						"aptitudes": [
+							"sapient",
+							"manipulator"
+						],
+						"attack": 4,
+						"card_type": "creature",
+						"cost": 5,
+						"defense": 4,
+						"display_name": "Troll Cobrador del Paso",
+						"effect_text": "La primera vez en cada turno que destruya una criatura en combate, recuperas 1 de Energia.",
+						"element": "neutral",
+						"families": [
+							"troll"
+						],
+						"properties": [],
+						"superfamilies": [
+							"humanoid"
+						]
+					},
+					"id": "M16",
+					"tags": [
+						"creature",
+						"prototype"
+					]
+				},
+				"M17": {
+					"attributes": {
+						"anatomy": "winged",
+						"aptitudes": [
+							"bestial"
+						],
+						"attack": 7,
+						"card_type": "creature",
+						"cost": 6,
+						"defense": 4,
+						"display_name": "Dragón de la Caldera",
+						"effect_text": "Sin habilidad.",
+						"element": "fire",
+						"families": [
+							"dragon"
+						],
+						"properties": [],
+						"superfamilies": [
+							"draconic"
+						]
+					},
+					"id": "M17",
+					"tags": [
+						"creature",
+						"prototype"
+					]
+				},
+				"M18": {
+					"attributes": {
+						"anatomy": "winged",
+						"aptitudes": [
+							"sapient",
+							"manipulator"
+						],
+						"attack": 5,
+						"card_type": "creature",
+						"cost": 7,
+						"defense": 6,
+						"display_name": "Dragón Rojo de las Dos Coronas",
+						"effect_text": "La primera vez en cada turno que destruya una criatura en combate y sobreviva, obtiene 1 ataque adicional ese turno. Solo una vez por turno.",
+						"element": "fire",
+						"families": [
+							"dragon"
+						],
+						"properties": [],
+						"superfamilies": [
+							"draconic"
+						]
+					},
+					"id": "M18",
+					"tags": [
+						"creature",
+						"prototype"
+					]
+				},
+				"R01": {
+					"attributes": {
+						"attack": 0,
+						"card_type": "terrain",
+						"cost": 0,
+						"defense": 0,
+						"display_name": "Bosque",
+						"effect_text": "Tus criaturas de Naturaleza obtienen +1 DEF.",
+						"element": "nature"
+					},
+					"id": "R01",
+					"tags": [
+						"terrain",
+						"prototype"
+					]
+				},
+				"R02": {
+					"attributes": {
+						"attack": 0,
+						"card_type": "terrain",
+						"cost": 0,
+						"defense": 0,
+						"display_name": "Lago",
+						"effect_text": "Tus criaturas de Agua obtienen +1 DEF.",
+						"element": "water"
+					},
+					"id": "R02",
+					"tags": [
+						"terrain",
+						"prototype"
+					]
+				},
+				"R03": {
+					"attributes": {
+						"attack": 0,
+						"card_type": "terrain",
+						"cost": 0,
+						"defense": 0,
+						"display_name": "Volcan",
+						"effect_text": "Tus criaturas de Fuego obtienen +1 ATQ.",
+						"element": "fire"
+					},
+					"id": "R03",
+					"tags": [
+						"terrain",
+						"prototype"
+					]
+				},
+				"T01": {
+					"attributes": {
+						"attack": 0,
+						"card_type": "trap",
+						"cost": 0,
+						"defense": 0,
+						"display_name": "Trampa T01",
+						"effect_text": "Cuando una criatura enemiga de coste 2 o menos ataque, destruyela.",
+						"spell_mode": "reactive"
+					},
+					"id": "T01",
+					"tags": [
+						"trap",
+						"prototype"
+					]
+				},
+				"T02": {
+					"attributes": {
+						"attack": 0,
+						"card_type": "trap",
+						"cost": 0,
+						"defense": 0,
+						"display_name": "Trampa T02",
+						"effect_text": "Cuando una criatura que controlas sea atacada, el atacante obtiene -2 ATQ durante ese combate.",
+						"spell_mode": "reactive"
+					},
+					"id": "T02",
+					"tags": [
+						"trap",
+						"prototype"
+					]
+				},
+				"T03": {
+					"attributes": {
+						"attack": 0,
+						"card_type": "trap",
+						"cost": 0,
+						"defense": 0,
+						"display_name": "Trampa T03",
+						"effect_text": "Cuando el rival active una Magia, anula su efecto; despues, ambas cartas van al Cementerio.",
+						"spell_mode": "reactive"
+					},
+					"id": "T03",
+					"tags": [
+						"trap",
+						"prototype"
+					]
+				},
+				"T04": {
+					"attributes": {
+						"attack": 0,
+						"card_type": "trap",
+						"cost": 0,
+						"defense": 0,
+						"display_name": "Trampa T04",
+						"effect_text": "Cuando una criatura enemiga pase voluntariamente de guardia a ataque, devuelvela a guardia.",
+						"spell_mode": "reactive"
+					},
+					"id": "T04",
+					"tags": [
+						"trap",
+						"prototype"
+					]
+				},
+				"T05": {
+					"attributes": {
+						"attack": 0,
+						"card_type": "trap",
+						"cost": 0,
+						"defense": 0,
+						"display_name": "Trampa T05",
+						"effect_text": "Cuando el rival vincule un equipo u objeto, destruye esa carta vinculada.",
+						"spell_mode": "reactive"
+					},
+					"id": "T05",
+					"tags": [
+						"trap",
+						"prototype"
+					]
+				},
+				"T06": {
+					"attributes": {
+						"attack": 0,
+						"card_type": "trap",
+						"cost": 0,
+						"defense": 0,
+						"display_name": "Trampa T06",
+						"effect_text": "Cuando una criatura que controlas sea destruida en combate, destruye a la criatura enemiga que combatio con ella si sigue en campo.",
+						"spell_mode": "reactive"
+					},
+					"id": "T06",
+					"tags": [
+						"trap",
+						"prototype"
+					]
+				}
+			},
+			"instances": {
+				"jcp-00001": {
+					"definition_id": "M01",
+					"id": "jcp-00001",
+					"metadata": {
+						"copy_index": 0,
+						"owner_id": 0,
+						"serial": 1
+					}
+				},
+				"jcp-00002": {
+					"definition_id": "M01",
+					"id": "jcp-00002",
+					"metadata": {
+						"copy_index": 1,
+						"owner_id": 1,
+						"serial": 2
+					}
+				},
+				"jcp-00003": {
+					"definition_id": "M02",
+					"id": "jcp-00003",
+					"metadata": {
+						"copy_index": 0,
+						"owner_id": 0,
+						"serial": 3
+					}
+				},
+				"jcp-00004": {
+					"definition_id": "M02",
+					"id": "jcp-00004",
+					"metadata": {
+						"copy_index": 1,
+						"face_up": true,
+						"fusion_combat_choice_turn": 24,
+						"fusion_entity": {
+							"anatomy": "amorphous",
+							"aptitudes": [],
+							"attack": 4,
+							"contained_physical_ids": [
+								"jcp-00004",
+								"jcp-00012"
+							],
+							"cost": 4,
+							"defense": 4,
+							"display_name": "Elemental Mayor de Agua",
+							"effect_text": "Al comenzar el primer combate en el que participe cada turno, su controlador elige: obtiene +1 ATQ o +1 DEF durante ese combate.",
+							"elements": [
+								"water"
+							],
+							"families": [
+								"elemental"
+							],
+							"fusion_identity_id": "fusion.f067_water_major",
+							"fusion_mode": "integration",
+							"id": "fusion.p1.t5",
+							"owner_id": 1,
+							"properties": [],
+							"source_fusion_ids": [],
+							"superfamilies": []
+						},
+						"last_attack_turn": 23,
+						"last_position_change_turn": 27,
+						"owner_id": 1,
+						"position": "guard",
+						"serial": 4,
+						"summoned_turn": 5
+					}
+				},
+				"jcp-00005": {
+					"definition_id": "M03",
+					"id": "jcp-00005",
+					"metadata": {
+						"copy_index": 0,
+						"face_up": true,
+						"last_attack_turn": 14,
+						"last_position_change_turn": -1,
+						"owner_id": 0,
+						"position": "attack",
+						"serial": 5,
+						"summoned_turn": 14
+					}
+				},
+				"jcp-00006": {
+					"definition_id": "M03",
+					"id": "jcp-00006",
+					"metadata": {
+						"copy_index": 1,
+						"owner_id": 1,
+						"serial": 6
+					}
+				},
+				"jcp-00007": {
+					"definition_id": "M04",
+					"id": "jcp-00007",
+					"metadata": {
+						"copy_index": 0,
+						"face_up": true,
+						"last_attack_turn": -1,
+						"last_position_change_turn": -1,
+						"owner_id": 0,
+						"position": "attack",
+						"serial": 7,
+						"summoned_turn": 6
+					}
+				},
+				"jcp-00008": {
+					"definition_id": "M04",
+					"id": "jcp-00008",
+					"metadata": {
+						"copy_index": 1,
+						"owner_id": 1,
+						"serial": 8
+					}
+				},
+				"jcp-00009": {
+					"definition_id": "M05",
+					"id": "jcp-00009",
+					"metadata": {
+						"copy_index": 0,
+						"face_up": true,
+						"owner_id": 0,
+						"position": "attack",
+						"serial": 9,
+						"summoned_turn": 6
+					}
+				},
+				"jcp-00010": {
+					"definition_id": "M05",
+					"id": "jcp-00010",
+					"metadata": {
+						"copy_index": 1,
+						"owner_id": 1,
+						"serial": 10
+					}
+				},
+				"jcp-00011": {
+					"definition_id": "M06",
+					"id": "jcp-00011",
+					"metadata": {
+						"copy_index": 0,
+						"face_up": true,
+						"last_attack_turn": 6,
+						"last_position_change_turn": 6,
+						"owner_id": 0,
+						"position": "attack",
+						"serial": 11,
+						"summoned_turn": 2,
+						"temporary_attack_bonus": 2,
+						"temporary_bonus_turn": 2,
+						"temporary_defense_bonus": 0
+					}
+				},
+				"jcp-00012": {
+					"definition_id": "M06",
+					"id": "jcp-00012",
+					"metadata": {
+						"contained_by": "jcp-00004",
+						"copy_index": 1,
+						"face_up": true,
+						"last_attack_turn": -1,
+						"last_position_change_turn": -1,
+						"owner_id": 1,
+						"position": "attack",
+						"serial": 12,
+						"summoned_turn": 5
+					}
+				},
+				"jcp-00013": {
+					"definition_id": "M07",
+					"id": "jcp-00013",
+					"metadata": {
+						"copy_index": 0,
+						"face_up": true,
+						"last_attack_turn": 10,
+						"last_position_change_turn": -1,
+						"owner_id": 0,
+						"position": "attack",
+						"serial": 13,
+						"summoned_turn": 10
+					}
+				},
+				"jcp-00014": {
+					"definition_id": "M07",
+					"id": "jcp-00014",
+					"metadata": {
+						"copy_index": 1,
+						"owner_id": 1,
+						"serial": 14
+					}
+				},
+				"jcp-00015": {
+					"definition_id": "M08",
+					"id": "jcp-00015",
+					"metadata": {
+						"copy_index": 0,
+						"face_up": true,
+						"last_attack_turn": -1,
+						"last_position_change_turn": -1,
+						"owner_id": 0,
+						"position": "guard",
+						"serial": 15,
+						"summoned_turn": 16
+					}
+				},
+				"jcp-00016": {
+					"definition_id": "M08",
+					"id": "jcp-00016",
+					"metadata": {
+						"copy_index": 1,
+						"face_up": true,
+						"last_attack_turn": -1,
+						"last_position_change_turn": -1,
+						"owner_id": 1,
+						"position": "attack",
+						"serial": 16,
+						"summoned_turn": 29
+					}
+				},
+				"jcp-00017": {
+					"definition_id": "M09",
+					"id": "jcp-00017",
+					"metadata": {
+						"copy_index": 0,
+						"owner_id": 0,
+						"serial": 17
+					}
+				},
+				"jcp-00018": {
+					"definition_id": "M09",
+					"id": "jcp-00018",
+					"metadata": {
+						"copy_index": 1,
+						"owner_id": 1,
+						"serial": 18
+					}
+				},
+				"jcp-00019": {
+					"definition_id": "M10",
+					"id": "jcp-00019",
+					"metadata": {
+						"copy_index": 0,
+						"owner_id": 0,
+						"serial": 19
+					}
+				},
+				"jcp-00020": {
+					"definition_id": "M10",
+					"id": "jcp-00020",
+					"metadata": {
+						"copy_index": 1,
+						"face_up": true,
+						"last_attack_turn": 15,
+						"last_position_change_turn": 21,
+						"owner_id": 1,
+						"position": "attack",
+						"serial": 20,
+						"summoned_turn": 15
+					}
+				},
+				"jcp-00021": {
+					"definition_id": "M11",
+					"id": "jcp-00021",
+					"metadata": {
+						"copy_index": 0,
+						"owner_id": 0,
+						"serial": 21
+					}
+				},
+				"jcp-00022": {
+					"definition_id": "M11",
+					"id": "jcp-00022",
+					"metadata": {
+						"copy_index": 1,
+						"face_up": true,
+						"last_attack_turn": -1,
+						"last_position_change_turn": -1,
+						"owner_id": 1,
+						"position": "attack",
+						"serial": 22,
+						"summoned_turn": 21,
+						"temporary_attack_bonus": 1,
+						"temporary_bonus_turn": 19,
+						"temporary_defense_bonus": 1
+					}
+				},
+				"jcp-00023": {
+					"definition_id": "M12",
+					"id": "jcp-00023",
+					"metadata": {
+						"copy_index": 0,
+						"face_up": true,
+						"last_attack_turn": -1,
+						"last_position_change_turn": 22,
+						"owner_id": 0,
+						"position": "guard",
+						"serial": 23,
+						"summoned_turn": 20
+					}
+				},
+				"jcp-00024": {
+					"definition_id": "M12",
+					"id": "jcp-00024",
+					"metadata": {
+						"copy_index": 1,
+						"owner_id": 1,
+						"serial": 24
+					}
+				},
+				"jcp-00025": {
+					"definition_id": "M13",
+					"id": "jcp-00025",
+					"metadata": {
+						"copy_index": 0,
+						"face_up": true,
+						"last_attack_turn": 24,
+						"last_position_change_turn": -1,
+						"owner_id": 0,
+						"position": "attack",
+						"serial": 25,
+						"summoned_turn": 24
+					}
+				},
+				"jcp-00026": {
+					"definition_id": "M13",
+					"id": "jcp-00026",
+					"metadata": {
+						"copy_index": 1,
+						"face_up": true,
+						"last_attack_turn": 23,
+						"last_position_change_turn": -1,
+						"owner_id": 1,
+						"position": "attack",
+						"serial": 26,
+						"summoned_turn": 23
+					}
+				},
+				"jcp-00027": {
+					"definition_id": "M14",
+					"id": "jcp-00027",
+					"metadata": {
+						"copy_index": 0,
+						"face_up": true,
+						"last_attack_turn": 14,
+						"last_position_change_turn": 14,
+						"owner_id": 0,
+						"position": "attack",
+						"serial": 27,
+						"summoned_turn": 8
+					}
+				},
+				"jcp-00028": {
+					"definition_id": "M14",
+					"id": "jcp-00028",
+					"metadata": {
+						"copy_index": 1,
+						"owner_id": 1,
+						"serial": 28
+					}
+				},
+				"jcp-00029": {
+					"definition_id": "M15",
+					"id": "jcp-00029",
+					"metadata": {
+						"copy_index": 0,
+						"owner_id": 0,
+						"serial": 29
+					}
+				},
+				"jcp-00030": {
+					"definition_id": "M15",
+					"id": "jcp-00030",
+					"metadata": {
+						"copy_index": 1,
+						"face_up": true,
+						"last_attack_turn": 21,
+						"last_position_change_turn": -1,
+						"owner_id": 1,
+						"position": "attack",
+						"serial": 30,
+						"summoned_turn": 19
+					}
+				},
+				"jcp-00031": {
+					"definition_id": "M16",
+					"id": "jcp-00031",
+					"metadata": {
+						"copy_index": 0,
+						"owner_id": 0,
+						"serial": 31
+					}
+				},
+				"jcp-00032": {
+					"definition_id": "M16",
+					"id": "jcp-00032",
+					"metadata": {
+						"copy_index": 1,
+						"face_up": true,
+						"last_attack_turn": -1,
+						"last_position_change_turn": 29,
+						"owner_id": 1,
+						"position": "guard",
+						"serial": 32,
+						"summoned_turn": 27
+					}
+				},
+				"jcp-00033": {
+					"definition_id": "M17",
+					"id": "jcp-00033",
+					"metadata": {
+						"copy_index": 0,
+						"face_up": true,
+						"last_attack_turn": 12,
+						"last_position_change_turn": -1,
+						"owner_id": 0,
+						"position": "attack",
+						"serial": 33,
+						"summoned_turn": 12
+					}
+				},
+				"jcp-00034": {
+					"definition_id": "M17",
+					"id": "jcp-00034",
+					"metadata": {
+						"copy_index": 1,
+						"face_up": true,
+						"last_attack_turn": 13,
+						"last_position_change_turn": -1,
+						"owner_id": 1,
+						"position": "attack",
+						"serial": 34,
+						"summoned_turn": 13
+					}
+				},
+				"jcp-00035": {
+					"definition_id": "M18",
+					"id": "jcp-00035",
+					"metadata": {
+						"copy_index": 0,
+						"dragon_bonus_available": true,
+						"dragon_bonus_turn": 23,
+						"face_up": true,
+						"last_attack_turn": 26,
+						"last_position_change_turn": 28,
+						"owner_id": 0,
+						"position": "guard",
+						"serial": 35,
+						"summoned_turn": 18
+					}
+				},
+				"jcp-00036": {
+					"definition_id": "M18",
+					"id": "jcp-00036",
+					"metadata": {
+						"copy_index": 1,
+						"face_up": true,
+						"last_attack_turn": -1,
+						"last_position_change_turn": 27,
+						"owner_id": 1,
+						"position": "attack",
+						"serial": 36,
+						"summoned_turn": 25,
+						"temporary_attack_bonus": 1,
+						"temporary_bonus_turn": 27,
+						"temporary_defense_bonus": 0
+					}
+				},
+				"jcp-00037": {
+					"definition_id": "G01",
+					"id": "jcp-00037",
+					"metadata": {
+						"copy_index": 0,
+						"owner_id": 0,
+						"serial": 37
+					}
+				},
+				"jcp-00038": {
+					"definition_id": "G01",
+					"id": "jcp-00038",
+					"metadata": {
+						"copy_index": 1,
+						"owner_id": 1,
+						"serial": 38
+					}
+				},
+				"jcp-00039": {
+					"definition_id": "G02",
+					"id": "jcp-00039",
+					"metadata": {
+						"copy_index": 0,
+						"owner_id": 0,
+						"serial": 39
+					}
+				},
+				"jcp-00040": {
+					"definition_id": "G02",
+					"id": "jcp-00040",
+					"metadata": {
+						"copy_index": 1,
+						"owner_id": 1,
+						"serial": 40
+					}
+				},
+				"jcp-00041": {
+					"definition_id": "G03",
+					"id": "jcp-00041",
+					"metadata": {
+						"copy_index": 0,
+						"owner_id": 0,
+						"serial": 41
+					}
+				},
+				"jcp-00042": {
+					"definition_id": "G03",
+					"id": "jcp-00042",
+					"metadata": {
+						"copy_index": 1,
+						"owner_id": 1,
+						"serial": 42
+					}
+				},
+				"jcp-00043": {
+					"definition_id": "G04",
+					"id": "jcp-00043",
+					"metadata": {
+						"copy_index": 0,
+						"owner_id": 0,
+						"serial": 43
+					}
+				},
+				"jcp-00044": {
+					"definition_id": "G04",
+					"id": "jcp-00044",
+					"metadata": {
+						"active": true,
+						"copy_index": 1,
+						"face_up": true,
+						"owner_id": 1,
+						"played_turn": 1,
+						"serial": 44
+					}
+				},
+				"jcp-00045": {
+					"definition_id": "G05",
+					"id": "jcp-00045",
+					"metadata": {
+						"copy_index": 0,
+						"owner_id": 0,
+						"serial": 45
+					}
+				},
+				"jcp-00046": {
+					"definition_id": "G05",
+					"id": "jcp-00046",
+					"metadata": {
+						"active": true,
+						"copy_index": 1,
+						"face_up": true,
+						"last_trigger_turn": 27,
+						"owner_id": 1,
+						"played_turn": 27,
+						"serial": 46
+					}
+				},
+				"jcp-00047": {
+					"definition_id": "G06",
+					"id": "jcp-00047",
+					"metadata": {
+						"active": false,
+						"copy_index": 0,
+						"face_up": false,
+						"owner_id": 0,
+						"serial": 47,
+						"set_turn": 26
+					}
+				},
+				"jcp-00048": {
+					"definition_id": "G06",
+					"id": "jcp-00048",
+					"metadata": {
+						"copy_index": 1,
+						"owner_id": 1,
+						"serial": 48
+					}
+				},
+				"jcp-00049": {
+					"definition_id": "G07",
+					"id": "jcp-00049",
+					"metadata": {
+						"active": false,
+						"copy_index": 0,
+						"face_up": false,
+						"owner_id": 0,
+						"serial": 49,
+						"set_turn": 28
+					}
+				},
+				"jcp-00050": {
+					"definition_id": "G07",
+					"id": "jcp-00050",
+					"metadata": {
+						"active": false,
+						"copy_index": 1,
+						"face_up": true,
+						"owner_id": 1,
+						"serial": 50,
+						"set_turn": 15
+					}
+				},
+				"jcp-00051": {
+					"definition_id": "T01",
+					"id": "jcp-00051",
+					"metadata": {
+						"copy_index": 0,
+						"owner_id": 0,
+						"serial": 51
+					}
+				},
+				"jcp-00052": {
+					"definition_id": "T01",
+					"id": "jcp-00052",
+					"metadata": {
+						"active": false,
+						"copy_index": 1,
+						"face_up": false,
+						"owner_id": 1,
+						"serial": 52,
+						"set_turn": 9
+					}
+				},
+				"jcp-00053": {
+					"definition_id": "T02",
+					"id": "jcp-00053",
+					"metadata": {
+						"copy_index": 0,
+						"owner_id": 0,
+						"serial": 53
+					}
+				},
+				"jcp-00054": {
+					"definition_id": "T02",
+					"id": "jcp-00054",
+					"metadata": {
+						"active": false,
+						"copy_index": 1,
+						"face_up": true,
+						"owner_id": 1,
+						"serial": 54,
+						"set_turn": 11
+					}
+				},
+				"jcp-00055": {
+					"definition_id": "T03",
+					"id": "jcp-00055",
+					"metadata": {
+						"active": false,
+						"copy_index": 0,
+						"face_up": false,
+						"owner_id": 0,
+						"serial": 55,
+						"set_turn": 18
+					}
+				},
+				"jcp-00056": {
+					"definition_id": "T03",
+					"id": "jcp-00056",
+					"metadata": {
+						"copy_index": 1,
+						"owner_id": 1,
+						"serial": 56
+					}
+				},
+				"jcp-00057": {
+					"definition_id": "T04",
+					"id": "jcp-00057",
+					"metadata": {
+						"copy_index": 0,
+						"owner_id": 0,
+						"serial": 57
+					}
+				},
+				"jcp-00058": {
+					"definition_id": "T04",
+					"id": "jcp-00058",
+					"metadata": {
+						"copy_index": 1,
+						"owner_id": 1,
+						"serial": 58
+					}
+				},
+				"jcp-00059": {
+					"definition_id": "T05",
+					"id": "jcp-00059",
+					"metadata": {
+						"copy_index": 0,
+						"owner_id": 0,
+						"serial": 59
+					}
+				},
+				"jcp-00060": {
+					"definition_id": "T05",
+					"id": "jcp-00060",
+					"metadata": {
+						"copy_index": 1,
+						"owner_id": 1,
+						"serial": 60
+					}
+				},
+				"jcp-00061": {
+					"definition_id": "T06",
+					"id": "jcp-00061",
+					"metadata": {
+						"copy_index": 0,
+						"owner_id": 0,
+						"serial": 61
+					}
+				},
+				"jcp-00062": {
+					"definition_id": "T06",
+					"id": "jcp-00062",
+					"metadata": {
+						"copy_index": 1,
+						"owner_id": 1,
+						"serial": 62
+					}
+				},
+				"jcp-00063": {
+					"definition_id": "E01",
+					"id": "jcp-00063",
+					"metadata": {
+						"active": true,
+						"copy_index": 0,
+						"equipped_turn": 22,
+						"face_up": true,
+						"linked_to": "jcp-00023",
+						"owner_id": 0,
+						"serial": 63
+					}
+				},
+				"jcp-00064": {
+					"definition_id": "E01",
+					"id": "jcp-00064",
+					"metadata": {
+						"active": true,
+						"copy_index": 1,
+						"equipped_turn": 27,
+						"face_up": true,
+						"linked_to": "jcp-00032",
+						"owner_id": 1,
+						"serial": 64
+					}
+				},
+				"jcp-00065": {
+					"definition_id": "E02",
+					"id": "jcp-00065",
+					"metadata": {
+						"copy_index": 0,
+						"owner_id": 0,
+						"serial": 65
+					}
+				},
+				"jcp-00066": {
+					"definition_id": "E02",
+					"id": "jcp-00066",
+					"metadata": {
+						"copy_index": 1,
+						"owner_id": 1,
+						"serial": 66
+					}
+				},
+				"jcp-00067": {
+					"definition_id": "E03",
+					"id": "jcp-00067",
+					"metadata": {
+						"copy_index": 0,
+						"owner_id": 0,
+						"serial": 67
+					}
+				},
+				"jcp-00068": {
+					"definition_id": "E03",
+					"id": "jcp-00068",
+					"metadata": {
+						"active": true,
+						"copy_index": 1,
+						"equipped_turn": 17,
+						"face_up": true,
+						"linked_to": "jcp-00022",
+						"owner_id": 1,
+						"serial": 68
+					}
+				},
+				"jcp-00069": {
+					"definition_id": "E04",
+					"id": "jcp-00069",
+					"metadata": {
+						"active": true,
+						"copy_index": 0,
+						"face_up": true,
+						"owner_id": 0,
+						"played_turn": 10,
+						"serial": 69
+					}
+				},
+				"jcp-00070": {
+					"definition_id": "E04",
+					"id": "jcp-00070",
+					"metadata": {
+						"copy_index": 1,
+						"owner_id": 1,
+						"serial": 70
+					}
+				},
+				"jcp-00071": {
+					"definition_id": "E05",
+					"id": "jcp-00071",
+					"metadata": {
+						"copy_index": 0,
+						"owner_id": 0,
+						"serial": 71
+					}
+				},
+				"jcp-00072": {
+					"definition_id": "E05",
+					"id": "jcp-00072",
+					"metadata": {
+						"active": true,
+						"copy_index": 1,
+						"equipped_turn": 13,
+						"face_up": true,
+						"linked_to": "jcp-00022",
+						"owner_id": 1,
+						"serial": 72
+					}
+				},
+				"jcp-00073": {
+					"definition_id": "E06",
+					"id": "jcp-00073",
+					"metadata": {
+						"active": true,
+						"copy_index": 0,
+						"equipped_turn": 4,
+						"face_up": true,
+						"linked_to": "jcp-00009",
+						"owner_id": 0,
+						"serial": 73
+					}
+				},
+				"jcp-00074": {
+					"definition_id": "E06",
+					"id": "jcp-00074",
+					"metadata": {
+						"copy_index": 1,
+						"owner_id": 1,
+						"serial": 74
+					}
+				},
+				"jcp-00075": {
+					"definition_id": "R01",
+					"id": "jcp-00075",
+					"metadata": {
+						"copy_index": 0,
+						"owner_id": 0,
+						"serial": 75
+					}
+				},
+				"jcp-00076": {
+					"definition_id": "R01",
+					"id": "jcp-00076",
+					"metadata": {
+						"copy_index": 1,
+						"owner_id": 1,
+						"serial": 76
+					}
+				},
+				"jcp-00077": {
+					"definition_id": "R02",
+					"id": "jcp-00077",
+					"metadata": {
+						"active": true,
+						"copy_index": 0,
+						"face_up": true,
+						"owner_id": 0,
+						"played_turn": 2,
+						"serial": 77
+					}
+				},
+				"jcp-00078": {
+					"definition_id": "R02",
+					"id": "jcp-00078",
+					"metadata": {
+						"copy_index": 1,
+						"owner_id": 1,
+						"serial": 78
+					}
+				},
+				"jcp-00079": {
+					"definition_id": "R03",
+					"id": "jcp-00079",
+					"metadata": {
+						"copy_index": 0,
+						"owner_id": 0,
+						"serial": 79
+					}
+				},
+				"jcp-00080": {
+					"definition_id": "R03",
+					"id": "jcp-00080",
+					"metadata": {
+						"active": true,
+						"copy_index": 1,
+						"face_up": true,
+						"owner_id": 1,
+						"played_turn": 1,
+						"serial": 80
+					}
+				}
+			},
+			"zones": {
+				"attachments:0": {
+					"cards": [],
+					"definition": {
+						"capacity": -1,
+						"count_visibility": "PUBLIC",
+						"id": "attachments:0",
+						"metadata": {},
+						"owner_id": 0,
+						"public_reveal_end": 0,
+						"public_reveal_start": 0,
+						"visibility": "PUBLIC",
+						"visible_to": []
+					}
+				},
+				"attachments:1": {
+					"cards": [
+						"jcp-00064"
+					],
+					"definition": {
+						"capacity": -1,
+						"count_visibility": "PUBLIC",
+						"id": "attachments:1",
+						"metadata": {},
+						"owner_id": 1,
+						"public_reveal_end": 0,
+						"public_reveal_start": 0,
+						"visibility": "PUBLIC",
+						"visible_to": []
+					}
+				},
+				"creatures:0": {
+					"cards": [
+						"jcp-00035"
+					],
+					"definition": {
+						"capacity": 5,
+						"count_visibility": "PUBLIC",
+						"id": "creatures:0",
+						"metadata": {},
+						"owner_id": 0,
+						"public_reveal_end": 0,
+						"public_reveal_start": 0,
+						"visibility": "PUBLIC",
+						"visible_to": []
+					}
+				},
+				"creatures:1": {
+					"cards": [
+						"jcp-00004",
+						"jcp-00036",
+						"jcp-00032",
+						"jcp-00016"
+					],
+					"definition": {
+						"capacity": 5,
+						"count_visibility": "PUBLIC",
+						"id": "creatures:1",
+						"metadata": {},
+						"owner_id": 1,
+						"public_reveal_end": 0,
+						"public_reveal_start": 0,
+						"visibility": "PUBLIC",
+						"visible_to": []
+					}
+				},
+				"deck:0": {
+					"cards": [
+						"jcp-00057",
+						"jcp-00075",
+						"jcp-00079",
+						"jcp-00021",
+						"jcp-00045",
+						"jcp-00017",
+						"jcp-00019",
+						"jcp-00031",
+						"jcp-00039",
+						"jcp-00065",
+						"jcp-00053",
+						"jcp-00051",
+						"jcp-00059",
+						"jcp-00067",
+						"jcp-00001",
+						"jcp-00071",
+						"jcp-00003",
+						"jcp-00061",
+						"jcp-00043",
+						"jcp-00029"
+					],
+					"definition": {
+						"capacity": -1,
+						"count_visibility": "PUBLIC",
+						"id": "deck:0",
+						"metadata": {},
+						"owner_id": 0,
+						"public_reveal_end": 0,
+						"public_reveal_start": 0,
+						"visibility": "HIDDEN",
+						"visible_to": []
+					}
+				},
+				"deck:1": {
+					"cards": [
+						"jcp-00014",
+						"jcp-00060",
+						"jcp-00002",
+						"jcp-00066",
+						"jcp-00058",
+						"jcp-00018",
+						"jcp-00006",
+						"jcp-00074",
+						"jcp-00070",
+						"jcp-00038",
+						"jcp-00042",
+						"jcp-00048",
+						"jcp-00010",
+						"jcp-00076",
+						"jcp-00024",
+						"jcp-00040",
+						"jcp-00062",
+						"jcp-00028",
+						"jcp-00078",
+						"jcp-00056",
+						"jcp-00008"
+					],
+					"definition": {
+						"capacity": -1,
+						"count_visibility": "PUBLIC",
+						"id": "deck:1",
+						"metadata": {},
+						"owner_id": 1,
+						"public_reveal_end": 0,
+						"public_reveal_start": 0,
+						"visibility": "HIDDEN",
+						"visible_to": []
+					}
+				},
+				"fusion_materials:0": {
+					"cards": [],
+					"definition": {
+						"capacity": -1,
+						"count_visibility": "PUBLIC",
+						"id": "fusion_materials:0",
+						"metadata": {},
+						"owner_id": 0,
+						"public_reveal_end": 0,
+						"public_reveal_start": 0,
+						"visibility": "PUBLIC",
+						"visible_to": []
+					}
+				},
+				"fusion_materials:1": {
+					"cards": [
+						"jcp-00012"
+					],
+					"definition": {
+						"capacity": -1,
+						"count_visibility": "PUBLIC",
+						"id": "fusion_materials:1",
+						"metadata": {},
+						"owner_id": 1,
+						"public_reveal_end": 0,
+						"public_reveal_start": 0,
+						"visibility": "PUBLIC",
+						"visible_to": []
+					}
+				},
+				"graveyard:0": {
+					"cards": [
+						"jcp-00037",
+						"jcp-00011",
+						"jcp-00073",
+						"jcp-00007",
+						"jcp-00009",
+						"jcp-00013",
+						"jcp-00041",
+						"jcp-00033",
+						"jcp-00005",
+						"jcp-00027",
+						"jcp-00015",
+						"jcp-00063",
+						"jcp-00023",
+						"jcp-00025"
+					],
+					"definition": {
+						"capacity": -1,
+						"count_visibility": "PUBLIC",
+						"id": "graveyard:0",
+						"metadata": {},
+						"owner_id": 0,
+						"public_reveal_end": 0,
+						"public_reveal_start": 0,
+						"visibility": "PUBLIC",
+						"visible_to": []
+					}
+				},
+				"graveyard:1": {
+					"cards": [
+						"jcp-00054",
+						"jcp-00034",
+						"jcp-00072",
+						"jcp-00068",
+						"jcp-00050",
+						"jcp-00030",
+						"jcp-00022",
+						"jcp-00020",
+						"jcp-00026"
+					],
+					"definition": {
+						"capacity": -1,
+						"count_visibility": "PUBLIC",
+						"id": "graveyard:1",
+						"metadata": {},
+						"owner_id": 1,
+						"public_reveal_end": 0,
+						"public_reveal_start": 0,
+						"visibility": "PUBLIC",
+						"visible_to": []
+					}
+				},
+				"hand:0": {
+					"cards": [],
+					"definition": {
+						"capacity": -1,
+						"count_visibility": "PUBLIC",
+						"id": "hand:0",
+						"metadata": {},
+						"owner_id": 0,
+						"public_reveal_end": 0,
+						"public_reveal_start": 0,
+						"visibility": "OWNER",
+						"visible_to": []
+					}
+				},
+				"hand:1": {
+					"cards": [],
+					"definition": {
+						"capacity": -1,
+						"count_visibility": "PUBLIC",
+						"id": "hand:1",
+						"metadata": {},
+						"owner_id": 1,
+						"public_reveal_end": 0,
+						"public_reveal_start": 0,
+						"visibility": "OWNER",
+						"visible_to": []
+					}
+				},
+				"support:0": {
+					"cards": [
+						"jcp-00069",
+						"jcp-00055",
+						"jcp-00047",
+						"jcp-00049"
+					],
+					"definition": {
+						"capacity": 5,
+						"count_visibility": "PUBLIC",
+						"id": "support:0",
+						"metadata": {},
+						"owner_id": 0,
+						"public_reveal_end": 0,
+						"public_reveal_start": 0,
+						"visibility": "PUBLIC",
+						"visible_to": []
+					}
+				},
+				"support:1": {
+					"cards": [
+						"jcp-00044",
+						"jcp-00052",
+						"jcp-00046"
+					],
+					"definition": {
+						"capacity": 5,
+						"count_visibility": "PUBLIC",
+						"id": "support:1",
+						"metadata": {},
+						"owner_id": 1,
+						"public_reveal_end": 0,
+						"public_reveal_start": 0,
+						"visibility": "PUBLIC",
+						"visible_to": []
+					}
+				},
+				"terrain:0": {
+					"cards": [
+						"jcp-00077"
+					],
+					"definition": {
+						"capacity": 1,
+						"count_visibility": "PUBLIC",
+						"id": "terrain:0",
+						"metadata": {},
+						"owner_id": 0,
+						"public_reveal_end": 0,
+						"public_reveal_start": 0,
+						"visibility": "PUBLIC",
+						"visible_to": []
+					}
+				},
+				"terrain:1": {
+					"cards": [
+						"jcp-00080"
+					],
+					"definition": {
+						"capacity": 1,
+						"count_visibility": "PUBLIC",
+						"id": "terrain:1",
+						"metadata": {},
+						"owner_id": 1,
+						"public_reveal_end": 0,
+						"public_reveal_start": 0,
+						"visibility": "PUBLIC",
+						"visible_to": []
+					}
+				}
+			}
+		},
+		"config": {
+			"energy_cap": 10,
+			"player_names": [
+				"Bot A",
+				"Bot B"
+			],
+			"starting_life": 30,
+			"starting_player": 1
+		},
+		"energy": {
+			"0": {
+				"available": 10,
+				"maximum": 10
+			},
+			"1": {
+				"available": 8,
+				"maximum": 10
+			}
+		},
+		"finished_reason": "",
+		"life": {
+			"0": 1,
+			"1": 17
+		},
+		"pending_response": {},
+		"phase": {
+			"current": "MAIN_1",
+			"definition": {
+				"initial": "START",
+				"terminal": [
+					"FINISHED"
+				],
+				"transitions": {
+					"COMBAT": [
+						"MAIN_2",
+						"FINISHED"
+					],
+					"DRAW": [
+						"MAIN_1",
+						"FINISHED"
+					],
+					"END": [
+						"FINISHED"
+					],
+					"FINISHED": [],
+					"MAIN_1": [
+						"COMBAT",
+						"FINISHED"
+					],
+					"MAIN_2": [
+						"END",
+						"FINISHED"
+					],
+					"START": [
+						"DRAW",
+						"FINISHED"
+					]
+				}
+			},
+			"entry_count": {
+				"DRAW": 1,
+				"MAIN_1": 1,
+				"START": 1
+			},
+			"history": [
+				"START",
+				"DRAW",
+				"MAIN_1"
+			]
+		},
+		"players": {
+			"players": [
+				{
+					"active": true,
+					"id": 0,
+					"metadata": {},
+					"name": "Bot A",
+					"seat": 0,
+					"team_id": -1
+				},
+				{
+					"active": true,
+					"id": 1,
+					"metadata": {},
+					"name": "Bot B",
+					"seat": 1,
+					"team_id": -1
+				}
+			],
+			"teams": []
+		},
+		"seed": 9,
+		"turn": {
+			"active_index": 1,
+			"direction": 1,
+			"order": [
+				0,
+				1
+			],
+			"round_anchor_index": 1,
+			"round_number": 15,
+			"turn_number": 29
+		},
+		"turn_usage": {
+			"fusion_used": false,
+			"normal_summon_used": true
+		},
+		"winner_ids": []
+	},
+	"step": 282
+}

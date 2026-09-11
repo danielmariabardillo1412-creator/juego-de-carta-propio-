@@ -1,0 +1,7 @@
+{
+  "status": "PASS",
+  "checks": 11337,
+  "gd_files": 65,
+  "failures": [],
+  "warning": "Static audit does not execute the Godot parser or runtime."
+}

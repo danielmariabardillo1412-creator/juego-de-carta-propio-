@@ -1,0 +1,43 @@
+{
+  "project": "Zapiti Universal Card Engine",
+  "build": "systems-hardening-f05",
+  "status": "F05_STATIC_REVIEW_PASS_RUNTIME_UNTESTED",
+  "date": "2026-07-31",
+  "godot_target": "4.7",
+  "single_source_root": "Universal_Card_Engine_Lab",
+  "controlled_file_count_excluding_manifest": 99,
+  "controlled_total_bytes_excluding_manifest": 422102,
+  "gdscript_files": 62,
+  "gdscript_lines": 8039,
+  "static_audit": {
+    "status": "PASS",
+    "checks": 10345,
+    "gd_files": 62,
+    "failures": [],
+    "warning": "Static audit does not execute the Godot parser or runtime."
+  },
+  "external_baseline": {
+    "uce_01": "PASS 27/27 on Godot 4.7 before F01",
+    "uce_02": "PASS 58/58 on Godot 4.7 before F01; test-only inference fix integrated",
+    "uce_03": "UNTESTED",
+    "f01_foundations": "UNTESTED",
+    "f02_cards_zones": "UNTESTED",
+    "f03_session_flow": "UNTESTED",
+    "f04_persistence_sync": "UNTESTED",
+    "f05_interfaces_ai": "UNTESTED",
+    "complete_integration": "UNTESTED",
+    "main_scene": "UNTESTED"
+  },
+  "completed_phases": [
+    "F01 foundations and atomic kernel",
+    "F02 cards, deck instances, zones, privacy and conservation",
+    "F03 players, teams, turns, rounds, phases and scoring",
+    "F04 typed persistence, atomic storage, replay and synchronization",
+    "F05 legal actions, viewer boundaries, bots and demo integration"
+  ],
+  "runtime_gate": {
+    "launcher": "RUN_FULL_AUDIT_WINDOWS.bat",
+    "required": "All diagnostics, UCE-01..03, F01..F05, complete integration and main scene must be executed on Godot 4.7."
+  },
+  "hard_limit": "Static review cannot prove GDScript compilation, Godot API compatibility or runtime behavior."
+}

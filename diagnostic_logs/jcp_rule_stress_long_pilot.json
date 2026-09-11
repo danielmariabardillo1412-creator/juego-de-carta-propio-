@@ -1,0 +1,24 @@
+{
+	"action_counts": {
+		"advance_phase": 111,
+		"attack": 1,
+		"pass_reaction": 2,
+		"play_persistent": 1,
+		"play_terrain": 2,
+		"set_creature": 1,
+		"set_support": 2,
+		"summon_creature": 2
+	},
+	"elapsed_msec": 5072,
+	"finish_reasons": {
+		"life_zero": 1
+	},
+	"games_completed": 1,
+	"games_requested": 1,
+	"last_seed": 4,
+	"maximum_actions_in_match": 122,
+	"start_seed": 4,
+	"status": "PASS",
+	"tied_matches": 0,
+	"total_actions": 122
+}

@@ -1,0 +1,261 @@
+{
+	"build_id": "systems-hardening-f05",
+	"config": {
+		"hand_size": 5,
+		"player_names": [
+			"Diagnostic A",
+			"Diagnostic B"
+		],
+		"starting_player": 0,
+		"target_score": 3
+	},
+	"current_stage": "finalize",
+	"environment": {
+		"command_line": [
+			"--script",
+			"res://tests/diagnostics/run_engine_diagnostics.gd"
+		],
+		"distribution": "Windows",
+		"godot": {
+			"build": "official",
+			"hash": "5b4e0cb0fd279832bbdd69fed5354d4e5ad26f88",
+			"hex": 263936,
+			"major": 4,
+			"minor": 7,
+			"patch": 0,
+			"status": "stable",
+			"string": "4.7-stable (official)",
+			"timestamp": 0
+		},
+		"locale": "es",
+		"os_name": "Windows",
+		"processor_count": 12,
+		"project_path": "F:/Taller de Juegos Zapity/juego_cartas_propio/engine/",
+		"user_path": "C:/Users/danie/AppData/Roaming/Godot/app_userdata/Juego de Cartas Propio - Laboratorio/"
+	},
+	"finished_unix": 1789104073,
+	"report_paths": [
+		"F:/Taller de Juegos Zapity/juego_cartas_propio/engine/diagnostic_logs/uce_diagnostic_latest.json",
+		"C:/Users/danie/AppData/Roaming/Godot/app_userdata/Juego de Cartas Propio - Laboratorio/uce_diagnostics/uce_diagnostic_latest.json",
+		"F:/Taller de Juegos Zapity/juego_cartas_propio/engine/diagnostic_logs/uce_diagnostic_latest.txt",
+		"C:/Users/danie/AppData/Roaming/Godot/app_userdata/Juego de Cartas Propio - Laboratorio/uce_diagnostics/uce_diagnostic_latest.txt"
+	],
+	"schema": "zapiti-universal-engine-diagnostic-v1",
+	"seed": 123456,
+	"stages": [
+		{
+			"code": "ENVIRONMENT_CAPTURED",
+			"details": {
+				"command_line": [
+					"--script",
+					"res://tests/diagnostics/run_engine_diagnostics.gd"
+				],
+				"distribution": "Windows",
+				"godot": {
+					"build": "official",
+					"hash": "5b4e0cb0fd279832bbdd69fed5354d4e5ad26f88",
+					"hex": 263936,
+					"major": 4,
+					"minor": 7,
+					"patch": 0,
+					"status": "stable",
+					"string": "4.7-stable (official)",
+					"timestamp": 0
+				},
+				"locale": "es",
+				"os_name": "Windows",
+				"processor_count": 12,
+				"project_path": "F:/Taller de Juegos Zapity/juego_cartas_propio/engine/",
+				"user_path": "C:/Users/danie/AppData/Roaming/Godot/app_userdata/Juego de Cartas Propio - Laboratorio/"
+			},
+			"index": 1,
+			"message": "Godot and operating-system metadata captured.",
+			"stage": "environment",
+			"status": "PASS",
+			"unix": 1789104071
+		},
+		{
+			"code": "RESOURCES_LOADABLE",
+			"details": {
+				"loaded_count": 28,
+				"required_count": 28
+			},
+			"index": 2,
+			"message": "All required scripts exist and load through ResourceLoader.",
+			"stage": "resource_scan",
+			"status": "PASS",
+			"unix": 1789104071
+		},
+		{
+			"code": "ACTION_ENVELOPE_ISOLATED",
+			"details": {},
+			"index": 3,
+			"message": "Validation, reduction and action logging use isolated canonical action snapshots.",
+			"stage": "action_envelope_isolation",
+			"status": "PASS",
+			"unix": 1789104071
+		},
+		{
+			"code": "MODULE_READY",
+			"details": {
+				"module_id": "example.high_card_arena"
+			},
+			"index": 4,
+			"message": "The example game module instantiated and accepted its configuration.",
+			"stage": "module_construction",
+			"status": "PASS",
+			"unix": 1789104071
+		},
+		{
+			"code": "ENGINE_READY",
+			"details": {},
+			"index": 5,
+			"message": "The universal engine accepted the module and configuration.",
+			"stage": "engine_construction",
+			"status": "PASS",
+			"unix": 1789104071
+		},
+		{
+			"code": "ENGINE_STARTED",
+			"details": {
+				"event_sequence": 1,
+				"lifecycle": "RUNNING",
+				"state_version": 0
+			},
+			"index": 6,
+			"message": "Engine created its initial deterministic state.",
+			"stage": "engine_start",
+			"status": "PASS",
+			"unix": 1789104071
+		},
+		{
+			"code": "VIEWS_AND_PRIVACY_OK",
+			"details": {
+				"active_legal_action_count": 6,
+				"owner_hand_count": 5
+			},
+			"index": 7,
+			"message": "Initial public/private views and legal-action boundaries are coherent.",
+			"stage": "initial_views",
+			"status": "PASS",
+			"unix": 1789104072
+		},
+		{
+			"code": "EXTERNAL_INTERFACES_OK",
+			"details": {
+				"actor_id": 0,
+				"legal_index": 0
+			},
+			"index": 8,
+			"message": "Unknown viewers are rejected and bot selection remains inside the canonical legal set.",
+			"stage": "external_interfaces",
+			"status": "PASS",
+			"unix": 1789104072
+		},
+		{
+			"code": "REJECTION_ATOMIC",
+			"details": {
+				"result_code": "WRONG_ACTOR",
+				"state_version": 0
+			},
+			"index": 9,
+			"message": "A rejected action did not mutate state or advance state_version.",
+			"stage": "rejected_action_atomicity",
+			"status": "PASS",
+			"unix": 1789104072
+		},
+		{
+			"code": "MATCH_FINISHED",
+			"details": {
+				"actions_applied": 10,
+				"finished_reason": "TARGET_REACHED",
+				"scores": {
+					"leader_rule": "HIGH",
+					"scores": {
+						"0": 2,
+						"1": 3
+					},
+					"target": 3,
+					"target_rule": "AT_LEAST"
+				},
+				"winner_ids": [
+					1
+				]
+			},
+			"index": 10,
+			"message": "The example game completed from initial deal to declared winner.",
+			"stage": "complete_match",
+			"status": "PASS",
+			"unix": 1789104072
+		},
+		{
+			"code": "STATE_INTEGRITY_OK",
+			"details": {
+				"action_count": 10,
+				"digest": "ed0fd4a83ed232e86c423e8fb7738e42e72633ce859c8f1fde9a7769d3ddc62d",
+				"event_count": 27,
+				"state_version": 10
+			},
+			"index": 11,
+			"message": "Digest and runtime-snapshot accounting are coherent.",
+			"stage": "state_integrity",
+			"status": "PASS",
+			"unix": 1789104072
+		},
+		{
+			"code": "PERSISTENCE_OK",
+			"details": {
+				"bytes": 202105
+			},
+			"index": 12,
+			"message": "Build, encode, checksum, atomic write and read-back succeeded.",
+			"stage": "persistence",
+			"status": "PASS",
+			"unix": 1789104072
+		},
+		{
+			"code": "REPLAY_MATCHED",
+			"details": {
+				"actual_digest": "c8499baf0e6e1055739f5823e729da7336d948048142f39d6ba664e3f25ace87",
+				"expected_digest": "c8499baf0e6e1055739f5823e729da7336d948048142f39d6ba664e3f25ace87"
+			},
+			"index": 13,
+			"message": "Seed plus accepted action log rebuilt the complete runtime snapshot.",
+			"stage": "replay",
+			"status": "PASS",
+			"unix": 1789104073
+		},
+		{
+			"code": "SYNC_PACKET_OK",
+			"details": {
+				"event_count": 27,
+				"state_version": 10
+			},
+			"index": 14,
+			"message": "Client-safe state, visible events and digest were packaged.",
+			"stage": "sync",
+			"status": "PASS",
+			"unix": 1789104073
+		},
+		{
+			"code": "DETERMINISTIC_DEAL_OK",
+			"details": {
+				"card_count": 5
+			},
+			"index": 15,
+			"message": "Two engines with the same seed produced the same private deal.",
+			"stage": "determinism",
+			"status": "PASS",
+			"unix": 1789104073
+		}
+	],
+	"started_unix": 1789104071,
+	"summary": {
+		"fail": 0,
+		"pass": 15,
+		"skip": 0,
+		"status": "PASS",
+		"total": 15,
+		"warn": 0
+	}
+}

@@ -1,0 +1,515 @@
+{
+  "schema": "universal-card-engine-manifest-v4",
+  "root": "Universal_Card_Engine_Lab",
+  "build": "systems-hardening-f05",
+  "status": "F05_OPEN_CODE_RUNTIME_PASS",
+  "manifest_excludes": [
+    "MANIFEST.json",
+    "diagnostic_logs/",
+    ".godot/"
+  ],
+  "file_count": 100,
+  "total_bytes": 436370,
+  "files": [
+    {
+      "path": "00_SINGLE_SOURCE_OF_TRUTH.md",
+      "bytes": 804,
+      "sha256": "d28c041572f8a0101fa9e5af3000914aed45e7f2f09bccdd0c1ec88e3eae31ba"
+    },
+    {
+      "path": "BUILD_SUMMARY.json",
+      "bytes": 1676,
+      "sha256": "114fe1ae4147e7457b3feb0aaf8aadc53368a41a4ac25313874c8887535c9385"
+    },
+    {
+      "path": "DIAGNOSTIC_README_FIRST.txt",
+      "bytes": 581,
+      "sha256": "97f68196aca157d0928764b8e8d994c12697b20c5e95794162ab9a833f19a1a3"
+    },
+    {
+      "path": "README.md",
+      "bytes": 2113,
+      "sha256": "fcd02421abb44a0eb03a21f2df0bd0694e76a25803f1dd3cabc29a8546d579a0"
+    },
+    {
+      "path": "RUN_DIAGNOSTIC_WINDOWS.bat",
+      "bytes": 1638,
+      "sha256": "2ca8d25a0b72f054f099d4c260aa9e8ea5d0b92ddf970388e6183c464dbc2fa4"
+    },
+    {
+      "path": "RUN_FULL_AUDIT_WINDOWS.bat",
+      "bytes": 3717,
+      "sha256": "90b65fbf9629e11e57f525abc16fae8044072c31ef931e0c0f5e5e08c5c0fe16"
+    },
+    {
+      "path": "RUN_PACKAGE_INTEGRITY_WINDOWS.bat",
+      "bytes": 544,
+      "sha256": "f2d862031cbd10c4da7fc68ba9fcb5716b9ab243cafcb0049473f57e1351f7b4"
+    },
+    {
+      "path": "STATIC_AUDIT.json",
+      "bytes": 160,
+      "sha256": "7dd56284a699ed472d601130c92c1daa732c5a868936419114e2e2ee45e07c7d"
+    },
+    {
+      "path": "TEST_AGENT_HANDOFF.md",
+      "bytes": 937,
+      "sha256": "658cdd59535601fe700abb13a8a14bacf5f77c5d0e428decc24a81c082154c7b"
+    },
+    {
+      "path": "demo/diagnostic_bootstrap.gd",
+      "bytes": 1864,
+      "sha256": "22302bcdab64bba9cbb244ac1d54d36cff45cfd22bbea8898e9603a194889374"
+    },
+    {
+      "path": "demo/diagnostic_bootstrap.tscn",
+      "bytes": 200,
+      "sha256": "7e9bac2dc446c0527137318ce7463cf4ff31f403604c3a33228f0ef102cf7925"
+    },
+    {
+      "path": "demo/high_card_demo.gd",
+      "bytes": 2484,
+      "sha256": "6e1092927372a72e816bdd76a9775b90d3705b3749276a7f5e5df38172c101cc"
+    },
+    {
+      "path": "demo/high_card_demo.tscn",
+      "bytes": 172,
+      "sha256": "99d907504d8a60582e4c218aa4c2e677a846651c67c69b66593a36725c0c6250"
+    },
+    {
+      "path": "docs/ARCHITECTURE_COMPLETE.md",
+      "bytes": 2563,
+      "sha256": "0c4974efba03228e78d73b769eef8271c21e1581df247e8844169da51c30bfc4"
+    },
+    {
+      "path": "docs/CARDS_ZONES_HARDENING_F02.md",
+      "bytes": 1284,
+      "sha256": "847b4639c2075e0a0a911851253693fc41e195b00f57986af4fb324833e8c366"
+    },
+    {
+      "path": "docs/CHANGELOG.md",
+      "bytes": 4866,
+      "sha256": "a73a7aa608242e47707e0e60a52f4597e5dbc7d21c7bb9c84383d85893b5bd64"
+    },
+    {
+      "path": "docs/CURRENT_STATE.md",
+      "bytes": 2368,
+      "sha256": "67dd0f48ade08536fba9b8229fd1bbe0c32c79830ccece666b2f293c6505cca7"
+    },
+    {
+      "path": "docs/DIAGNOSTICS.md",
+      "bytes": 2396,
+      "sha256": "d67f55af8b5ae01ee34c7afbc4df85ea661b8940d541857ad010b415da02d822"
+    },
+    {
+      "path": "docs/DIAGNOSTIC_REVIEW_FINDINGS.md",
+      "bytes": 4413,
+      "sha256": "783faefdbe9b03bfd961411e23b8228629afe18dc1305de62a92cd5d4997c8d9"
+    },
+    {
+      "path": "docs/FOUNDATION_HARDENING_F01.md",
+      "bytes": 5657,
+      "sha256": "851a4169c70621e0194b0e1467809eeaa3b418383ba10e632eab66567a0102e4"
+    },
+    {
+      "path": "docs/GAME_MODULE_GUIDE.md",
+      "bytes": 1321,
+      "sha256": "251a14ed907df00a29cf65e98a50077a6a93778ebebb737d1f02f947a01043f6"
+    },
+    {
+      "path": "docs/INTERFACES_AI_HARDENING_F05.md",
+      "bytes": 1417,
+      "sha256": "01771bbf6aa33087425f7428bf7cb5027b959c91ab9db8c42193f8c73338bac3"
+    },
+    {
+      "path": "docs/LIMITATIONS_EXPERIMENT.md",
+      "bytes": 1175,
+      "sha256": "7c3847d5ed2d8b0565a066067dc3822ff2cfa1492110d08b824a5f6c1f7655ce"
+    },
+    {
+      "path": "docs/PERSISTENCE_SYNC_HARDENING_F04.md",
+      "bytes": 1303,
+      "sha256": "83c51bf1ff00800a2bd68aac65233242f7cec751f1420c38f1d2fcbf763788b4"
+    },
+    {
+      "path": "docs/SESSION_FLOW_HARDENING_F03.md",
+      "bytes": 1286,
+      "sha256": "a3dfd945e358ceec29f4d935312b42fc0a664fee5a3d8ec7e8664d558128a439"
+    },
+    {
+      "path": "docs/TEST_PLAN_COMPLETE.md",
+      "bytes": 1652,
+      "sha256": "c597993fab736a1ee4507fc188592c4a43cd02377d8df623f92f198d6b74a46a"
+    },
+    {
+      "path": "docs/history/DECISIONS.md",
+      "bytes": 4910,
+      "sha256": "3d1b0881093466d9f89a8d19c7a690ba1b7dc29a9e99461be29ee880c3ca1734"
+    },
+    {
+      "path": "docs/history/OPEN_CODE_RESULT_B02.md",
+      "bytes": 1117,
+      "sha256": "5441cac13f809b57db3ebe0ec59522d32004cf51febde95836a4d65ce3e66b09"
+    },
+    {
+      "path": "docs/history/PHASE_UCE_01.md",
+      "bytes": 1359,
+      "sha256": "df91cee226cf14ca44b1ee30be451449469b82e9a1fcde9ca6f9e60968619689"
+    },
+    {
+      "path": "docs/history/PHASE_UCE_02.md",
+      "bytes": 1123,
+      "sha256": "654047ca19d59cd045aacd4505e68bd7d17c2924bfb57052187dcc90b011592d"
+    },
+    {
+      "path": "docs/history/PHASE_UCE_03.md",
+      "bytes": 1648,
+      "sha256": "21c116db54bd127439523036d117853d484b02096103c891c6af25d248b42be1"
+    },
+    {
+      "path": "docs/history/RNG_LCG31_SPEC.md",
+      "bytes": 1405,
+      "sha256": "5ed2d84b424600c4c85c30f6542029c906c8422eebb3e9fbff0f0616cae995fc"
+    },
+    {
+      "path": "docs/history/TEST_PLAN_UCE_01.md",
+      "bytes": 1071,
+      "sha256": "3c96a649dab8cad0ff9bedb48a2f59569e565e72f93c996b353fbf93dbb53c81"
+    },
+    {
+      "path": "docs/history/TEST_PLAN_UCE_02.md",
+      "bytes": 990,
+      "sha256": "55b3f11aa2c864f557e49b6aacaaa6dbd07a8aa6cccc31bda6616b435e813bc0"
+    },
+    {
+      "path": "docs/history/TEST_PLAN_UCE_03.md",
+      "bytes": 1379,
+      "sha256": "8f460989cb89baf3ba15246f3670c8bf26f7f6385930ce0f8607db2fb7e9d373"
+    },
+    {
+      "path": "docs/history/ZAPITI_REFERENCE_USAGE.md",
+      "bytes": 1164,
+      "sha256": "b1d587114cd1ed175febc3661727f038f5059bdb0bd15c73d48dce858758a894"
+    },
+    {
+      "path": "games/high_card_arena/high_card_arena_module.gd",
+      "bytes": 28853,
+      "sha256": "01caeb05dbb634999e16ed806907a80f536603db61caa3f8a9247f3a4f26cd4d"
+    },
+    {
+      "path": "project.godot",
+      "bytes": 347,
+      "sha256": "c8242f847cd73bceac64ddb02f51a785d4f73ae36749ef9063d93300e631b6c9"
+    },
+    {
+      "path": "src/ai/bot_adapter.gd",
+      "bytes": 2878,
+      "sha256": "06e35c98a5f5ad8cba9c69bfd6ba425ea8e7bc2526e2df9f5d82ccfadb0b1248"
+    },
+    {
+      "path": "src/ai/first_legal_policy.gd",
+      "bytes": 205,
+      "sha256": "a0cbb9f237fd2c439fb93ad7c30e64a6a9ae2c7cf86ed11911a08d2fc4f4392e"
+    },
+    {
+      "path": "src/ai/legal_action.gd",
+      "bytes": 624,
+      "sha256": "149ededfa83c9bbd0ed860bd7671a362015889c079750885247bec86cfc17e16"
+    },
+    {
+      "path": "src/cards/card_definition.gd",
+      "bytes": 3240,
+      "sha256": "6c62f189751019db2bc924d15bba4436b81457ca5d6a120676afa0cc7e6848c7"
+    },
+    {
+      "path": "src/cards/card_instance.gd",
+      "bytes": 1960,
+      "sha256": "c972a74a989f661e9809820c88646e1c7052a284e8b21daa41078fce51f0b11b"
+    },
+    {
+      "path": "src/cards/card_operations.gd",
+      "bytes": 1996,
+      "sha256": "7f89120210538fd098b445ceda243f1efdab4c2df9bc8367f4d75f88da75ee2c"
+    },
+    {
+      "path": "src/cards/card_query.gd",
+      "bytes": 2550,
+      "sha256": "247550b06d3d24d9a5beb56e70ca857aaa6fbf32350bd0120dcdd052a09164a2"
+    },
+    {
+      "path": "src/cards/card_randomizer.gd",
+      "bytes": 2331,
+      "sha256": "3e78411af52401b510cb06ce79b3e9504fa9fc429e6b29eccc737f5c20ad4663"
+    },
+    {
+      "path": "src/cards/card_state.gd",
+      "bytes": 17712,
+      "sha256": "2215f88a2d3dbab69eaa30b65c77efcc532d747d5fe982bb0a5075415133f115"
+    },
+    {
+      "path": "src/cards/deal_service.gd",
+      "bytes": 5469,
+      "sha256": "6f10651a9449167b26ad9b2526c0e42c8ea7bd1770c4c749c47b04200d3474a5"
+    },
+    {
+      "path": "src/cards/deck_builder.gd",
+      "bytes": 4285,
+      "sha256": "2f722d78409984350c7d6c4e70b82dff8a470d3849edba3ab05b88370099189a"
+    },
+    {
+      "path": "src/cards/zone_definition.gd",
+      "bytes": 5989,
+      "sha256": "32f545aeed4d9295ce801253057f44b86d810a6db8950d6c08c755686984bc20"
+    },
+    {
+      "path": "src/core/engine_result.gd",
+      "bytes": 617,
+      "sha256": "4737afde804cc79280d20dcd151af886e9205206859eb7f2a54aad8806f8666e"
+    },
+    {
+      "path": "src/core/game_action.gd",
+      "bytes": 2880,
+      "sha256": "f1ec7504e22180368b2a1dde6c20cf333454d0c3c225ed4540eb0830a33082d7"
+    },
+    {
+      "path": "src/core/game_catalog.gd",
+      "bytes": 3202,
+      "sha256": "830a861167f9d7f4d5109bb14040062308e96d841d3026797312465e705dd194"
+    },
+    {
+      "path": "src/core/game_event.gd",
+      "bytes": 3009,
+      "sha256": "5192aa76c8804661c041d6b5e594be53ddd4abfe907ec958feb4d7f98b81d1c8"
+    },
+    {
+      "path": "src/core/identifier_rules.gd",
+      "bytes": 1504,
+      "sha256": "e1eb6068145410a5a932780c039e13c0df376031bf2a78f6eeeb42adbeb2a241"
+    },
+    {
+      "path": "src/core/legal_action.gd",
+      "bytes": 3051,
+      "sha256": "8d4cda0066da5158edeaa87e7166e85ae71cea587f498bbc26ab6536dc720102"
+    },
+    {
+      "path": "src/core/module_contract.gd",
+      "bytes": 1660,
+      "sha256": "bd8ce1d2ce9d346f00d76bb8fc60defb099efd3781547b1c97c31853951e37eb"
+    },
+    {
+      "path": "src/core/module_protocol.gd",
+      "bytes": 5921,
+      "sha256": "3aa8974fbc644181e4b2f6ea39e05537a8afe7a9ae305382c5405c7c749d44f4"
+    },
+    {
+      "path": "src/core/pure_data_validator.gd",
+      "bytes": 2747,
+      "sha256": "dd874018ee8d571ced37425a18aa1606e3471aee9534b8ca9e6c9fb114fba4d2"
+    },
+    {
+      "path": "src/core/runtime_snapshot.gd",
+      "bytes": 9038,
+      "sha256": "c2c50ff68ff7b364ae962aedfd25c4bfbe5acc125ff4917a43430010204f4bda"
+    },
+    {
+      "path": "src/core/universal_card_engine.gd",
+      "bytes": 19563,
+      "sha256": "d8e19ea0bfaaf41f08e3993b570aa7a4f7394ab6b8ebfe80ab6abdaa3c74e973"
+    },
+    {
+      "path": "src/diagnostics/engine_diagnostic_runner.gd",
+      "bytes": 38382,
+      "sha256": "760886a8e8e686ee22b5971d72686a7b0685b68ddfaa04c8228595acdbe812d3"
+    },
+    {
+      "path": "src/network/sync_packet.gd",
+      "bytes": 7850,
+      "sha256": "95b4a6b0404a4f23766956ebcb729bdc18177390d38969293c439360e47b92d9"
+    },
+    {
+      "path": "src/persistence/replay_service.gd",
+      "bytes": 6161,
+      "sha256": "374746181dad091e04022b7322e20517b7510db20b15dd942db6a47d2bc7b1e7"
+    },
+    {
+      "path": "src/persistence/save_codec.gd",
+      "bytes": 10904,
+      "sha256": "fc22bea3dbc63f9abe56b4a991e9082d7a2239e4671517ef4a8f793dc85fbcc3"
+    },
+    {
+      "path": "src/persistence/save_file_store.gd",
+      "bytes": 7249,
+      "sha256": "1ef8dfe667175001cd02a94f3ae8021f216b9c4d56eeb0cc63e52a35fa240b04"
+    },
+    {
+      "path": "src/random/deterministic_rng.gd",
+      "bytes": 4128,
+      "sha256": "623c290153ba0fda08980786969dcc2db4bbfd7bac6f40f00b0aa683bac962ec"
+    },
+    {
+      "path": "src/rules/condition_evaluator.gd",
+      "bytes": 3991,
+      "sha256": "0c791f3578ed925b9f0d9a241e01b52795f9b93fb09431d49cc22669a180fc8f"
+    },
+    {
+      "path": "src/rules/effect_executor.gd",
+      "bytes": 2014,
+      "sha256": "987195da0502298edfdaec7ec65228139dccf0993d3b5d4ca487b06170a7a88b"
+    },
+    {
+      "path": "src/scoring/score_state.gd",
+      "bytes": 6396,
+      "sha256": "010025864842af5bfb64892284f501a9f24627e8bd3792debdabdfe8c8bf5ed9"
+    },
+    {
+      "path": "src/session/player_registry.gd",
+      "bytes": 7840,
+      "sha256": "2e10c237757b97484eea63429511a11493484517cef07859498ef06d6e039066"
+    },
+    {
+      "path": "src/state/data_path.gd",
+      "bytes": 3476,
+      "sha256": "391cc401987f5b0bd5c0ed39b4871e0f1b6be9e17602f528fe363dfdb924a9c3"
+    },
+    {
+      "path": "src/state/state_digest.gd",
+      "bytes": 1555,
+      "sha256": "18b8668d31272e22901ae011baeea7ecb2bb88e4702b9d8b4c33aba3a12e31d6"
+    },
+    {
+      "path": "src/turns/phase_machine.gd",
+      "bytes": 8017,
+      "sha256": "9d86a8c7c6b2d2f2eb9246f8dc084dd27dfdc4216a6ea31a88b4d1610db2ba66"
+    },
+    {
+      "path": "src/turns/turn_state.gd",
+      "bytes": 6844,
+      "sha256": "629a5893f11186cb78b6ac5479571a2aa6221b2e18cd429698dc83e146472548"
+    },
+    {
+      "path": "tests/diagnostics/run_engine_diagnostics.gd",
+      "bytes": 839,
+      "sha256": "86d9be7770280c1e77a7e789874770c8c6c004f28124415a7f859dd7d6b056ce"
+    },
+    {
+      "path": "tests/fixtures/action_mutation_module.gd",
+      "bytes": 2094,
+      "sha256": "a40b76b6fc3e0e7761332b3a457c424d8b03b71510425ce2b024d5445c7bc917"
+    },
+    {
+      "path": "tests/fixtures/draw_card_module.gd",
+      "bytes": 3714,
+      "sha256": "ac05f752fc367f2ef702e47e1bad3531e819c594fe6f7f44fc18c12044904979"
+    },
+    {
+      "path": "tests/fixtures/identity_drift_module.gd",
+      "bytes": 243,
+      "sha256": "764e169ca411553c01ab862e8b4d16aac47d50445af70409a2642e49cc8451c9"
+    },
+    {
+      "path": "tests/fixtures/illegal_bot_policy.gd",
+      "bytes": 307,
+      "sha256": "72ff3647cb78af1314806754eca8872152d5f348c69617673411b6d47884e032"
+    },
+    {
+      "path": "tests/fixtures/invalid_legal_action_module.gd",
+      "bytes": 318,
+      "sha256": "ab4bd7a58094b9d4e6bcead391be7c507797444ef3b5966a69e985018a097dea"
+    },
+    {
+      "path": "tests/fixtures/invalid_view_module.gd",
+      "bytes": 229,
+      "sha256": "4fb3d568a6128e6a0fad0264da38abd297f0a6b62e07c16de1e8805068e50e0d"
+    },
+    {
+      "path": "tests/fixtures/malformed_bot_policy.gd",
+      "bytes": 202,
+      "sha256": "0e13878153326d25f28717639c37fe83bbfa406c0027494000788791996ebc0b"
+    },
+    {
+      "path": "tests/fixtures/malformed_transition_module.gd",
+      "bytes": 287,
+      "sha256": "575d7016a0c75e0e76a170d751855a00d69ba46d8963b0d59dd1e78d372d093a"
+    },
+    {
+      "path": "tests/fixtures/minimal_turn_module.gd",
+      "bytes": 2671,
+      "sha256": "601082883bd4448ff8e3b3e4298dcaf4da963a7ecf35b0537d2b6de4c5dec2d6"
+    },
+    {
+      "path": "tests/fixtures/mutating_bot_policy.gd",
+      "bytes": 339,
+      "sha256": "5954b1f4fc20d847f413ebd9b5d985de25108cb2504cd3e1cd63db2db37303f1"
+    },
+    {
+      "path": "tests/fixtures/reserved_event_module.gd",
+      "bytes": 348,
+      "sha256": "0635f0d6cc095b4ae9aa2355b075c9b72685b073d255959b9b53f3c8a75d23c6"
+    },
+    {
+      "path": "tests/fixtures/shuffle_deal_module.gd",
+      "bytes": 3120,
+      "sha256": "f5ac4a6752980a9b6007f02d60d20fe69ea0272f0d983dece8de4df1ddb44344"
+    },
+    {
+      "path": "tests/full/run_complete_engine_experiment.gd",
+      "bytes": 12211,
+      "sha256": "44a232055c126be10aab4a334d8632ddb20359781e34397fd1d558ef3a959b16"
+    },
+    {
+      "path": "tests/run_uce_01_smoke.gd",
+      "bytes": 4303,
+      "sha256": "723b0714f4be92899754edbf2c4849fd77eb0479d2e4eb4a89a54e2fa55f7231"
+    },
+    {
+      "path": "tests/run_uce_02_cards.gd",
+      "bytes": 10387,
+      "sha256": "a1ae36ecbbd6f3c5a40fbab4daab16b9c0dfd4f43212b339117a4ea2f83681a0"
+    },
+    {
+      "path": "tests/run_uce_03_random_deal.gd",
+      "bytes": 11526,
+      "sha256": "52a809ef678b0468dec7c1f7db197a50c081d5e31d2498e0071678c9c2190b2f"
+    },
+    {
+      "path": "tests/run_uce_f01_foundations.gd",
+      "bytes": 9670,
+      "sha256": "051f83855cbed817118d98d46947e19e36382b40edb8fceea0be14c61040dcf5"
+    },
+    {
+      "path": "tests/run_uce_f02_cards_hardening.gd",
+      "bytes": 10666,
+      "sha256": "381f31ebda4ce9d17ae866e532479e2eff75657bf0ce54afb1d2cfe4e9490472"
+    },
+    {
+      "path": "tests/run_uce_f03_session_flow.gd",
+      "bytes": 7704,
+      "sha256": "6bbe692ea14d031f750ee9e7c1699c48953964ae977eb82ac0e4aec45c85bb23"
+    },
+    {
+      "path": "tests/run_uce_f04_persistence_sync.gd",
+      "bytes": 6891,
+      "sha256": "fa9d64cdc8781adfb94ffed89496865af3eae7dedaa2d48e7ffc596299242395"
+    },
+    {
+      "path": "tests/run_uce_f05_interfaces_ai.gd",
+      "bytes": 7878,
+      "sha256": "963903d8d16d95f640aff4cc5b7faba6ad5870affb749e61fa0ed06ce4665d8a"
+    },
+    {
+      "path": "tests/run_uce_f05_hostile.gd",
+      "bytes": 13699,
+      "sha256": "ccaa2d8e13763f5770f503f7e68ce9f6d6aeef8ba454f32c1c012f7b930a9843"
+    },
+    {
+      "path": "tools/static_audit.py",
+      "bytes": 12136,
+      "sha256": "6a704474162f4ba7599e4bc03f0049607d9688691981d0db544640ddbac519f8"
+    },
+    {
+      "path": "tools/verify_manifest.ps1",
+      "bytes": 3393,
+      "sha256": "0eb597bccea9015d25981757b514d045e6149d1d7e64b8aadd2844c1af8e76ef"
+    }
+  ]
+}

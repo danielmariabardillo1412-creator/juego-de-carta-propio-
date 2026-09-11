@@ -1,0 +1,66 @@
+﻿{
+    "schema":  "zapiti-universal-engine-package-integrity-v1",
+    "started_utc":  "2026-09-11T17:10:48.9901154Z",
+    "project_root":  "F:\\Taller de Juegos Zapity\\juego_cartas_propio\\engine",
+    "manifest_path":  "F:\\Taller de Juegos Zapity\\juego_cartas_propio\\engine\\MANIFEST.json",
+    "status":  "FAIL",
+    "checked":  100,
+    "missing":  [
+
+                ],
+    "mismatched":  [
+                       {
+                           "path":  "00_SINGLE_SOURCE_OF_TRUTH.md",
+                           "expected_sha256":  "d28c041572f8a0101fa9e5af3000914aed45e7f2f09bccdd0c1ec88e3eae31ba",
+                           "actual_sha256":  "3be6b404bbb5a6bfb5b92c622b19dc17651da57bc459500c34c4e83749dc92cd",
+                           "expected_bytes":  804,
+                           "actual_bytes":  1482
+                       },
+                       {
+                           "path":  "DIAGNOSTIC_README_FIRST.txt",
+                           "expected_sha256":  "97f68196aca157d0928764b8e8d994c12697b20c5e95794162ab9a833f19a1a3",
+                           "actual_sha256":  "e62784915e1217b363ac70c5861c723b1f991890bf6ea1a3b3becfc443073741",
+                           "expected_bytes":  581,
+                           "actual_bytes":  726
+                       },
+                       {
+                           "path":  "README.md",
+                           "expected_sha256":  "fcd02421abb44a0eb03a21f2df0bd0694e76a25803f1dd3cabc29a8546d579a0",
+                           "actual_sha256":  "4f2cd78d74b64ab8ec68c9afe7606112563c5c9ea99544445c0d2af443289d16",
+                           "expected_bytes":  2113,
+                           "actual_bytes":  3019
+                       },
+                       {
+                           "path":  "STATIC_AUDIT.json",
+                           "expected_sha256":  "7dd56284a699ed472d601130c92c1daa732c5a868936419114e2e2ee45e07c7d",
+                           "actual_sha256":  "cdba29d7255a2d24e80752bbaedfa69fb97ad3f33278d294e9cef6326d59b61c",
+                           "expected_bytes":  160,
+                           "actual_bytes":  160
+                       },
+                       {
+                           "path":  "docs/CHANGELOG.md",
+                           "expected_sha256":  "a73a7aa608242e47707e0e60a52f4597e5dbc7d21c7bb9c84383d85893b5bd64",
+                           "actual_sha256":  "d9dead5151d0b5a815084dc988b0de4b526ba5fc2f0fae8c2fb47aa108a1e7e8",
+                           "expected_bytes":  4866,
+                           "actual_bytes":  27280
+                       },
+                       {
+                           "path":  "docs/CURRENT_STATE.md",
+                           "expected_sha256":  "67dd0f48ade08536fba9b8229fd1bbe0c32c79830ccece666b2f293c6505cca7",
+                           "actual_sha256":  "59689ce5aab48ec1e99194705f9c90d1fb3da4cf9c00f96d4c8cece15a7037b1",
+                           "expected_bytes":  2368,
+                           "actual_bytes":  2594
+                       },
+                       {
+                           "path":  "project.godot",
+                           "expected_sha256":  "c8242f847cd73bceac64ddb02f51a785d4f73ae36749ef9063d93300e631b6c9",
+                           "actual_sha256":  "c6a5257d0e856e9cb03a063e45102db84376aacbfb891e6de5f6bad192bf4caf",
+                           "expected_bytes":  347,
+                           "actual_bytes":  507
+                       }
+                   ],
+    "errors":  [
+
+               ],
+    "finished_utc":  "2026-09-11T17:10:49.5321755Z"
+}

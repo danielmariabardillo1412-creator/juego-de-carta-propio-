@@ -1,0 +1,4247 @@
+{
+	"action": {},
+	"detail": {
+		"actual": []
+	},
+	"ok": false,
+	"seed": 13,
+	"snapshot": {
+		"actions": [
+			{
+				"actor_id": 1,
+				"payload": {},
+				"request_id": "stress-13-0",
+				"type": "advance_phase"
+			},
+			{
+				"actor_id": 1,
+				"payload": {},
+				"request_id": "stress-13-1",
+				"type": "advance_phase"
+			},
+			{
+				"actor_id": 1,
+				"payload": {
+					"instance_id": "jcp-00044"
+				},
+				"request_id": "stress-13-2",
+				"type": "play_persistent"
+			},
+			{
+				"actor_id": 1,
+				"payload": {},
+				"request_id": "stress-13-3",
+				"type": "advance_phase"
+			},
+			{
+				"actor_id": 1,
+				"payload": {},
+				"request_id": "stress-13-4",
+				"type": "advance_phase"
+			},
+			{
+				"actor_id": 1,
+				"payload": {
+					"instance_id": "jcp-00076"
+				},
+				"request_id": "stress-13-5",
+				"type": "play_terrain"
+			},
+			{
+				"actor_id": 1,
+				"payload": {
+					"instance_id": "jcp-00012"
+				},
+				"request_id": "stress-13-6",
+				"type": "set_creature"
+			},
+			{
+				"actor_id": 1,
+				"payload": {
+					"instance_id": "jcp-00040",
+					"target_player_id": 1,
+					"target_slot": 0
+				},
+				"request_id": "stress-13-7",
+				"type": "play_main_spell"
+			},
+			{
+				"actor_id": 1,
+				"payload": {},
+				"request_id": "stress-13-8",
+				"type": "advance_phase"
+			},
+			{
+				"actor_id": 1,
+				"payload": {},
+				"request_id": "stress-13-9",
+				"type": "advance_phase"
+			},
+			{
+				"actor_id": 0,
+				"payload": {},
+				"request_id": "stress-13-10",
+				"type": "advance_phase"
+			},
+			{
+				"actor_id": 0,
+				"payload": {},
+				"request_id": "stress-13-11",
+				"type": "advance_phase"
+			},
+			{
+				"actor_id": 0,
+				"payload": {
+					"instance_id": "jcp-00005"
+				},
+				"request_id": "stress-13-12",
+				"type": "summon_creature"
+			},
+			{
+				"actor_id": 0,
+				"payload": {
+					"instance_id": "jcp-00069"
+				},
+				"request_id": "stress-13-13",
+				"type": "play_persistent"
+			},
+			{
+				"actor_id": 0,
+				"payload": {
+					"instance_id": "jcp-00057"
+				},
+				"request_id": "stress-13-14",
+				"type": "set_support"
+			},
+			{
+				"actor_id": 0,
+				"payload": {},
+				"request_id": "stress-13-15",
+				"type": "advance_phase"
+			},
+			{
+				"actor_id": 0,
+				"payload": {
+					"attacker_id": "jcp-00005",
+					"target_slot": 0
+				},
+				"request_id": "stress-13-16",
+				"type": "attack"
+			},
+			{
+				"actor_id": 0,
+				"payload": {},
+				"request_id": "stress-13-17",
+				"type": "advance_phase"
+			},
+			{
+				"actor_id": 0,
+				"payload": {},
+				"request_id": "stress-13-18",
+				"type": "advance_phase"
+			},
+			{
+				"actor_id": 0,
+				"payload": {},
+				"request_id": "stress-13-19",
+				"type": "advance_phase"
+			},
+			{
+				"actor_id": 1,
+				"payload": {},
+				"request_id": "stress-13-20",
+				"type": "advance_phase"
+			},
+			{
+				"actor_id": 1,
+				"payload": {},
+				"request_id": "stress-13-21",
+				"type": "advance_phase"
+			},
+			{
+				"actor_id": 1,
+				"payload": {},
+				"request_id": "stress-13-22",
+				"type": "advance_phase"
+			},
+			{
+				"actor_id": 1,
+				"payload": {},
+				"request_id": "stress-13-23",
+				"type": "advance_phase"
+			},
+			{
+				"actor_id": 1,
+				"payload": {},
+				"request_id": "stress-13-24",
+				"type": "advance_phase"
+			},
+			{
+				"actor_id": 1,
+				"payload": {},
+				"request_id": "stress-13-25",
+				"type": "advance_phase"
+			},
+			{
+				"actor_id": 0,
+				"payload": {},
+				"request_id": "stress-13-26",
+				"type": "advance_phase"
+			},
+			{
+				"actor_id": 0,
+				"payload": {},
+				"request_id": "stress-13-27",
+				"type": "advance_phase"
+			},
+			{
+				"actor_id": 0,
+				"payload": {
+					"instance_id": "jcp-00013"
+				},
+				"request_id": "stress-13-28",
+				"type": "summon_creature"
+			},
+			{
+				"actor_id": 0,
+				"payload": {},
+				"request_id": "stress-13-29",
+				"type": "advance_phase"
+			},
+			{
+				"actor_id": 0,
+				"payload": {
+					"attacker_id": "jcp-00013",
+					"target_slot": 0
+				},
+				"request_id": "stress-13-30",
+				"type": "attack"
+			},
+			{
+				"actor_id": 0,
+				"payload": {
+					"attacker_id": "jcp-00005",
+					"target_slot": 0
+				},
+				"request_id": "stress-13-31",
+				"type": "attack"
+			},
+			{
+				"actor_id": 0,
+				"payload": {},
+				"request_id": "stress-13-32",
+				"type": "advance_phase"
+			},
+			{
+				"actor_id": 0,
+				"payload": {},
+				"request_id": "stress-13-33",
+				"type": "advance_phase"
+			},
+			{
+				"actor_id": 0,
+				"payload": {},
+				"request_id": "stress-13-34",
+				"type": "advance_phase"
+			},
+			{
+				"actor_id": 1,
+				"payload": {},
+				"request_id": "stress-13-35",
+				"type": "advance_phase"
+			},
+			{
+				"actor_id": 1,
+				"payload": {},
+				"request_id": "stress-13-36",
+				"type": "advance_phase"
+			},
+			{
+				"actor_id": 1,
+				"payload": {
+					"instance_id": "jcp-00012",
+					"target_position": "attack"
+				},
+				"request_id": "stress-13-37",
+				"type": "change_position"
+			},
+			{
+				"actor_id": 0,
+				"payload": {
+					"support_slot": 1
+				},
+				"request_id": "stress-13-38",
+				"type": "activate_reaction"
+			},
+			{
+				"actor_id": 1,
+				"payload": {},
+				"request_id": "stress-13-39",
+				"type": "pass_reaction"
+			},
+			{
+				"actor_id": 0,
+				"payload": {},
+				"request_id": "stress-13-40",
+				"type": "pass_reaction"
+			},
+			{
+				"actor_id": 1,
+				"payload": {
+					"instance_id": "jcp-00022"
+				},
+				"request_id": "stress-13-41",
+				"type": "set_creature"
+			},
+			{
+				"actor_id": 1,
+				"payload": {},
+				"request_id": "stress-13-42",
+				"type": "advance_phase"
+			},
+			{
+				"actor_id": 1,
+				"payload": {},
+				"request_id": "stress-13-43",
+				"type": "advance_phase"
+			},
+			{
+				"actor_id": 1,
+				"payload": {},
+				"request_id": "stress-13-44",
+				"type": "advance_phase"
+			},
+			{
+				"actor_id": 1,
+				"payload": {},
+				"request_id": "stress-13-45",
+				"type": "advance_phase"
+			},
+			{
+				"actor_id": 0,
+				"payload": {},
+				"request_id": "stress-13-46",
+				"type": "advance_phase"
+			},
+			{
+				"actor_id": 0,
+				"payload": {},
+				"request_id": "stress-13-47",
+				"type": "advance_phase"
+			},
+			{
+				"actor_id": 0,
+				"payload": {
+					"instance_id": "jcp-00007"
+				},
+				"request_id": "stress-13-48",
+				"type": "set_creature"
+			},
+			{
+				"actor_id": 0,
+				"payload": {
+					"instance_id": "jcp-00045"
+				},
+				"request_id": "stress-13-49",
+				"type": "play_persistent"
+			},
+			{
+				"actor_id": 0,
+				"payload": {
+					"instance_id": "jcp-00013",
+					"target_position": "guard"
+				},
+				"request_id": "stress-13-50",
+				"type": "change_position"
+			},
+			{
+				"actor_id": 0,
+				"payload": {
+					"instance_id": "jcp-00005",
+					"target_position": "guard"
+				},
+				"request_id": "stress-13-51",
+				"type": "change_position"
+			},
+			{
+				"actor_id": 0,
+				"payload": {},
+				"request_id": "stress-13-52",
+				"type": "advance_phase"
+			},
+			{
+				"actor_id": 0,
+				"payload": {},
+				"request_id": "stress-13-53",
+				"type": "advance_phase"
+			},
+			{
+				"actor_id": 0,
+				"payload": {},
+				"request_id": "stress-13-54",
+				"type": "advance_phase"
+			},
+			{
+				"actor_id": 0,
+				"payload": {},
+				"request_id": "stress-13-55",
+				"type": "advance_phase"
+			},
+			{
+				"actor_id": 1,
+				"payload": {},
+				"request_id": "stress-13-56",
+				"type": "advance_phase"
+			},
+			{
+				"actor_id": 1,
+				"payload": {},
+				"request_id": "stress-13-57",
+				"type": "advance_phase"
+			},
+			{
+				"actor_id": 1,
+				"payload": {
+					"instance_id": "jcp-00046"
+				},
+				"request_id": "stress-13-58",
+				"type": "play_persistent"
+			},
+			{
+				"actor_id": 1,
+				"payload": {
+					"instance_id": "jcp-00022",
+					"target_position": "attack"
+				},
+				"request_id": "stress-13-59",
+				"type": "change_position"
+			},
+			{
+				"actor_id": 1,
+				"payload": {
+					"instance_id": "jcp-00012",
+					"target_position": "attack"
+				},
+				"request_id": "stress-13-60",
+				"type": "change_position"
+			},
+			{
+				"actor_id": 1,
+				"payload": {
+					"instance_id": "jcp-00074",
+					"target_instance_id": "jcp-00022"
+				},
+				"request_id": "stress-13-61",
+				"type": "equip_item"
+			},
+			{
+				"actor_id": 1,
+				"payload": {},
+				"request_id": "stress-13-62",
+				"type": "advance_phase"
+			},
+			{
+				"actor_id": 1,
+				"payload": {
+					"attacker_id": "jcp-00022",
+					"target_slot": 1
+				},
+				"request_id": "stress-13-63",
+				"type": "attack"
+			},
+			{
+				"actor_id": 1,
+				"payload": {
+					"attacker_id": "jcp-00012",
+					"target_slot": 1
+				},
+				"request_id": "stress-13-64",
+				"type": "attack"
+			},
+			{
+				"actor_id": 1,
+				"payload": {},
+				"request_id": "stress-13-65",
+				"type": "advance_phase"
+			},
+			{
+				"actor_id": 1,
+				"payload": {},
+				"request_id": "stress-13-66",
+				"type": "advance_phase"
+			},
+			{
+				"actor_id": 1,
+				"payload": {},
+				"request_id": "stress-13-67",
+				"type": "advance_phase"
+			},
+			{
+				"actor_id": 0,
+				"payload": {},
+				"request_id": "stress-13-68",
+				"type": "advance_phase"
+			},
+			{
+				"actor_id": 0,
+				"payload": {},
+				"request_id": "stress-13-69",
+				"type": "advance_phase"
+			},
+			{
+				"actor_id": 0,
+				"payload": {
+					"instance_id": "jcp-00027"
+				},
+				"request_id": "stress-13-70",
+				"type": "summon_creature"
+			},
+			{
+				"actor_id": 0,
+				"payload": {
+					"instance_id": "jcp-00053"
+				},
+				"request_id": "stress-13-71",
+				"type": "set_support"
+			},
+			{
+				"actor_id": 0,
+				"payload": {
+					"instance_id": "jcp-00005",
+					"target_position": "attack"
+				},
+				"request_id": "stress-13-72",
+				"type": "change_position"
+			},
+			{
+				"actor_id": 0,
+				"payload": {},
+				"request_id": "stress-13-73",
+				"type": "advance_phase"
+			},
+			{
+				"actor_id": 0,
+				"payload": {
+					"attacker_id": "jcp-00027",
+					"target_slot": 1
+				},
+				"request_id": "stress-13-74",
+				"type": "attack"
+			}
+		],
+		"config": {
+			"player_names": [
+				"Bot A",
+				"Bot B"
+			],
+			"starting_life": 1,
+			"starting_player": 1
+		},
+		"engine_schema": "zapiti-universal-engine-runtime",
+		"engine_version": 1,
+		"event_sequence": 152,
+		"events": [
+			{
+				"payload": {
+					"lifecycle": "RUNNING",
+					"module_id": "zapiti.juego_cartas_propio",
+					"module_version": "0.23.0-summon-attack",
+					"seed": 13
+				},
+				"sequence": 1,
+				"type": "engine_started",
+				"visible_to": []
+			},
+			{
+				"payload": {
+					"phase": "START",
+					"player_id": 1
+				},
+				"sequence": 2,
+				"type": "phase_completed",
+				"visible_to": []
+			},
+			{
+				"payload": {
+					"phase": "DRAW",
+					"player_id": 1
+				},
+				"sequence": 3,
+				"type": "phase_started",
+				"visible_to": []
+			},
+			{
+				"payload": {
+					"phase": "DRAW",
+					"player_id": 1
+				},
+				"sequence": 4,
+				"type": "phase_completed",
+				"visible_to": []
+			},
+			{
+				"payload": {
+					"phase": "MAIN_1",
+					"player_id": 1
+				},
+				"sequence": 5,
+				"type": "phase_started",
+				"visible_to": []
+			},
+			{
+				"payload": {
+					"definition_id": "G04",
+					"instance_id": "jcp-00044",
+					"player_id": 1
+				},
+				"sequence": 6,
+				"type": "persistent_played",
+				"visible_to": []
+			},
+			{
+				"payload": {
+					"phase": "MAIN_1",
+					"player_id": 1
+				},
+				"sequence": 7,
+				"type": "phase_completed",
+				"visible_to": []
+			},
+			{
+				"payload": {
+					"phase": "COMBAT",
+					"player_id": 1
+				},
+				"sequence": 8,
+				"type": "phase_started",
+				"visible_to": []
+			},
+			{
+				"payload": {
+					"phase": "COMBAT",
+					"player_id": 1
+				},
+				"sequence": 9,
+				"type": "phase_completed",
+				"visible_to": []
+			},
+			{
+				"payload": {
+					"phase": "MAIN_2",
+					"player_id": 1
+				},
+				"sequence": 10,
+				"type": "phase_started",
+				"visible_to": []
+			},
+			{
+				"payload": {
+					"definition_id": "R01",
+					"instance_id": "jcp-00076",
+					"player_id": 1
+				},
+				"sequence": 11,
+				"type": "terrain_played",
+				"visible_to": []
+			},
+			{
+				"payload": {
+					"player_id": 1,
+					"position": "guard"
+				},
+				"sequence": 12,
+				"type": "creature_set",
+				"visible_to": []
+			},
+			{
+				"payload": {
+					"cost": 1,
+					"definition_id": "M06",
+					"instance_id": "jcp-00012",
+					"player_id": 1
+				},
+				"sequence": 13,
+				"type": "private_creature_set",
+				"visible_to": [
+					1
+				]
+			},
+			{
+				"payload": {
+					"definition_id": "G02",
+					"instance_id": "jcp-00040",
+					"player_id": 1,
+					"target_player_id": 1,
+					"target_slot": 0
+				},
+				"sequence": 14,
+				"type": "main_spell_resolved",
+				"visible_to": []
+			},
+			{
+				"payload": {
+					"phase": "MAIN_2",
+					"player_id": 1
+				},
+				"sequence": 15,
+				"type": "phase_completed",
+				"visible_to": []
+			},
+			{
+				"payload": {
+					"phase": "END",
+					"player_id": 1
+				},
+				"sequence": 16,
+				"type": "phase_started",
+				"visible_to": []
+			},
+			{
+				"payload": {
+					"phase": "END",
+					"player_id": 1
+				},
+				"sequence": 17,
+				"type": "phase_completed",
+				"visible_to": []
+			},
+			{
+				"payload": {
+					"energy": {
+						"available": 1,
+						"maximum": 1
+					},
+					"player_id": 0,
+					"round_number": 1,
+					"turn_number": 2
+				},
+				"sequence": 18,
+				"type": "turn_started",
+				"visible_to": []
+			},
+			{
+				"payload": {
+					"phase": "START",
+					"player_id": 0
+				},
+				"sequence": 19,
+				"type": "phase_completed",
+				"visible_to": []
+			},
+			{
+				"payload": {
+					"count": 1,
+					"player_id": 0
+				},
+				"sequence": 20,
+				"type": "card_drawn",
+				"visible_to": []
+			},
+			{
+				"payload": {
+					"instance_id": "jcp-00007",
+					"player_id": 0
+				},
+				"sequence": 21,
+				"type": "private_card_drawn",
+				"visible_to": [
+					0
+				]
+			},
+			{
+				"payload": {
+					"phase": "DRAW",
+					"player_id": 0
+				},
+				"sequence": 22,
+				"type": "phase_started",
+				"visible_to": []
+			},
+			{
+				"payload": {
+					"phase": "DRAW",
+					"player_id": 0
+				},
+				"sequence": 23,
+				"type": "phase_completed",
+				"visible_to": []
+			},
+			{
+				"payload": {
+					"phase": "MAIN_1",
+					"player_id": 0
+				},
+				"sequence": 24,
+				"type": "phase_started",
+				"visible_to": []
+			},
+			{
+				"payload": {
+					"cost": 1,
+					"definition_id": "M03",
+					"instance_id": "jcp-00005",
+					"player_id": 0,
+					"position": "attack"
+				},
+				"sequence": 25,
+				"type": "creature_summoned",
+				"visible_to": []
+			},
+			{
+				"payload": {
+					"definition_id": "E04",
+					"instance_id": "jcp-00069",
+					"player_id": 0
+				},
+				"sequence": 26,
+				"type": "persistent_played",
+				"visible_to": []
+			},
+			{
+				"payload": {
+					"player_id": 0
+				},
+				"sequence": 27,
+				"type": "support_set",
+				"visible_to": []
+			},
+			{
+				"payload": {
+					"definition_id": "T04",
+					"instance_id": "jcp-00057",
+					"player_id": 0
+				},
+				"sequence": 28,
+				"type": "private_support_set",
+				"visible_to": [
+					0
+				]
+			},
+			{
+				"payload": {
+					"phase": "MAIN_1",
+					"player_id": 0
+				},
+				"sequence": 29,
+				"type": "phase_completed",
+				"visible_to": []
+			},
+			{
+				"payload": {
+					"phase": "COMBAT",
+					"player_id": 0
+				},
+				"sequence": 30,
+				"type": "phase_started",
+				"visible_to": []
+			},
+			{
+				"payload": {
+					"definition_id": "M06",
+					"instance_id": "jcp-00012",
+					"player_id": 1,
+					"position": "guard"
+				},
+				"sequence": 31,
+				"type": "creature_revealed",
+				"visible_to": []
+			},
+			{
+				"payload": {
+					"creature_id": "jcp-00012",
+					"defense_bonus": 1,
+					"definition_id": "M06",
+					"player_id": 1
+				},
+				"sequence": 32,
+				"type": "creature_reveal_bonus_triggered",
+				"visible_to": []
+			},
+			{
+				"payload": {
+					"attacker_attack": 0,
+					"attacker_defense": 3,
+					"attacker_destroyed": false,
+					"attacker_id": "jcp-00005",
+					"damage_to_attacker": 0,
+					"damage_to_defender": 0,
+					"target_attack": 0,
+					"target_defense": 4,
+					"target_destroyed": false,
+					"target_id": "jcp-00012"
+				},
+				"sequence": 33,
+				"type": "creature_combat_resolved",
+				"visible_to": []
+			},
+			{
+				"payload": {
+					"phase": "COMBAT",
+					"player_id": 0
+				},
+				"sequence": 34,
+				"type": "phase_completed",
+				"visible_to": []
+			},
+			{
+				"payload": {
+					"phase": "MAIN_2",
+					"player_id": 0
+				},
+				"sequence": 35,
+				"type": "phase_started",
+				"visible_to": []
+			},
+			{
+				"payload": {
+					"phase": "MAIN_2",
+					"player_id": 0
+				},
+				"sequence": 36,
+				"type": "phase_completed",
+				"visible_to": []
+			},
+			{
+				"payload": {
+					"phase": "END",
+					"player_id": 0
+				},
+				"sequence": 37,
+				"type": "phase_started",
+				"visible_to": []
+			},
+			{
+				"payload": {
+					"phase": "END",
+					"player_id": 0
+				},
+				"sequence": 38,
+				"type": "phase_completed",
+				"visible_to": []
+			},
+			{
+				"payload": {
+					"energy": {
+						"available": 2,
+						"maximum": 2
+					},
+					"player_id": 1,
+					"round_number": 2,
+					"turn_number": 3
+				},
+				"sequence": 39,
+				"type": "turn_started",
+				"visible_to": []
+			},
+			{
+				"payload": {
+					"phase": "START",
+					"player_id": 1
+				},
+				"sequence": 40,
+				"type": "phase_completed",
+				"visible_to": []
+			},
+			{
+				"payload": {
+					"count": 1,
+					"player_id": 1
+				},
+				"sequence": 41,
+				"type": "card_drawn",
+				"visible_to": []
+			},
+			{
+				"payload": {
+					"instance_id": "jcp-00022",
+					"player_id": 1
+				},
+				"sequence": 42,
+				"type": "private_card_drawn",
+				"visible_to": [
+					1
+				]
+			},
+			{
+				"payload": {
+					"phase": "DRAW",
+					"player_id": 1
+				},
+				"sequence": 43,
+				"type": "phase_started",
+				"visible_to": []
+			},
+			{
+				"payload": {
+					"phase": "DRAW",
+					"player_id": 1
+				},
+				"sequence": 44,
+				"type": "phase_completed",
+				"visible_to": []
+			},
+			{
+				"payload": {
+					"phase": "MAIN_1",
+					"player_id": 1
+				},
+				"sequence": 45,
+				"type": "phase_started",
+				"visible_to": []
+			},
+			{
+				"payload": {
+					"phase": "MAIN_1",
+					"player_id": 1
+				},
+				"sequence": 46,
+				"type": "phase_completed",
+				"visible_to": []
+			},
+			{
+				"payload": {
+					"phase": "COMBAT",
+					"player_id": 1
+				},
+				"sequence": 47,
+				"type": "phase_started",
+				"visible_to": []
+			},
+			{
+				"payload": {
+					"phase": "COMBAT",
+					"player_id": 1
+				},
+				"sequence": 48,
+				"type": "phase_completed",
+				"visible_to": []
+			},
+			{
+				"payload": {
+					"phase": "MAIN_2",
+					"player_id": 1
+				},
+				"sequence": 49,
+				"type": "phase_started",
+				"visible_to": []
+			},
+			{
+				"payload": {
+					"phase": "MAIN_2",
+					"player_id": 1
+				},
+				"sequence": 50,
+				"type": "phase_completed",
+				"visible_to": []
+			},
+			{
+				"payload": {
+					"phase": "END",
+					"player_id": 1
+				},
+				"sequence": 51,
+				"type": "phase_started",
+				"visible_to": []
+			},
+			{
+				"payload": {
+					"phase": "END",
+					"player_id": 1
+				},
+				"sequence": 52,
+				"type": "phase_completed",
+				"visible_to": []
+			},
+			{
+				"payload": {
+					"energy": {
+						"available": 2,
+						"maximum": 2
+					},
+					"player_id": 0,
+					"round_number": 2,
+					"turn_number": 4
+				},
+				"sequence": 53,
+				"type": "turn_started",
+				"visible_to": []
+			},
+			{
+				"payload": {
+					"phase": "START",
+					"player_id": 0
+				},
+				"sequence": 54,
+				"type": "phase_completed",
+				"visible_to": []
+			},
+			{
+				"payload": {
+					"count": 1,
+					"player_id": 0
+				},
+				"sequence": 55,
+				"type": "card_drawn",
+				"visible_to": []
+			},
+			{
+				"payload": {
+					"instance_id": "jcp-00009",
+					"player_id": 0
+				},
+				"sequence": 56,
+				"type": "private_card_drawn",
+				"visible_to": [
+					0
+				]
+			},
+			{
+				"payload": {
+					"phase": "DRAW",
+					"player_id": 0
+				},
+				"sequence": 57,
+				"type": "phase_started",
+				"visible_to": []
+			},
+			{
+				"payload": {
+					"phase": "DRAW",
+					"player_id": 0
+				},
+				"sequence": 58,
+				"type": "phase_completed",
+				"visible_to": []
+			},
+			{
+				"payload": {
+					"phase": "MAIN_1",
+					"player_id": 0
+				},
+				"sequence": 59,
+				"type": "phase_started",
+				"visible_to": []
+			},
+			{
+				"payload": {
+					"cost": 1,
+					"definition_id": "M07",
+					"instance_id": "jcp-00013",
+					"player_id": 0,
+					"position": "attack"
+				},
+				"sequence": 60,
+				"type": "creature_summoned",
+				"visible_to": []
+			},
+			{
+				"payload": {
+					"phase": "MAIN_1",
+					"player_id": 0
+				},
+				"sequence": 61,
+				"type": "phase_completed",
+				"visible_to": []
+			},
+			{
+				"payload": {
+					"phase": "COMBAT",
+					"player_id": 0
+				},
+				"sequence": 62,
+				"type": "phase_started",
+				"visible_to": []
+			},
+			{
+				"payload": {
+					"attacker_attack": 0,
+					"attacker_defense": 1,
+					"attacker_destroyed": false,
+					"attacker_id": "jcp-00013",
+					"damage_to_attacker": 0,
+					"damage_to_defender": 0,
+					"target_attack": 0,
+					"target_defense": 3,
+					"target_destroyed": false,
+					"target_id": "jcp-00012"
+				},
+				"sequence": 63,
+				"type": "creature_combat_resolved",
+				"visible_to": []
+			},
+			{
+				"payload": {
+					"attacker_attack": 0,
+					"attacker_defense": 3,
+					"attacker_destroyed": false,
+					"attacker_id": "jcp-00005",
+					"damage_to_attacker": 0,
+					"damage_to_defender": 0,
+					"target_attack": 0,
+					"target_defense": 3,
+					"target_destroyed": false,
+					"target_id": "jcp-00012"
+				},
+				"sequence": 64,
+				"type": "creature_combat_resolved",
+				"visible_to": []
+			},
+			{
+				"payload": {
+					"phase": "COMBAT",
+					"player_id": 0
+				},
+				"sequence": 65,
+				"type": "phase_completed",
+				"visible_to": []
+			},
+			{
+				"payload": {
+					"phase": "MAIN_2",
+					"player_id": 0
+				},
+				"sequence": 66,
+				"type": "phase_started",
+				"visible_to": []
+			},
+			{
+				"payload": {
+					"phase": "MAIN_2",
+					"player_id": 0
+				},
+				"sequence": 67,
+				"type": "phase_completed",
+				"visible_to": []
+			},
+			{
+				"payload": {
+					"phase": "END",
+					"player_id": 0
+				},
+				"sequence": 68,
+				"type": "phase_started",
+				"visible_to": []
+			},
+			{
+				"payload": {
+					"phase": "END",
+					"player_id": 0
+				},
+				"sequence": 69,
+				"type": "phase_completed",
+				"visible_to": []
+			},
+			{
+				"payload": {
+					"energy": {
+						"available": 3,
+						"maximum": 3
+					},
+					"player_id": 1,
+					"round_number": 3,
+					"turn_number": 5
+				},
+				"sequence": 70,
+				"type": "turn_started",
+				"visible_to": []
+			},
+			{
+				"payload": {
+					"phase": "START",
+					"player_id": 1
+				},
+				"sequence": 71,
+				"type": "phase_completed",
+				"visible_to": []
+			},
+			{
+				"payload": {
+					"count": 1,
+					"player_id": 1
+				},
+				"sequence": 72,
+				"type": "card_drawn",
+				"visible_to": []
+			},
+			{
+				"payload": {
+					"instance_id": "jcp-00074",
+					"player_id": 1
+				},
+				"sequence": 73,
+				"type": "private_card_drawn",
+				"visible_to": [
+					1
+				]
+			},
+			{
+				"payload": {
+					"phase": "DRAW",
+					"player_id": 1
+				},
+				"sequence": 74,
+				"type": "phase_started",
+				"visible_to": []
+			},
+			{
+				"payload": {
+					"phase": "DRAW",
+					"player_id": 1
+				},
+				"sequence": 75,
+				"type": "phase_completed",
+				"visible_to": []
+			},
+			{
+				"payload": {
+					"phase": "MAIN_1",
+					"player_id": 1
+				},
+				"sequence": 76,
+				"type": "phase_started",
+				"visible_to": []
+			},
+			{
+				"payload": {
+					"definition_id": "M06",
+					"instance_id": "jcp-00012",
+					"player_id": 1,
+					"position": "attack",
+					"revealed": false
+				},
+				"sequence": 77,
+				"type": "creature_position_changed",
+				"visible_to": []
+			},
+			{
+				"payload": {
+					"definition_id": "T04",
+					"player_id": 0,
+					"support_slot": 1
+				},
+				"sequence": 78,
+				"type": "reaction_activated",
+				"visible_to": []
+			},
+			{
+				"payload": {
+					"consecutive_passes": 1,
+					"player_id": 1
+				},
+				"sequence": 79,
+				"type": "reaction_priority_passed",
+				"visible_to": []
+			},
+			{
+				"payload": {
+					"consecutive_passes": 2,
+					"player_id": 0
+				},
+				"sequence": 80,
+				"type": "reaction_priority_passed",
+				"visible_to": []
+			},
+			{
+				"payload": {
+					"definition_id": "T04",
+					"player_id": 0,
+					"support_slot": 1
+				},
+				"sequence": 81,
+				"type": "reaction_resolved",
+				"visible_to": []
+			},
+			{
+				"payload": {
+					"creature_id": "jcp-00012",
+					"player_id": 1,
+					"position": "guard"
+				},
+				"sequence": 82,
+				"type": "position_change_reversed",
+				"visible_to": []
+			},
+			{
+				"payload": {
+					"player_id": 1,
+					"position": "guard"
+				},
+				"sequence": 83,
+				"type": "creature_set",
+				"visible_to": []
+			},
+			{
+				"payload": {
+					"cost": 3,
+					"definition_id": "M11",
+					"instance_id": "jcp-00022",
+					"player_id": 1
+				},
+				"sequence": 84,
+				"type": "private_creature_set",
+				"visible_to": [
+					1
+				]
+			},
+			{
+				"payload": {
+					"phase": "MAIN_1",
+					"player_id": 1
+				},
+				"sequence": 85,
+				"type": "phase_completed",
+				"visible_to": []
+			},
+			{
+				"payload": {
+					"phase": "COMBAT",
+					"player_id": 1
+				},
+				"sequence": 86,
+				"type": "phase_started",
+				"visible_to": []
+			},
+			{
+				"payload": {
+					"phase": "COMBAT",
+					"player_id": 1
+				},
+				"sequence": 87,
+				"type": "phase_completed",
+				"visible_to": []
+			},
+			{
+				"payload": {
+					"phase": "MAIN_2",
+					"player_id": 1
+				},
+				"sequence": 88,
+				"type": "phase_started",
+				"visible_to": []
+			},
+			{
+				"payload": {
+					"phase": "MAIN_2",
+					"player_id": 1
+				},
+				"sequence": 89,
+				"type": "phase_completed",
+				"visible_to": []
+			},
+			{
+				"payload": {
+					"phase": "END",
+					"player_id": 1
+				},
+				"sequence": 90,
+				"type": "phase_started",
+				"visible_to": []
+			},
+			{
+				"payload": {
+					"phase": "END",
+					"player_id": 1
+				},
+				"sequence": 91,
+				"type": "phase_completed",
+				"visible_to": []
+			},
+			{
+				"payload": {
+					"energy": {
+						"available": 3,
+						"maximum": 3
+					},
+					"player_id": 0,
+					"round_number": 3,
+					"turn_number": 6
+				},
+				"sequence": 92,
+				"type": "turn_started",
+				"visible_to": []
+			},
+			{
+				"payload": {
+					"phase": "START",
+					"player_id": 0
+				},
+				"sequence": 93,
+				"type": "phase_completed",
+				"visible_to": []
+			},
+			{
+				"payload": {
+					"count": 1,
+					"player_id": 0
+				},
+				"sequence": 94,
+				"type": "card_drawn",
+				"visible_to": []
+			},
+			{
+				"payload": {
+					"instance_id": "jcp-00045",
+					"player_id": 0
+				},
+				"sequence": 95,
+				"type": "private_card_drawn",
+				"visible_to": [
+					0
+				]
+			},
+			{
+				"payload": {
+					"phase": "DRAW",
+					"player_id": 0
+				},
+				"sequence": 96,
+				"type": "phase_started",
+				"visible_to": []
+			},
+			{
+				"payload": {
+					"phase": "DRAW",
+					"player_id": 0
+				},
+				"sequence": 97,
+				"type": "phase_completed",
+				"visible_to": []
+			},
+			{
+				"payload": {
+					"phase": "MAIN_1",
+					"player_id": 0
+				},
+				"sequence": 98,
+				"type": "phase_started",
+				"visible_to": []
+			},
+			{
+				"payload": {
+					"player_id": 0,
+					"position": "guard"
+				},
+				"sequence": 99,
+				"type": "creature_set",
+				"visible_to": []
+			},
+			{
+				"payload": {
+					"cost": 1,
+					"definition_id": "M04",
+					"instance_id": "jcp-00007",
+					"player_id": 0
+				},
+				"sequence": 100,
+				"type": "private_creature_set",
+				"visible_to": [
+					0
+				]
+			},
+			{
+				"payload": {
+					"definition_id": "G05",
+					"instance_id": "jcp-00045",
+					"player_id": 0
+				},
+				"sequence": 101,
+				"type": "persistent_played",
+				"visible_to": []
+			},
+			{
+				"payload": {
+					"definition_id": "M07",
+					"instance_id": "jcp-00013",
+					"player_id": 0,
+					"position": "guard",
+					"revealed": false
+				},
+				"sequence": 102,
+				"type": "creature_position_changed",
+				"visible_to": []
+			},
+			{
+				"payload": {
+					"definition_id": "M03",
+					"instance_id": "jcp-00005",
+					"player_id": 0,
+					"position": "guard",
+					"revealed": false
+				},
+				"sequence": 103,
+				"type": "creature_position_changed",
+				"visible_to": []
+			},
+			{
+				"payload": {
+					"phase": "MAIN_1",
+					"player_id": 0
+				},
+				"sequence": 104,
+				"type": "phase_completed",
+				"visible_to": []
+			},
+			{
+				"payload": {
+					"phase": "COMBAT",
+					"player_id": 0
+				},
+				"sequence": 105,
+				"type": "phase_started",
+				"visible_to": []
+			},
+			{
+				"payload": {
+					"phase": "COMBAT",
+					"player_id": 0
+				},
+				"sequence": 106,
+				"type": "phase_completed",
+				"visible_to": []
+			},
+			{
+				"payload": {
+					"phase": "MAIN_2",
+					"player_id": 0
+				},
+				"sequence": 107,
+				"type": "phase_started",
+				"visible_to": []
+			},
+			{
+				"payload": {
+					"phase": "MAIN_2",
+					"player_id": 0
+				},
+				"sequence": 108,
+				"type": "phase_completed",
+				"visible_to": []
+			},
+			{
+				"payload": {
+					"phase": "END",
+					"player_id": 0
+				},
+				"sequence": 109,
+				"type": "phase_started",
+				"visible_to": []
+			},
+			{
+				"payload": {
+					"phase": "END",
+					"player_id": 0
+				},
+				"sequence": 110,
+				"type": "phase_completed",
+				"visible_to": []
+			},
+			{
+				"payload": {
+					"energy": {
+						"available": 4,
+						"maximum": 4
+					},
+					"player_id": 1,
+					"round_number": 4,
+					"turn_number": 7
+				},
+				"sequence": 111,
+				"type": "turn_started",
+				"visible_to": []
+			},
+			{
+				"payload": {
+					"phase": "START",
+					"player_id": 1
+				},
+				"sequence": 112,
+				"type": "phase_completed",
+				"visible_to": []
+			},
+			{
+				"payload": {
+					"count": 1,
+					"player_id": 1
+				},
+				"sequence": 113,
+				"type": "card_drawn",
+				"visible_to": []
+			},
+			{
+				"payload": {
+					"instance_id": "jcp-00046",
+					"player_id": 1
+				},
+				"sequence": 114,
+				"type": "private_card_drawn",
+				"visible_to": [
+					1
+				]
+			},
+			{
+				"payload": {
+					"phase": "DRAW",
+					"player_id": 1
+				},
+				"sequence": 115,
+				"type": "phase_started",
+				"visible_to": []
+			},
+			{
+				"payload": {
+					"phase": "DRAW",
+					"player_id": 1
+				},
+				"sequence": 116,
+				"type": "phase_completed",
+				"visible_to": []
+			},
+			{
+				"payload": {
+					"phase": "MAIN_1",
+					"player_id": 1
+				},
+				"sequence": 117,
+				"type": "phase_started",
+				"visible_to": []
+			},
+			{
+				"payload": {
+					"definition_id": "G05",
+					"instance_id": "jcp-00046",
+					"player_id": 1
+				},
+				"sequence": 118,
+				"type": "persistent_played",
+				"visible_to": []
+			},
+			{
+				"payload": {
+					"definition_id": "M11",
+					"instance_id": "jcp-00022",
+					"player_id": 1,
+					"position": "attack",
+					"revealed": true
+				},
+				"sequence": 119,
+				"type": "creature_position_changed",
+				"visible_to": []
+			},
+			{
+				"payload": {
+					"attack_bonus": 1,
+					"source_definition_id": "G05",
+					"source_instance_id": "jcp-00046",
+					"target_instance_id": "jcp-00022"
+				},
+				"sequence": 120,
+				"type": "persistent_effect_triggered",
+				"visible_to": []
+			},
+			{
+				"payload": {
+					"definition_id": "M06",
+					"instance_id": "jcp-00012",
+					"player_id": 1,
+					"position": "attack",
+					"revealed": false
+				},
+				"sequence": 121,
+				"type": "creature_position_changed",
+				"visible_to": []
+			},
+			{
+				"payload": {
+					"definition_id": "E06",
+					"instance_id": "jcp-00074",
+					"player_id": 1,
+					"target_instance_id": "jcp-00022"
+				},
+				"sequence": 122,
+				"type": "item_equipped",
+				"visible_to": []
+			},
+			{
+				"payload": {
+					"phase": "MAIN_1",
+					"player_id": 1
+				},
+				"sequence": 123,
+				"type": "phase_completed",
+				"visible_to": []
+			},
+			{
+				"payload": {
+					"phase": "COMBAT",
+					"player_id": 1
+				},
+				"sequence": 124,
+				"type": "phase_started",
+				"visible_to": []
+			},
+			{
+				"payload": {
+					"count": 1,
+					"creature_id": "jcp-00013",
+					"definition_id": "M07",
+					"player_id": 0
+				},
+				"sequence": 125,
+				"type": "creature_destruction_draw",
+				"visible_to": []
+			},
+			{
+				"payload": {
+					"instance_id": "jcp-00053",
+					"player_id": 0
+				},
+				"sequence": 126,
+				"type": "private_card_drawn",
+				"visible_to": [
+					0
+				]
+			},
+			{
+				"payload": {
+					"attacker_attack": 6,
+					"attacker_defense": 2,
+					"attacker_destroyed": false,
+					"attacker_id": "jcp-00022",
+					"damage_to_attacker": 0,
+					"damage_to_defender": 0,
+					"target_attack": 0,
+					"target_defense": 1,
+					"target_destroyed": true,
+					"target_id": "jcp-00013"
+				},
+				"sequence": 127,
+				"type": "creature_combat_resolved",
+				"visible_to": []
+			},
+			{
+				"payload": {
+					"definition_id": "M04",
+					"instance_id": "jcp-00007",
+					"player_id": 0,
+					"position": "guard"
+				},
+				"sequence": 128,
+				"type": "creature_revealed",
+				"visible_to": []
+			},
+			{
+				"payload": {
+					"attacker_attack": 0,
+					"attacker_defense": 2,
+					"attacker_destroyed": false,
+					"attacker_id": "jcp-00012",
+					"damage_to_attacker": 0,
+					"damage_to_defender": 0,
+					"target_attack": 1,
+					"target_defense": 1,
+					"target_destroyed": false,
+					"target_id": "jcp-00007"
+				},
+				"sequence": 129,
+				"type": "creature_combat_resolved",
+				"visible_to": []
+			},
+			{
+				"payload": {
+					"phase": "COMBAT",
+					"player_id": 1
+				},
+				"sequence": 130,
+				"type": "phase_completed",
+				"visible_to": []
+			},
+			{
+				"payload": {
+					"phase": "MAIN_2",
+					"player_id": 1
+				},
+				"sequence": 131,
+				"type": "phase_started",
+				"visible_to": []
+			},
+			{
+				"payload": {
+					"phase": "MAIN_2",
+					"player_id": 1
+				},
+				"sequence": 132,
+				"type": "phase_completed",
+				"visible_to": []
+			},
+			{
+				"payload": {
+					"phase": "END",
+					"player_id": 1
+				},
+				"sequence": 133,
+				"type": "phase_started",
+				"visible_to": []
+			},
+			{
+				"payload": {
+					"phase": "END",
+					"player_id": 1
+				},
+				"sequence": 134,
+				"type": "phase_completed",
+				"visible_to": []
+			},
+			{
+				"payload": {
+					"energy": {
+						"available": 4,
+						"maximum": 4
+					},
+					"player_id": 0,
+					"round_number": 4,
+					"turn_number": 8
+				},
+				"sequence": 135,
+				"type": "turn_started",
+				"visible_to": []
+			},
+			{
+				"payload": {
+					"phase": "START",
+					"player_id": 0
+				},
+				"sequence": 136,
+				"type": "phase_completed",
+				"visible_to": []
+			},
+			{
+				"payload": {
+					"count": 1,
+					"player_id": 0
+				},
+				"sequence": 137,
+				"type": "card_drawn",
+				"visible_to": []
+			},
+			{
+				"payload": {
+					"instance_id": "jcp-00027",
+					"player_id": 0
+				},
+				"sequence": 138,
+				"type": "private_card_drawn",
+				"visible_to": [
+					0
+				]
+			},
+			{
+				"payload": {
+					"phase": "DRAW",
+					"player_id": 0
+				},
+				"sequence": 139,
+				"type": "phase_started",
+				"visible_to": []
+			},
+			{
+				"payload": {
+					"phase": "DRAW",
+					"player_id": 0
+				},
+				"sequence": 140,
+				"type": "phase_completed",
+				"visible_to": []
+			},
+			{
+				"payload": {
+					"phase": "MAIN_1",
+					"player_id": 0
+				},
+				"sequence": 141,
+				"type": "phase_started",
+				"visible_to": []
+			},
+			{
+				"payload": {
+					"cost": 4,
+					"definition_id": "M14",
+					"instance_id": "jcp-00027",
+					"player_id": 0,
+					"position": "attack"
+				},
+				"sequence": 142,
+				"type": "creature_summoned",
+				"visible_to": []
+			},
+			{
+				"payload": {
+					"player_id": 0
+				},
+				"sequence": 143,
+				"type": "support_set",
+				"visible_to": []
+			},
+			{
+				"payload": {
+					"definition_id": "T02",
+					"instance_id": "jcp-00053",
+					"player_id": 0
+				},
+				"sequence": 144,
+				"type": "private_support_set",
+				"visible_to": [
+					0
+				]
+			},
+			{
+				"payload": {
+					"definition_id": "M03",
+					"instance_id": "jcp-00005",
+					"player_id": 0,
+					"position": "attack",
+					"revealed": false
+				},
+				"sequence": 145,
+				"type": "creature_position_changed",
+				"visible_to": []
+			},
+			{
+				"payload": {
+					"attack_bonus": 1,
+					"source_definition_id": "G05",
+					"source_instance_id": "jcp-00045",
+					"target_instance_id": "jcp-00005"
+				},
+				"sequence": 146,
+				"type": "persistent_effect_triggered",
+				"visible_to": []
+			},
+			{
+				"payload": {
+					"phase": "MAIN_1",
+					"player_id": 0
+				},
+				"sequence": 147,
+				"type": "phase_completed",
+				"visible_to": []
+			},
+			{
+				"payload": {
+					"phase": "COMBAT",
+					"player_id": 0
+				},
+				"sequence": 148,
+				"type": "phase_started",
+				"visible_to": []
+			},
+			{
+				"payload": {
+					"creature_id": "jcp-00022",
+					"linked_ids": [
+						"jcp-00074"
+					]
+				},
+				"sequence": 149,
+				"type": "linked_cards_destroyed",
+				"visible_to": []
+			},
+			{
+				"payload": {
+					"attacker_attack": 4,
+					"attacker_defense": 4,
+					"attacker_destroyed": true,
+					"attacker_id": "jcp-00027",
+					"damage_to_attacker": 1,
+					"damage_to_defender": 2,
+					"target_attack": 5,
+					"target_defense": 2,
+					"target_destroyed": true,
+					"target_id": "jcp-00022"
+				},
+				"sequence": 150,
+				"type": "creature_combat_resolved",
+				"visible_to": []
+			},
+			{
+				"payload": {
+					"defeated_ids": [
+						0,
+						1
+					],
+					"winner_ids": []
+				},
+				"sequence": 151,
+				"type": "players_defeated",
+				"visible_to": []
+			},
+			{
+				"payload": {
+					"state_version": 75
+				},
+				"sequence": 152,
+				"type": "engine_finished",
+				"visible_to": []
+			}
+		],
+		"lifecycle": "FINISHED",
+		"module_id": "zapiti.juego_cartas_propio",
+		"module_state": {
+			"cards": {
+				"definitions": {
+					"E01": {
+						"attributes": {
+							"allowed_anatomies": [],
+							"attack": 0,
+							"card_type": "item",
+							"cost": 0,
+							"defense": 0,
+							"display_name": "Objeto E01",
+							"effect_text": "Equipo. El portador obtiene +1 ATQ. Requiere Manipulador.",
+							"item_mode": "equipment",
+							"required_aptitudes": [
+								"manipulator"
+							]
+						},
+						"id": "E01",
+						"tags": [
+							"item",
+							"prototype"
+						]
+					},
+					"E02": {
+						"attributes": {
+							"allowed_anatomies": [],
+							"attack": 0,
+							"card_type": "item",
+							"cost": 0,
+							"defense": 0,
+							"display_name": "Objeto E02",
+							"effect_text": "Equipo. El portador obtiene +1 DEF.",
+							"item_mode": "equipment",
+							"required_aptitudes": []
+						},
+						"id": "E02",
+						"tags": [
+							"item",
+							"prototype"
+						]
+					},
+					"E03": {
+						"attributes": {
+							"allowed_anatomies": [],
+							"attack": 0,
+							"card_type": "item",
+							"cost": 0,
+							"defense": 0,
+							"display_name": "Objeto E03",
+							"effect_text": "Equipo. En guardia, el portador obtiene +1 ATQ y +1 DEF. Requiere Manipulador.",
+							"item_mode": "equipment",
+							"required_aptitudes": [
+								"manipulator"
+							]
+						},
+						"id": "E03",
+						"tags": [
+							"item",
+							"prototype"
+						]
+					},
+					"E04": {
+						"attributes": {
+							"allowed_anatomies": [],
+							"attack": 0,
+							"card_type": "item",
+							"cost": 0,
+							"defense": 0,
+							"display_name": "Objeto E04",
+							"effect_text": "Artefacto. Una vez por turno, permite trasladar un equipo entre criaturas propias compatibles.",
+							"item_mode": "artifact",
+							"required_aptitudes": []
+						},
+						"id": "E04",
+						"tags": [
+							"item",
+							"prototype"
+						]
+					},
+					"E05": {
+						"attributes": {
+							"allowed_anatomies": [],
+							"attack": 0,
+							"card_type": "item",
+							"cost": 0,
+							"defense": 0,
+							"display_name": "Objeto E05",
+							"effect_text": "Equipo del Bastion. El portador obtiene +1 DEF.",
+							"item_mode": "equipment",
+							"required_aptitudes": []
+						},
+						"id": "E05",
+						"tags": [
+							"item",
+							"prototype"
+						]
+					},
+					"E06": {
+						"attributes": {
+							"allowed_anatomies": [],
+							"attack": 0,
+							"card_type": "item",
+							"cost": 0,
+							"defense": 0,
+							"display_name": "Objeto E06",
+							"effect_text": "Equipo del Bastion. El portador obtiene +1 ATQ. Requiere Manipulador.",
+							"item_mode": "equipment",
+							"required_aptitudes": [
+								"manipulator"
+							]
+						},
+						"id": "E06",
+						"tags": [
+							"item",
+							"prototype"
+						]
+					},
+					"G01": {
+						"attributes": {
+							"attack": 0,
+							"card_type": "spell",
+							"cost": 0,
+							"defense": 0,
+							"display_name": "Magia G01",
+							"effect_text": "Una criatura que controlas obtiene +2 ATQ hasta el final del turno.",
+							"spell_mode": "main"
+						},
+						"id": "G01",
+						"tags": [
+							"spell",
+							"prototype"
+						]
+					},
+					"G02": {
+						"attributes": {
+							"attack": 0,
+							"card_type": "spell",
+							"cost": 0,
+							"defense": 0,
+							"display_name": "Magia G02",
+							"effect_text": "Una criatura que controlas obtiene +2 DEF hasta el final del turno.",
+							"spell_mode": "main"
+						},
+						"id": "G02",
+						"tags": [
+							"spell",
+							"prototype"
+						]
+					},
+					"G03": {
+						"attributes": {
+							"attack": 0,
+							"card_type": "spell",
+							"cost": 0,
+							"defense": 0,
+							"display_name": "Magia G03",
+							"effect_text": "Devuelve a la mano una criatura enemiga visible de coste impreso 2 o menos.",
+							"spell_mode": "main"
+						},
+						"id": "G03",
+						"tags": [
+							"spell",
+							"prototype"
+						]
+					},
+					"G04": {
+						"attributes": {
+							"attack": 0,
+							"card_type": "spell",
+							"cost": 0,
+							"defense": 0,
+							"display_name": "Magia G04",
+							"effect_text": "Tus criaturas en postura de guardia obtienen +1 DEF.",
+							"spell_mode": "persistent"
+						},
+						"id": "G04",
+						"tags": [
+							"spell",
+							"prototype"
+						]
+					},
+					"G05": {
+						"attributes": {
+							"attack": 0,
+							"card_type": "spell",
+							"cost": 0,
+							"defense": 0,
+							"display_name": "Magia G05",
+							"effect_text": "La primera criatura que pase de guardia a ataque en tu turno obtiene +1 ATQ hasta el final del turno.",
+							"spell_mode": "persistent"
+						},
+						"id": "G05",
+						"tags": [
+							"spell",
+							"prototype"
+						]
+					},
+					"G06": {
+						"attributes": {
+							"attack": 0,
+							"card_type": "spell",
+							"cost": 0,
+							"defense": 0,
+							"display_name": "Magia G06",
+							"effect_text": "Cuando una criatura que controlas sea atacada, obtiene +2 DEF durante ese combate.",
+							"spell_mode": "reactive"
+						},
+						"id": "G06",
+						"tags": [
+							"spell",
+							"prototype"
+						]
+					},
+					"G07": {
+						"attributes": {
+							"attack": 0,
+							"card_type": "spell",
+							"cost": 0,
+							"defense": 0,
+							"display_name": "Magia G07",
+							"effect_text": "Cuando una criatura que controlas sea atacada, devuelvela a tu mano.",
+							"spell_mode": "reactive"
+						},
+						"id": "G07",
+						"tags": [
+							"spell",
+							"prototype"
+						]
+					},
+					"M01": {
+						"attributes": {
+							"anatomy": "quadruped",
+							"aptitudes": [
+								"bestial"
+							],
+							"attack": 2,
+							"card_type": "creature",
+							"cost": 1,
+							"defense": 0,
+							"display_name": "Lobo de Zarza",
+							"effect_text": "Sin habilidad.",
+							"element": "nature",
+							"families": [
+								"wolf"
+							],
+							"properties": [],
+							"superfamilies": [
+								"bestial"
+							]
+						},
+						"id": "M01",
+						"tags": [
+							"creature",
+							"prototype"
+						]
+					},
+					"M02": {
+						"attributes": {
+							"anatomy": "humanoid",
+							"aptitudes": [
+								"sapient",
+								"manipulator"
+							],
+							"attack": 1,
+							"card_type": "creature",
+							"cost": 1,
+							"defense": 2,
+							"display_name": "Ondina del Remanso",
+							"effect_text": "Sin habilidad.",
+							"element": "water",
+							"families": [
+								"elemental"
+							],
+							"properties": [],
+							"superfamilies": []
+						},
+						"id": "M02",
+						"tags": [
+							"creature",
+							"prototype"
+						]
+					},
+					"M03": {
+						"attributes": {
+							"anatomy": "amorphous",
+							"aptitudes": [],
+							"attack": 0,
+							"card_type": "creature",
+							"cost": 1,
+							"defense": 3,
+							"display_name": "Núcleo de Escoria",
+							"effect_text": "Sin habilidad.",
+							"element": "fire",
+							"families": [
+								"elemental"
+							],
+							"properties": [],
+							"superfamilies": []
+						},
+						"id": "M03",
+						"tags": [
+							"creature",
+							"prototype"
+						]
+					},
+					"M04": {
+						"attributes": {
+							"anatomy": "humanoid",
+							"aptitudes": [
+								"sapient",
+								"manipulator"
+							],
+							"attack": 1,
+							"card_type": "creature",
+							"cost": 1,
+							"defense": 1,
+							"display_name": "Goblin Rebuscador",
+							"effect_text": "Sin habilidad.",
+							"element": "neutral",
+							"families": [
+								"goblin"
+							],
+							"properties": [],
+							"superfamilies": [
+								"humanoid"
+							]
+						},
+						"id": "M04",
+						"tags": [
+							"creature",
+							"prototype"
+						]
+					},
+					"M05": {
+						"attributes": {
+							"anatomy": "humanoid",
+							"aptitudes": [
+								"sapient",
+								"manipulator"
+							],
+							"attack": 1,
+							"card_type": "creature",
+							"cost": 1,
+							"defense": 1,
+							"display_name": "Goblin Portaantorchas",
+							"effect_text": "Al declarar un ataque, obtiene +1 ATQ durante ese combate.",
+							"element": "fire",
+							"families": [
+								"goblin"
+							],
+							"properties": [],
+							"superfamilies": [
+								"humanoid"
+							]
+						},
+						"id": "M05",
+						"tags": [
+							"creature",
+							"prototype"
+						]
+					},
+					"M06": {
+						"attributes": {
+							"anatomy": "amorphous",
+							"aptitudes": [],
+							"attack": 0,
+							"card_type": "creature",
+							"cost": 1,
+							"defense": 2,
+							"display_name": "Muro de Marea",
+							"effect_text": "Cuando sea revelada al recibir un ataque, obtiene +1 DEF durante ese combate.",
+							"element": "water",
+							"families": [
+								"elemental"
+							],
+							"properties": [],
+							"superfamilies": []
+						},
+						"id": "M06",
+						"tags": [
+							"creature",
+							"prototype"
+						]
+					},
+					"M07": {
+						"attributes": {
+							"anatomy": "quadruped",
+							"aptitudes": [
+								"bestial"
+							],
+							"attack": 0,
+							"card_type": "creature",
+							"cost": 1,
+							"defense": 1,
+							"display_name": "Cachorro de la Senda Verde",
+							"effect_text": "Cuando sea destruida, roba 1 carta.",
+							"element": "nature",
+							"families": [
+								"wolf"
+							],
+							"properties": [],
+							"superfamilies": [
+								"bestial"
+							]
+						},
+						"id": "M07",
+						"tags": [
+							"creature",
+							"prototype"
+						]
+					},
+					"M08": {
+						"attributes": {
+							"anatomy": "amorphous",
+							"aptitudes": [],
+							"attack": 3,
+							"card_type": "creature",
+							"cost": 2,
+							"defense": 1,
+							"display_name": "Oleada Errante",
+							"effect_text": "Sin habilidad.",
+							"element": "water",
+							"families": [
+								"elemental"
+							],
+							"properties": [],
+							"superfamilies": []
+						},
+						"id": "M08",
+						"tags": [
+							"creature",
+							"prototype"
+						]
+					},
+					"M09": {
+						"attributes": {
+							"anatomy": "humanoid",
+							"aptitudes": [
+								"sapient",
+								"manipulator"
+							],
+							"attack": 2,
+							"card_type": "creature",
+							"cost": 2,
+							"defense": 2,
+							"display_name": "Goblin Pendenciero",
+							"effect_text": "Una vez por turno, durante una fase principal propia, puede pagar 1 de Energia para obtener +1 ATQ hasta el final del turno.",
+							"element": "neutral",
+							"families": [
+								"goblin"
+							],
+							"properties": [],
+							"superfamilies": [
+								"humanoid"
+							]
+						},
+						"id": "M09",
+						"tags": [
+							"creature",
+							"prototype"
+						]
+					},
+					"M10": {
+						"attributes": {
+							"anatomy": "humanoid",
+							"aptitudes": [
+								"sapient",
+								"manipulator"
+							],
+							"attack": 1,
+							"card_type": "creature",
+							"cost": 2,
+							"defense": 3,
+							"display_name": "Goblin Trampero del Matorral",
+							"effect_text": "Mientras este en postura de guardia, obtiene +1 ATQ.",
+							"element": "nature",
+							"families": [
+								"goblin"
+							],
+							"properties": [],
+							"superfamilies": [
+								"humanoid"
+							]
+						},
+						"id": "M10",
+						"tags": [
+							"creature",
+							"prototype"
+						]
+					},
+					"M11": {
+						"attributes": {
+							"anatomy": "humanoid",
+							"aptitudes": [
+								"sapient",
+								"manipulator"
+							],
+							"attack": 4,
+							"card_type": "creature",
+							"cost": 3,
+							"defense": 2,
+							"display_name": "Troll Quebrapuertas",
+							"effect_text": "Sin habilidad.",
+							"element": "neutral",
+							"families": [
+								"troll"
+							],
+							"properties": [],
+							"superfamilies": [
+								"humanoid"
+							]
+						},
+						"id": "M11",
+						"tags": [
+							"creature",
+							"prototype"
+						]
+					},
+					"M12": {
+						"attributes": {
+							"anatomy": "humanoid",
+							"aptitudes": [
+								"sapient",
+								"manipulator",
+								"channeler"
+							],
+							"attack": 3,
+							"card_type": "creature",
+							"cost": 3,
+							"defense": 2,
+							"display_name": "Oráculo del Espejo de Agua",
+							"effect_text": "Al entrar boca arriba, su controlador mira una carta de apoyo boca abajo del rival sin revelarla publicamente.",
+							"element": "water",
+							"families": [
+								"elemental"
+							],
+							"properties": [],
+							"superfamilies": []
+						},
+						"id": "M12",
+						"tags": [
+							"creature",
+							"prototype"
+						]
+					},
+					"M13": {
+						"attributes": {
+							"anatomy": "humanoid",
+							"aptitudes": [
+								"sapient",
+								"manipulator"
+							],
+							"attack": 2,
+							"card_type": "creature",
+							"cost": 3,
+							"defense": 2,
+							"display_name": "Troll Guarda del Puente",
+							"effect_text": "Una vez por turno, cuando otra criatura propia sea atacada, puede pasar a ser el objetivo de ese ataque.",
+							"element": "neutral",
+							"families": [
+								"troll"
+							],
+							"properties": [],
+							"superfamilies": [
+								"humanoid"
+							]
+						},
+						"id": "M13",
+						"tags": [
+							"creature",
+							"prototype"
+						]
+					},
+					"M14": {
+						"attributes": {
+							"anatomy": "quadruped",
+							"aptitudes": [
+								"bestial"
+							],
+							"attack": 4,
+							"card_type": "creature",
+							"cost": 4,
+							"defense": 4,
+							"display_name": "Lobo Gris del Páramo",
+							"effect_text": "Sin habilidad.",
+							"element": "neutral",
+							"families": [
+								"wolf"
+							],
+							"properties": [],
+							"superfamilies": [
+								"bestial"
+							]
+						},
+						"id": "M14",
+						"tags": [
+							"creature",
+							"prototype"
+						]
+					},
+					"M15": {
+						"attributes": {
+							"anatomy": "humanoid",
+							"aptitudes": [
+								"sapient",
+								"manipulator",
+								"channeler"
+							],
+							"attack": 3,
+							"card_type": "creature",
+							"cost": 4,
+							"defense": 3,
+							"display_name": "Troll Chamán del Musgo",
+							"effect_text": "Al entrar boca arriba, otra criatura propia obtiene +1 ATQ y +1 DEF hasta el final del turno.",
+							"element": "nature",
+							"families": [
+								"troll"
+							],
+							"properties": [],
+							"superfamilies": [
+								"humanoid"
+							]
+						},
+						"id": "M15",
+						"tags": [
+							"creature",
+							"prototype"
+						]
+					},
+					"M16": {
+						"attributes": {
+							"anatomy": "humanoid",
+							"aptitudes": [
+								"sapient",
+								"manipulator"
+							],
+							"attack": 4,
+							"card_type": "creature",
+							"cost": 5,
+							"defense": 4,
+							"display_name": "Troll Cobrador del Paso",
+							"effect_text": "La primera vez en cada turno que destruya una criatura en combate, recuperas 1 de Energia.",
+							"element": "neutral",
+							"families": [
+								"troll"
+							],
+							"properties": [],
+							"superfamilies": [
+								"humanoid"
+							]
+						},
+						"id": "M16",
+						"tags": [
+							"creature",
+							"prototype"
+						]
+					},
+					"M17": {
+						"attributes": {
+							"anatomy": "winged",
+							"aptitudes": [
+								"bestial"
+							],
+							"attack": 7,
+							"card_type": "creature",
+							"cost": 6,
+							"defense": 4,
+							"display_name": "Dragón de la Caldera",
+							"effect_text": "Sin habilidad.",
+							"element": "fire",
+							"families": [
+								"dragon"
+							],
+							"properties": [],
+							"superfamilies": [
+								"draconic"
+							]
+						},
+						"id": "M17",
+						"tags": [
+							"creature",
+							"prototype"
+						]
+					},
+					"M18": {
+						"attributes": {
+							"anatomy": "winged",
+							"aptitudes": [
+								"sapient",
+								"manipulator"
+							],
+							"attack": 5,
+							"card_type": "creature",
+							"cost": 7,
+							"defense": 6,
+							"display_name": "Dragón Rojo de las Dos Coronas",
+							"effect_text": "La primera vez en cada turno que destruya una criatura en combate y sobreviva, obtiene 1 ataque adicional ese turno. Solo una vez por turno.",
+							"element": "fire",
+							"families": [
+								"dragon"
+							],
+							"properties": [],
+							"superfamilies": [
+								"draconic"
+							]
+						},
+						"id": "M18",
+						"tags": [
+							"creature",
+							"prototype"
+						]
+					},
+					"R01": {
+						"attributes": {
+							"attack": 0,
+							"card_type": "terrain",
+							"cost": 0,
+							"defense": 0,
+							"display_name": "Bosque",
+							"effect_text": "Tus criaturas de Naturaleza obtienen +1 DEF.",
+							"element": "nature"
+						},
+						"id": "R01",
+						"tags": [
+							"terrain",
+							"prototype"
+						]
+					},
+					"R02": {
+						"attributes": {
+							"attack": 0,
+							"card_type": "terrain",
+							"cost": 0,
+							"defense": 0,
+							"display_name": "Lago",
+							"effect_text": "Tus criaturas de Agua obtienen +1 DEF.",
+							"element": "water"
+						},
+						"id": "R02",
+						"tags": [
+							"terrain",
+							"prototype"
+						]
+					},
+					"R03": {
+						"attributes": {
+							"attack": 0,
+							"card_type": "terrain",
+							"cost": 0,
+							"defense": 0,
+							"display_name": "Volcan",
+							"effect_text": "Tus criaturas de Fuego obtienen +1 ATQ.",
+							"element": "fire"
+						},
+						"id": "R03",
+						"tags": [
+							"terrain",
+							"prototype"
+						]
+					},
+					"T01": {
+						"attributes": {
+							"attack": 0,
+							"card_type": "trap",
+							"cost": 0,
+							"defense": 0,
+							"display_name": "Trampa T01",
+							"effect_text": "Cuando una criatura enemiga de coste 2 o menos ataque, destruyela.",
+							"spell_mode": "reactive"
+						},
+						"id": "T01",
+						"tags": [
+							"trap",
+							"prototype"
+						]
+					},
+					"T02": {
+						"attributes": {
+							"attack": 0,
+							"card_type": "trap",
+							"cost": 0,
+							"defense": 0,
+							"display_name": "Trampa T02",
+							"effect_text": "Cuando una criatura que controlas sea atacada, el atacante obtiene -2 ATQ durante ese combate.",
+							"spell_mode": "reactive"
+						},
+						"id": "T02",
+						"tags": [
+							"trap",
+							"prototype"
+						]
+					},
+					"T03": {
+						"attributes": {
+							"attack": 0,
+							"card_type": "trap",
+							"cost": 0,
+							"defense": 0,
+							"display_name": "Trampa T03",
+							"effect_text": "Cuando el rival active una Magia, anula su efecto; despues, ambas cartas van al Cementerio.",
+							"spell_mode": "reactive"
+						},
+						"id": "T03",
+						"tags": [
+							"trap",
+							"prototype"
+						]
+					},
+					"T04": {
+						"attributes": {
+							"attack": 0,
+							"card_type": "trap",
+							"cost": 0,
+							"defense": 0,
+							"display_name": "Trampa T04",
+							"effect_text": "Cuando una criatura enemiga pase voluntariamente de guardia a ataque, devuelvela a guardia.",
+							"spell_mode": "reactive"
+						},
+						"id": "T04",
+						"tags": [
+							"trap",
+							"prototype"
+						]
+					},
+					"T05": {
+						"attributes": {
+							"attack": 0,
+							"card_type": "trap",
+							"cost": 0,
+							"defense": 0,
+							"display_name": "Trampa T05",
+							"effect_text": "Cuando el rival vincule un equipo u objeto, destruye esa carta vinculada.",
+							"spell_mode": "reactive"
+						},
+						"id": "T05",
+						"tags": [
+							"trap",
+							"prototype"
+						]
+					},
+					"T06": {
+						"attributes": {
+							"attack": 0,
+							"card_type": "trap",
+							"cost": 0,
+							"defense": 0,
+							"display_name": "Trampa T06",
+							"effect_text": "Cuando una criatura que controlas sea destruida en combate, destruye a la criatura enemiga que combatio con ella si sigue en campo.",
+							"spell_mode": "reactive"
+						},
+						"id": "T06",
+						"tags": [
+							"trap",
+							"prototype"
+						]
+					}
+				},
+				"instances": {
+					"jcp-00001": {
+						"definition_id": "M01",
+						"id": "jcp-00001",
+						"metadata": {
+							"copy_index": 0,
+							"owner_id": 0,
+							"serial": 1
+						}
+					},
+					"jcp-00002": {
+						"definition_id": "M01",
+						"id": "jcp-00002",
+						"metadata": {
+							"copy_index": 1,
+							"owner_id": 1,
+							"serial": 2
+						}
+					},
+					"jcp-00003": {
+						"definition_id": "M02",
+						"id": "jcp-00003",
+						"metadata": {
+							"copy_index": 0,
+							"owner_id": 0,
+							"serial": 3
+						}
+					},
+					"jcp-00004": {
+						"definition_id": "M02",
+						"id": "jcp-00004",
+						"metadata": {
+							"copy_index": 1,
+							"owner_id": 1,
+							"serial": 4
+						}
+					},
+					"jcp-00005": {
+						"definition_id": "M03",
+						"id": "jcp-00005",
+						"metadata": {
+							"copy_index": 0,
+							"face_up": true,
+							"last_attack_turn": 4,
+							"last_position_change_turn": 8,
+							"owner_id": 0,
+							"position": "attack",
+							"serial": 5,
+							"summoned_turn": 2,
+							"temporary_attack_bonus": 1,
+							"temporary_bonus_turn": 8,
+							"temporary_defense_bonus": 0
+						}
+					},
+					"jcp-00006": {
+						"definition_id": "M03",
+						"id": "jcp-00006",
+						"metadata": {
+							"copy_index": 1,
+							"owner_id": 1,
+							"serial": 6
+						}
+					},
+					"jcp-00007": {
+						"definition_id": "M04",
+						"id": "jcp-00007",
+						"metadata": {
+							"copy_index": 0,
+							"face_up": true,
+							"last_attack_turn": -1,
+							"last_position_change_turn": -1,
+							"owner_id": 0,
+							"position": "guard",
+							"serial": 7,
+							"summoned_turn": 6
+						}
+					},
+					"jcp-00008": {
+						"definition_id": "M04",
+						"id": "jcp-00008",
+						"metadata": {
+							"copy_index": 1,
+							"owner_id": 1,
+							"serial": 8
+						}
+					},
+					"jcp-00009": {
+						"definition_id": "M05",
+						"id": "jcp-00009",
+						"metadata": {
+							"copy_index": 0,
+							"owner_id": 0,
+							"serial": 9
+						}
+					},
+					"jcp-00010": {
+						"definition_id": "M05",
+						"id": "jcp-00010",
+						"metadata": {
+							"copy_index": 1,
+							"owner_id": 1,
+							"serial": 10
+						}
+					},
+					"jcp-00011": {
+						"definition_id": "M06",
+						"id": "jcp-00011",
+						"metadata": {
+							"copy_index": 0,
+							"owner_id": 0,
+							"serial": 11
+						}
+					},
+					"jcp-00012": {
+						"definition_id": "M06",
+						"id": "jcp-00012",
+						"metadata": {
+							"copy_index": 1,
+							"face_up": true,
+							"last_attack_turn": 7,
+							"last_position_change_turn": 7,
+							"owner_id": 1,
+							"position": "attack",
+							"serial": 12,
+							"summoned_turn": 1,
+							"temporary_attack_bonus": 0,
+							"temporary_bonus_turn": 1,
+							"temporary_defense_bonus": 2
+						}
+					},
+					"jcp-00013": {
+						"definition_id": "M07",
+						"id": "jcp-00013",
+						"metadata": {
+							"copy_index": 0,
+							"face_up": true,
+							"last_attack_turn": 4,
+							"last_position_change_turn": 6,
+							"owner_id": 0,
+							"position": "guard",
+							"serial": 13,
+							"summoned_turn": 4
+						}
+					},
+					"jcp-00014": {
+						"definition_id": "M07",
+						"id": "jcp-00014",
+						"metadata": {
+							"copy_index": 1,
+							"owner_id": 1,
+							"serial": 14
+						}
+					},
+					"jcp-00015": {
+						"definition_id": "M08",
+						"id": "jcp-00015",
+						"metadata": {
+							"copy_index": 0,
+							"owner_id": 0,
+							"serial": 15
+						}
+					},
+					"jcp-00016": {
+						"definition_id": "M08",
+						"id": "jcp-00016",
+						"metadata": {
+							"copy_index": 1,
+							"owner_id": 1,
+							"serial": 16
+						}
+					},
+					"jcp-00017": {
+						"definition_id": "M09",
+						"id": "jcp-00017",
+						"metadata": {
+							"copy_index": 0,
+							"owner_id": 0,
+							"serial": 17
+						}
+					},
+					"jcp-00018": {
+						"definition_id": "M09",
+						"id": "jcp-00018",
+						"metadata": {
+							"copy_index": 1,
+							"owner_id": 1,
+							"serial": 18
+						}
+					},
+					"jcp-00019": {
+						"definition_id": "M10",
+						"id": "jcp-00019",
+						"metadata": {
+							"copy_index": 0,
+							"owner_id": 0,
+							"serial": 19
+						}
+					},
+					"jcp-00020": {
+						"definition_id": "M10",
+						"id": "jcp-00020",
+						"metadata": {
+							"copy_index": 1,
+							"owner_id": 1,
+							"serial": 20
+						}
+					},
+					"jcp-00021": {
+						"definition_id": "M11",
+						"id": "jcp-00021",
+						"metadata": {
+							"copy_index": 0,
+							"owner_id": 0,
+							"serial": 21
+						}
+					},
+					"jcp-00022": {
+						"definition_id": "M11",
+						"id": "jcp-00022",
+						"metadata": {
+							"copy_index": 1,
+							"face_up": true,
+							"last_attack_turn": 7,
+							"last_position_change_turn": 7,
+							"owner_id": 1,
+							"position": "attack",
+							"serial": 22,
+							"summoned_turn": 5,
+							"temporary_attack_bonus": 1,
+							"temporary_bonus_turn": 7,
+							"temporary_defense_bonus": 0
+						}
+					},
+					"jcp-00023": {
+						"definition_id": "M12",
+						"id": "jcp-00023",
+						"metadata": {
+							"copy_index": 0,
+							"owner_id": 0,
+							"serial": 23
+						}
+					},
+					"jcp-00024": {
+						"definition_id": "M12",
+						"id": "jcp-00024",
+						"metadata": {
+							"copy_index": 1,
+							"owner_id": 1,
+							"serial": 24
+						}
+					},
+					"jcp-00025": {
+						"definition_id": "M13",
+						"id": "jcp-00025",
+						"metadata": {
+							"copy_index": 0,
+							"owner_id": 0,
+							"serial": 25
+						}
+					},
+					"jcp-00026": {
+						"definition_id": "M13",
+						"id": "jcp-00026",
+						"metadata": {
+							"copy_index": 1,
+							"owner_id": 1,
+							"serial": 26
+						}
+					},
+					"jcp-00027": {
+						"definition_id": "M14",
+						"id": "jcp-00027",
+						"metadata": {
+							"copy_index": 0,
+							"face_up": true,
+							"last_attack_turn": 8,
+							"last_position_change_turn": -1,
+							"owner_id": 0,
+							"position": "attack",
+							"serial": 27,
+							"summoned_turn": 8
+						}
+					},
+					"jcp-00028": {
+						"definition_id": "M14",
+						"id": "jcp-00028",
+						"metadata": {
+							"copy_index": 1,
+							"owner_id": 1,
+							"serial": 28
+						}
+					},
+					"jcp-00029": {
+						"definition_id": "M15",
+						"id": "jcp-00029",
+						"metadata": {
+							"copy_index": 0,
+							"owner_id": 0,
+							"serial": 29
+						}
+					},
+					"jcp-00030": {
+						"definition_id": "M15",
+						"id": "jcp-00030",
+						"metadata": {
+							"copy_index": 1,
+							"owner_id": 1,
+							"serial": 30
+						}
+					},
+					"jcp-00031": {
+						"definition_id": "M16",
+						"id": "jcp-00031",
+						"metadata": {
+							"copy_index": 0,
+							"owner_id": 0,
+							"serial": 31
+						}
+					},
+					"jcp-00032": {
+						"definition_id": "M16",
+						"id": "jcp-00032",
+						"metadata": {
+							"copy_index": 1,
+							"owner_id": 1,
+							"serial": 32
+						}
+					},
+					"jcp-00033": {
+						"definition_id": "M17",
+						"id": "jcp-00033",
+						"metadata": {
+							"copy_index": 0,
+							"owner_id": 0,
+							"serial": 33
+						}
+					},
+					"jcp-00034": {
+						"definition_id": "M17",
+						"id": "jcp-00034",
+						"metadata": {
+							"copy_index": 1,
+							"owner_id": 1,
+							"serial": 34
+						}
+					},
+					"jcp-00035": {
+						"definition_id": "M18",
+						"id": "jcp-00035",
+						"metadata": {
+							"copy_index": 0,
+							"owner_id": 0,
+							"serial": 35
+						}
+					},
+					"jcp-00036": {
+						"definition_id": "M18",
+						"id": "jcp-00036",
+						"metadata": {
+							"copy_index": 1,
+							"owner_id": 1,
+							"serial": 36
+						}
+					},
+					"jcp-00037": {
+						"definition_id": "G01",
+						"id": "jcp-00037",
+						"metadata": {
+							"copy_index": 0,
+							"owner_id": 0,
+							"serial": 37
+						}
+					},
+					"jcp-00038": {
+						"definition_id": "G01",
+						"id": "jcp-00038",
+						"metadata": {
+							"copy_index": 1,
+							"owner_id": 1,
+							"serial": 38
+						}
+					},
+					"jcp-00039": {
+						"definition_id": "G02",
+						"id": "jcp-00039",
+						"metadata": {
+							"copy_index": 0,
+							"owner_id": 0,
+							"serial": 39
+						}
+					},
+					"jcp-00040": {
+						"definition_id": "G02",
+						"id": "jcp-00040",
+						"metadata": {
+							"copy_index": 1,
+							"owner_id": 1,
+							"serial": 40
+						}
+					},
+					"jcp-00041": {
+						"definition_id": "G03",
+						"id": "jcp-00041",
+						"metadata": {
+							"copy_index": 0,
+							"owner_id": 0,
+							"serial": 41
+						}
+					},
+					"jcp-00042": {
+						"definition_id": "G03",
+						"id": "jcp-00042",
+						"metadata": {
+							"copy_index": 1,
+							"owner_id": 1,
+							"serial": 42
+						}
+					},
+					"jcp-00043": {
+						"definition_id": "G04",
+						"id": "jcp-00043",
+						"metadata": {
+							"copy_index": 0,
+							"owner_id": 0,
+							"serial": 43
+						}
+					},
+					"jcp-00044": {
+						"definition_id": "G04",
+						"id": "jcp-00044",
+						"metadata": {
+							"active": true,
+							"copy_index": 1,
+							"face_up": true,
+							"owner_id": 1,
+							"played_turn": 1,
+							"serial": 44
+						}
+					},
+					"jcp-00045": {
+						"definition_id": "G05",
+						"id": "jcp-00045",
+						"metadata": {
+							"active": true,
+							"copy_index": 0,
+							"face_up": true,
+							"last_trigger_turn": 8,
+							"owner_id": 0,
+							"played_turn": 6,
+							"serial": 45
+						}
+					},
+					"jcp-00046": {
+						"definition_id": "G05",
+						"id": "jcp-00046",
+						"metadata": {
+							"active": true,
+							"copy_index": 1,
+							"face_up": true,
+							"last_trigger_turn": 7,
+							"owner_id": 1,
+							"played_turn": 7,
+							"serial": 46
+						}
+					},
+					"jcp-00047": {
+						"definition_id": "G06",
+						"id": "jcp-00047",
+						"metadata": {
+							"copy_index": 0,
+							"owner_id": 0,
+							"serial": 47
+						}
+					},
+					"jcp-00048": {
+						"definition_id": "G06",
+						"id": "jcp-00048",
+						"metadata": {
+							"copy_index": 1,
+							"owner_id": 1,
+							"serial": 48
+						}
+					},
+					"jcp-00049": {
+						"definition_id": "G07",
+						"id": "jcp-00049",
+						"metadata": {
+							"copy_index": 0,
+							"owner_id": 0,
+							"serial": 49
+						}
+					},
+					"jcp-00050": {
+						"definition_id": "G07",
+						"id": "jcp-00050",
+						"metadata": {
+							"copy_index": 1,
+							"owner_id": 1,
+							"serial": 50
+						}
+					},
+					"jcp-00051": {
+						"definition_id": "T01",
+						"id": "jcp-00051",
+						"metadata": {
+							"copy_index": 0,
+							"owner_id": 0,
+							"serial": 51
+						}
+					},
+					"jcp-00052": {
+						"definition_id": "T01",
+						"id": "jcp-00052",
+						"metadata": {
+							"copy_index": 1,
+							"owner_id": 1,
+							"serial": 52
+						}
+					},
+					"jcp-00053": {
+						"definition_id": "T02",
+						"id": "jcp-00053",
+						"metadata": {
+							"active": false,
+							"copy_index": 0,
+							"face_up": false,
+							"owner_id": 0,
+							"serial": 53,
+							"set_turn": 8
+						}
+					},
+					"jcp-00054": {
+						"definition_id": "T02",
+						"id": "jcp-00054",
+						"metadata": {
+							"copy_index": 1,
+							"owner_id": 1,
+							"serial": 54
+						}
+					},
+					"jcp-00055": {
+						"definition_id": "T03",
+						"id": "jcp-00055",
+						"metadata": {
+							"copy_index": 0,
+							"owner_id": 0,
+							"serial": 55
+						}
+					},
+					"jcp-00056": {
+						"definition_id": "T03",
+						"id": "jcp-00056",
+						"metadata": {
+							"copy_index": 1,
+							"owner_id": 1,
+							"serial": 56
+						}
+					},
+					"jcp-00057": {
+						"definition_id": "T04",
+						"id": "jcp-00057",
+						"metadata": {
+							"active": false,
+							"copy_index": 0,
+							"face_up": true,
+							"owner_id": 0,
+							"serial": 57,
+							"set_turn": 2
+						}
+					},
+					"jcp-00058": {
+						"definition_id": "T04",
+						"id": "jcp-00058",
+						"metadata": {
+							"copy_index": 1,
+							"owner_id": 1,
+							"serial": 58
+						}
+					},
+					"jcp-00059": {
+						"definition_id": "T05",
+						"id": "jcp-00059",
+						"metadata": {
+							"copy_index": 0,
+							"owner_id": 0,
+							"serial": 59
+						}
+					},
+					"jcp-00060": {
+						"definition_id": "T05",
+						"id": "jcp-00060",
+						"metadata": {
+							"copy_index": 1,
+							"owner_id": 1,
+							"serial": 60
+						}
+					},
+					"jcp-00061": {
+						"definition_id": "T06",
+						"id": "jcp-00061",
+						"metadata": {
+							"copy_index": 0,
+							"owner_id": 0,
+							"serial": 61
+						}
+					},
+					"jcp-00062": {
+						"definition_id": "T06",
+						"id": "jcp-00062",
+						"metadata": {
+							"copy_index": 1,
+							"owner_id": 1,
+							"serial": 62
+						}
+					},
+					"jcp-00063": {
+						"definition_id": "E01",
+						"id": "jcp-00063",
+						"metadata": {
+							"copy_index": 0,
+							"owner_id": 0,
+							"serial": 63
+						}
+					},
+					"jcp-00064": {
+						"definition_id": "E01",
+						"id": "jcp-00064",
+						"metadata": {
+							"copy_index": 1,
+							"owner_id": 1,
+							"serial": 64
+						}
+					},
+					"jcp-00065": {
+						"definition_id": "E02",
+						"id": "jcp-00065",
+						"metadata": {
+							"copy_index": 0,
+							"owner_id": 0,
+							"serial": 65
+						}
+					},
+					"jcp-00066": {
+						"definition_id": "E02",
+						"id": "jcp-00066",
+						"metadata": {
+							"copy_index": 1,
+							"owner_id": 1,
+							"serial": 66
+						}
+					},
+					"jcp-00067": {
+						"definition_id": "E03",
+						"id": "jcp-00067",
+						"metadata": {
+							"copy_index": 0,
+							"owner_id": 0,
+							"serial": 67
+						}
+					},
+					"jcp-00068": {
+						"definition_id": "E03",
+						"id": "jcp-00068",
+						"metadata": {
+							"copy_index": 1,
+							"owner_id": 1,
+							"serial": 68
+						}
+					},
+					"jcp-00069": {
+						"definition_id": "E04",
+						"id": "jcp-00069",
+						"metadata": {
+							"active": true,
+							"copy_index": 0,
+							"face_up": true,
+							"owner_id": 0,
+							"played_turn": 2,
+							"serial": 69
+						}
+					},
+					"jcp-00070": {
+						"definition_id": "E04",
+						"id": "jcp-00070",
+						"metadata": {
+							"copy_index": 1,
+							"owner_id": 1,
+							"serial": 70
+						}
+					},
+					"jcp-00071": {
+						"definition_id": "E05",
+						"id": "jcp-00071",
+						"metadata": {
+							"copy_index": 0,
+							"owner_id": 0,
+							"serial": 71
+						}
+					},
+					"jcp-00072": {
+						"definition_id": "E05",
+						"id": "jcp-00072",
+						"metadata": {
+							"copy_index": 1,
+							"owner_id": 1,
+							"serial": 72
+						}
+					},
+					"jcp-00073": {
+						"definition_id": "E06",
+						"id": "jcp-00073",
+						"metadata": {
+							"copy_index": 0,
+							"owner_id": 0,
+							"serial": 73
+						}
+					},
+					"jcp-00074": {
+						"definition_id": "E06",
+						"id": "jcp-00074",
+						"metadata": {
+							"active": true,
+							"copy_index": 1,
+							"equipped_turn": 7,
+							"face_up": true,
+							"linked_to": "jcp-00022",
+							"owner_id": 1,
+							"serial": 74
+						}
+					},
+					"jcp-00075": {
+						"definition_id": "R01",
+						"id": "jcp-00075",
+						"metadata": {
+							"copy_index": 0,
+							"owner_id": 0,
+							"serial": 75
+						}
+					},
+					"jcp-00076": {
+						"definition_id": "R01",
+						"id": "jcp-00076",
+						"metadata": {
+							"active": true,
+							"copy_index": 1,
+							"face_up": true,
+							"owner_id": 1,
+							"played_turn": 1,
+							"serial": 76
+						}
+					},
+					"jcp-00077": {
+						"definition_id": "R02",
+						"id": "jcp-00077",
+						"metadata": {
+							"copy_index": 0,
+							"owner_id": 0,
+							"serial": 77
+						}
+					},
+					"jcp-00078": {
+						"definition_id": "R02",
+						"id": "jcp-00078",
+						"metadata": {
+							"copy_index": 1,
+							"owner_id": 1,
+							"serial": 78
+						}
+					},
+					"jcp-00079": {
+						"definition_id": "R03",
+						"id": "jcp-00079",
+						"metadata": {
+							"copy_index": 0,
+							"owner_id": 0,
+							"serial": 79
+						}
+					},
+					"jcp-00080": {
+						"definition_id": "R03",
+						"id": "jcp-00080",
+						"metadata": {
+							"copy_index": 1,
+							"owner_id": 1,
+							"serial": 80
+						}
+					}
+				},
+				"zones": {
+					"attachments:0": {
+						"cards": [],
+						"definition": {
+							"capacity": -1,
+							"count_visibility": "PUBLIC",
+							"id": "attachments:0",
+							"metadata": {},
+							"owner_id": 0,
+							"public_reveal_end": 0,
+							"public_reveal_start": 0,
+							"visibility": "PUBLIC",
+							"visible_to": []
+						}
+					},
+					"attachments:1": {
+						"cards": [],
+						"definition": {
+							"capacity": -1,
+							"count_visibility": "PUBLIC",
+							"id": "attachments:1",
+							"metadata": {},
+							"owner_id": 1,
+							"public_reveal_end": 0,
+							"public_reveal_start": 0,
+							"visibility": "PUBLIC",
+							"visible_to": []
+						}
+					},
+					"creatures:0": {
+						"cards": [
+							"jcp-00005",
+							"jcp-00007"
+						],
+						"definition": {
+							"capacity": 5,
+							"count_visibility": "PUBLIC",
+							"id": "creatures:0",
+							"metadata": {},
+							"owner_id": 0,
+							"public_reveal_end": 0,
+							"public_reveal_start": 0,
+							"visibility": "PUBLIC",
+							"visible_to": []
+						}
+					},
+					"creatures:1": {
+						"cards": [
+							"jcp-00012"
+						],
+						"definition": {
+							"capacity": 5,
+							"count_visibility": "PUBLIC",
+							"id": "creatures:1",
+							"metadata": {},
+							"owner_id": 1,
+							"public_reveal_end": 0,
+							"public_reveal_start": 0,
+							"visibility": "PUBLIC",
+							"visible_to": []
+						}
+					},
+					"deck:0": {
+						"cards": [
+							"jcp-00067",
+							"jcp-00037",
+							"jcp-00049",
+							"jcp-00015",
+							"jcp-00059",
+							"jcp-00025",
+							"jcp-00003",
+							"jcp-00043",
+							"jcp-00019",
+							"jcp-00017",
+							"jcp-00023",
+							"jcp-00061",
+							"jcp-00001",
+							"jcp-00041",
+							"jcp-00029",
+							"jcp-00039",
+							"jcp-00075",
+							"jcp-00051",
+							"jcp-00011",
+							"jcp-00021",
+							"jcp-00077",
+							"jcp-00047",
+							"jcp-00035",
+							"jcp-00055",
+							"jcp-00073",
+							"jcp-00033",
+							"jcp-00071",
+							"jcp-00079",
+							"jcp-00063",
+							"jcp-00065"
+						],
+						"definition": {
+							"capacity": -1,
+							"count_visibility": "PUBLIC",
+							"id": "deck:0",
+							"metadata": {},
+							"owner_id": 0,
+							"public_reveal_end": 0,
+							"public_reveal_start": 0,
+							"visibility": "HIDDEN",
+							"visible_to": []
+						}
+					},
+					"deck:1": {
+						"cards": [
+							"jcp-00014",
+							"jcp-00036",
+							"jcp-00042",
+							"jcp-00018",
+							"jcp-00006",
+							"jcp-00032",
+							"jcp-00070",
+							"jcp-00066",
+							"jcp-00026",
+							"jcp-00038",
+							"jcp-00010",
+							"jcp-00078",
+							"jcp-00052",
+							"jcp-00020",
+							"jcp-00030",
+							"jcp-00028",
+							"jcp-00050",
+							"jcp-00054",
+							"jcp-00062",
+							"jcp-00072",
+							"jcp-00002",
+							"jcp-00064",
+							"jcp-00024",
+							"jcp-00080",
+							"jcp-00068",
+							"jcp-00056",
+							"jcp-00048",
+							"jcp-00058",
+							"jcp-00004",
+							"jcp-00008",
+							"jcp-00016",
+							"jcp-00060"
+						],
+						"definition": {
+							"capacity": -1,
+							"count_visibility": "PUBLIC",
+							"id": "deck:1",
+							"metadata": {},
+							"owner_id": 1,
+							"public_reveal_end": 0,
+							"public_reveal_start": 0,
+							"visibility": "HIDDEN",
+							"visible_to": []
+						}
+					},
+					"fusion_materials:0": {
+						"cards": [],
+						"definition": {
+							"capacity": -1,
+							"count_visibility": "PUBLIC",
+							"id": "fusion_materials:0",
+							"metadata": {},
+							"owner_id": 0,
+							"public_reveal_end": 0,
+							"public_reveal_start": 0,
+							"visibility": "PUBLIC",
+							"visible_to": []
+						}
+					},
+					"fusion_materials:1": {
+						"cards": [],
+						"definition": {
+							"capacity": -1,
+							"count_visibility": "PUBLIC",
+							"id": "fusion_materials:1",
+							"metadata": {},
+							"owner_id": 1,
+							"public_reveal_end": 0,
+							"public_reveal_start": 0,
+							"visibility": "PUBLIC",
+							"visible_to": []
+						}
+					},
+					"graveyard:0": {
+						"cards": [
+							"jcp-00057",
+							"jcp-00013",
+							"jcp-00027"
+						],
+						"definition": {
+							"capacity": -1,
+							"count_visibility": "PUBLIC",
+							"id": "graveyard:0",
+							"metadata": {},
+							"owner_id": 0,
+							"public_reveal_end": 0,
+							"public_reveal_start": 0,
+							"visibility": "PUBLIC",
+							"visible_to": []
+						}
+					},
+					"graveyard:1": {
+						"cards": [
+							"jcp-00040",
+							"jcp-00074",
+							"jcp-00022"
+						],
+						"definition": {
+							"capacity": -1,
+							"count_visibility": "PUBLIC",
+							"id": "graveyard:1",
+							"metadata": {},
+							"owner_id": 1,
+							"public_reveal_end": 0,
+							"public_reveal_start": 0,
+							"visibility": "PUBLIC",
+							"visible_to": []
+						}
+					},
+					"hand:0": {
+						"cards": [
+							"jcp-00031",
+							"jcp-00009"
+						],
+						"definition": {
+							"capacity": -1,
+							"count_visibility": "PUBLIC",
+							"id": "hand:0",
+							"metadata": {},
+							"owner_id": 0,
+							"public_reveal_end": 0,
+							"public_reveal_start": 0,
+							"visibility": "OWNER",
+							"visible_to": []
+						}
+					},
+					"hand:1": {
+						"cards": [
+							"jcp-00034"
+						],
+						"definition": {
+							"capacity": -1,
+							"count_visibility": "PUBLIC",
+							"id": "hand:1",
+							"metadata": {},
+							"owner_id": 1,
+							"public_reveal_end": 0,
+							"public_reveal_start": 0,
+							"visibility": "OWNER",
+							"visible_to": []
+						}
+					},
+					"support:0": {
+						"cards": [
+							"jcp-00069",
+							"jcp-00045",
+							"jcp-00053"
+						],
+						"definition": {
+							"capacity": 5,
+							"count_visibility": "PUBLIC",
+							"id": "support:0",
+							"metadata": {},
+							"owner_id": 0,
+							"public_reveal_end": 0,
+							"public_reveal_start": 0,
+							"visibility": "PUBLIC",
+							"visible_to": []
+						}
+					},
+					"support:1": {
+						"cards": [
+							"jcp-00044",
+							"jcp-00046"
+						],
+						"definition": {
+							"capacity": 5,
+							"count_visibility": "PUBLIC",
+							"id": "support:1",
+							"metadata": {},
+							"owner_id": 1,
+							"public_reveal_end": 0,
+							"public_reveal_start": 0,
+							"visibility": "PUBLIC",
+							"visible_to": []
+						}
+					},
+					"terrain:0": {
+						"cards": [],
+						"definition": {
+							"capacity": 1,
+							"count_visibility": "PUBLIC",
+							"id": "terrain:0",
+							"metadata": {},
+							"owner_id": 0,
+							"public_reveal_end": 0,
+							"public_reveal_start": 0,
+							"visibility": "PUBLIC",
+							"visible_to": []
+						}
+					},
+					"terrain:1": {
+						"cards": [
+							"jcp-00076"
+						],
+						"definition": {
+							"capacity": 1,
+							"count_visibility": "PUBLIC",
+							"id": "terrain:1",
+							"metadata": {},
+							"owner_id": 1,
+							"public_reveal_end": 0,
+							"public_reveal_start": 0,
+							"visibility": "PUBLIC",
+							"visible_to": []
+						}
+					}
+				}
+			},
+			"config": {
+				"energy_cap": 10,
+				"player_names": [
+					"Bot A",
+					"Bot B"
+				],
+				"starting_life": 1,
+				"starting_player": 1
+			},
+			"energy": {
+				"0": {
+					"available": 0,
+					"maximum": 4
+				},
+				"1": {
+					"available": 4,
+					"maximum": 4
+				}
+			},
+			"finished_reason": "life_zero",
+			"life": {
+				"0": 0,
+				"1": 0
+			},
+			"pending_response": {},
+			"phase": {
+				"current": "FINISHED",
+				"definition": {
+					"initial": "START",
+					"terminal": [
+						"FINISHED"
+					],
+					"transitions": {
+						"COMBAT": [
+							"MAIN_2",
+							"FINISHED"
+						],
+						"DRAW": [
+							"MAIN_1",
+							"FINISHED"
+						],
+						"END": [
+							"FINISHED"
+						],
+						"FINISHED": [],
+						"MAIN_1": [
+							"COMBAT",
+							"FINISHED"
+						],
+						"MAIN_2": [
+							"END",
+							"FINISHED"
+						],
+						"START": [
+							"DRAW",
+							"FINISHED"
+						]
+					}
+				},
+				"entry_count": {
+					"COMBAT": 1,
+					"DRAW": 1,
+					"FINISHED": 1,
+					"MAIN_1": 1,
+					"START": 1
+				},
+				"history": [
+					"START",
+					"DRAW",
+					"MAIN_1",
+					"COMBAT",
+					"FINISHED"
+				]
+			},
+			"players": {
+				"players": [
+					{
+						"active": true,
+						"id": 0,
+						"metadata": {},
+						"name": "Bot A",
+						"seat": 0,
+						"team_id": -1
+					},
+					{
+						"active": true,
+						"id": 1,
+						"metadata": {},
+						"name": "Bot B",
+						"seat": 1,
+						"team_id": -1
+					}
+				],
+				"teams": []
+			},
+			"seed": 13,
+			"turn": {
+				"active_index": 0,
+				"direction": 1,
+				"order": [
+					0,
+					1
+				],
+				"round_anchor_index": 1,
+				"round_number": 4,
+				"turn_number": 8
+			},
+			"turn_usage": {
+				"fusion_used": false,
+				"normal_summon_used": true
+			},
+			"winner_ids": []
+		},
+		"module_version": "0.23.0-summon-attack",
+		"request_ids": {
+			"stress-13-0": 1,
+			"stress-13-1": 2,
+			"stress-13-10": 11,
+			"stress-13-11": 12,
+			"stress-13-12": 13,
+			"stress-13-13": 14,
+			"stress-13-14": 15,
+			"stress-13-15": 16,
+			"stress-13-16": 17,
+			"stress-13-17": 18,
+			"stress-13-18": 19,
+			"stress-13-19": 20,
+			"stress-13-2": 3,
+			"stress-13-20": 21,
+			"stress-13-21": 22,
+			"stress-13-22": 23,
+			"stress-13-23": 24,
+			"stress-13-24": 25,
+			"stress-13-25": 26,
+			"stress-13-26": 27,
+			"stress-13-27": 28,
+			"stress-13-28": 29,
+			"stress-13-29": 30,
+			"stress-13-3": 4,
+			"stress-13-30": 31,
+			"stress-13-31": 32,
+			"stress-13-32": 33,
+			"stress-13-33": 34,
+			"stress-13-34": 35,
+			"stress-13-35": 36,
+			"stress-13-36": 37,
+			"stress-13-37": 38,
+			"stress-13-38": 39,
+			"stress-13-39": 40,
+			"stress-13-4": 5,
+			"stress-13-40": 41,
+			"stress-13-41": 42,
+			"stress-13-42": 43,
+			"stress-13-43": 44,
+			"stress-13-44": 45,
+			"stress-13-45": 46,
+			"stress-13-46": 47,
+			"stress-13-47": 48,
+			"stress-13-48": 49,
+			"stress-13-49": 50,
+			"stress-13-5": 6,
+			"stress-13-50": 51,
+			"stress-13-51": 52,
+			"stress-13-52": 53,
+			"stress-13-53": 54,
+			"stress-13-54": 55,
+			"stress-13-55": 56,
+			"stress-13-56": 57,
+			"stress-13-57": 58,
+			"stress-13-58": 59,
+			"stress-13-59": 60,
+			"stress-13-6": 7,
+			"stress-13-60": 61,
+			"stress-13-61": 62,
+			"stress-13-62": 63,
+			"stress-13-63": 64,
+			"stress-13-64": 65,
+			"stress-13-65": 66,
+			"stress-13-66": 67,
+			"stress-13-67": 68,
+			"stress-13-68": 69,
+			"stress-13-69": 70,
+			"stress-13-7": 8,
+			"stress-13-70": 71,
+			"stress-13-71": 72,
+			"stress-13-72": 73,
+			"stress-13-73": 74,
+			"stress-13-74": 75,
+			"stress-13-8": 9,
+			"stress-13-9": 10
+		},
+		"seed": 13,
+		"state_version": 75
+	},
+	"stage": "winner_count",
+	"step": 75
+}

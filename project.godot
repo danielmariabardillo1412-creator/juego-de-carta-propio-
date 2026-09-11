@@ -1,0 +1,20 @@
+; Zapiti Universal Card Engine — complete theoretical experiment
+config_version=5
+
+[application]
+config/name="Juego de Cartas Propio - Laboratorio"
+run/main_scene="res://demo/juego_cartas_table.tscn"
+
+[display]
+
+window/size/viewport_width=1600
+window/size/viewport_height=900
+window/size/window_width_override=1600
+window/size/window_height_override=900
+
+[debug]
+settings/stdout/print_fps=false
+
+[rendering]
+renderer/rendering_method="gl_compatibility"
+renderer/rendering_method.mobile="gl_compatibility"
