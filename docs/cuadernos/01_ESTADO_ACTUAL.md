@@ -3,7 +3,7 @@
 Última actualización: **2026-09-12**  
 Módulo: **`zapiti.juego_cartas_propio`**  
 Versión: **`0.24.0-stress-hardening`**  
-Estado: **prototipo de reglas con mesa visual de duelo local; motor con último RUNTIME PASS en Godot 4.7 estable; fase visual greybox V0.1 abierta, con benchmark de interfaz activo antes de consolidar medidas y todavía pendiente de verificación runtime**
+Estado: **prototipo de reglas con mesa visual de duelo local; motor con último RUNTIME PASS en Godot 4.7 estable; fase visual greybox V0.1 abierta, con benchmark comercial y comunitario activo antes de consolidar medidas y todavía pendiente de verificación runtime**
 
 ## Límites del trabajo
 
@@ -152,12 +152,21 @@ La primera implementación escrita de esta rama se conserva como **andamio**, no
 
 ## Benchmark de interfaz activo — 2026-09-12
 
-El documento de referencia de esta etapa es `docs/diseno/CUADERNO_BENCHMARK_INTERFAZ_TCG_V0_1.md`. Su función es preservar el contexto y evitar que ChatGPT, Codex u otra sesión vuelvan a inventar desde cero problemas de interfaz ya resueltos por juegos de cartas maduros.
+El documento principal de esta etapa es `docs/diseno/CUADERNO_BENCHMARK_INTERFAZ_TCG_V0_1.md`. Ya contiene dos pasadas de referencias comerciales: además de Yu-Gi-Oh!/Magic estudia Runeterra, Shadowverse, Pokémon, Marvel Snap, Flesh and Blood, Lorcana, Shadowverse: Evolve, Eternal, Hearthstone, GWENT, Duel Links y Pokémon TCG Pocket. La síntesis de alta confianza usa carta 63:88, unidad `U`, casilla capaz de alojar Ataque/Guardia sin variar escala, clic/tap como control canónico, objetivos sobre tablero, mini-cadena temporal y breakpoint móvil real.
 
-- Se estudian de forma modular Yu-Gi-Oh!, MTG Arena, Legends of Runeterra, Shadowverse, Pokémon TCG/TCG Live, Marvel Snap, Flesh and Blood, Disney Lorcana, Shadowverse: Evolve y Eternal. Otras referencias quedan reservadas para una segunda pasada si aportan una solución concreta superior.
-- La referencia no significa copia de identidad visual: se extraen proporciones, jerarquías, patrones de interacción y métodos de comunicar estado; no assets, marcos, iconos distintivos, ornamentación ni una composición completa ajena.
-- Candidato de proporción de carta: **63:88**. Las medidas de mano, campo, guardia, preview, montones, cabeceras y separación deben derivarse de una unidad común `U` en vez de números independientes.
-- Entre las ideas candidatas figuran: cartas jugables resaltadas, selección carta→destino, equipo visualmente unido a su portador, Fusión como una entidad con materiales inspeccionables, mini-cadena temporal para respuestas, prioridad inequívoca, fase/energía/fin de turno de lectura inmediata y previsión opcional `si se resolviera ahora` usando exclusivamente información pública y cálculo autorizado por el motor.
-- Estas propuestas no importan reglas de otros juegos y no cambian UCE. Primero se decidirá la síntesis; después se actualizará el contrato del greybox y solo entonces se adaptará el código.
+Se añadió además `docs/diseno/CUADERNO_BENCHMARK_COMUNIDAD_Y_FOROS_V0_1.md`, dedicado a feedback real de jugadores en Reddit, Steam y BoardGameGeek. El filtro es explícitamente técnico: no se incorporan peticiones de cinemáticas 3D ni VFX fuera de alcance; se priorizan mejoras de información, flujo y accesibilidad que un proyecto pequeño puede mantener.
 
-**Estado de la fase:** abierta. El motor conserva su último PASS cerrado; el benchmark es documental y el greybox consolidado todavía no ha pasado parser/runtime ni inspección gráfica. Próximo paso: cerrar el estándar de interfaz desde el cuaderno de benchmark, aplicarlo al andamio y después ejecutar las puertas de Godot y captura antes de la partida humana completa.
+Hallazgos comunitarios de mayor valor para JCP:
+
+- vista contextual de **efectos activos** con fuente y duración;
+- futura consulta del motor **`¿por qué no puedo?`** para explicar una acción bloqueada sin duplicar reglas en UI;
+- texto de carta estructurado y resaltado de la cláusula que se está resolviendo;
+- indicadores discretos de usos restantes, habilidades consumidas y duraciones;
+- menos ventanas y clics cuando no existe elección real;
+- permitir inspeccionar el tablero mientras una decisión contextual está pendiente;
+- cancelar/reseleccionar libremente antes del punto de commit, pero no deshacer acciones ya resueltas por UCE;
+- animaciones 2D breves, opcionales y nunca necesarias para entender una regla.
+
+Estas ideas siguen siendo candidatas de interfaz, no nuevas reglas del duelo. El greybox escrito continúa como andamio hasta clasificar la síntesis en `obligatorio antes de prueba humana`, `después del greybox` y `futuro`.
+
+**Estado de la fase:** abierta. El motor conserva su último PASS cerrado; la investigación de interfaz es documental y el greybox consolidado todavía no ha pasado parser/runtime ni inspección gráfica. Próximo paso: cerrar el estándar de interfaz cruzando benchmark comercial + comunidad + reglas propias, aplicarlo al andamio y después ejecutar las puertas de Godot y captura antes de la partida humana completa.
