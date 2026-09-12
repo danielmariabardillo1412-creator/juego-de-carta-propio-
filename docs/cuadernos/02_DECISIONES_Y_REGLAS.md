@@ -307,3 +307,15 @@ La mesa utiliza el lenguaje espacial general de un juego de cartas enfrentado si
 La interfaz no presenta todos los apoyos como equivalentes: un equipo o una Magia instantánea dirigida obliga a elegir criatura y no puede aparcarse en Apoyo; la instantánea va al Cementerio tras resolverse. Las Magias persistentes ocupan Apoyo boca arriba y las Trampas o respuestas preparadas lo hacen boca abajo. Son visualizaciones de las acciones legales ya definidas por S01, no reglas importadas de otro juego.
 
 Seleccionar una criatura propia fuera de Combate no permite que un clic prematuro sobre el rival sustituya silenciosamente la selección: conserva al atacante y explica que debe entrarse en Combate. Dentro de Combate, se elige atacante y después criatura rival resaltada; cuando el campo rival está vacío, la cabecera de Vida rival funciona como objetivo de ataque directo. Las casillas continúan siendo equivalentes y su elección sigue siendo estética.
+
+### JCP-DEC-040 — Greybox representativo antes de la prueba humana — vigente para prototipo
+
+Fuentes consultadas: S00 y S01, decisiones JCP-DEC-033/038/039 y referencias visuales aportadas por el diseñador; decisión de trabajo confirmada el 2026-09-12.
+
+Las pruebas automáticas pueden seguir validando motor y reglas sin arte final, pero una prueba humana de claridad, comodidad y ritmo debe realizarse sobre una disposición suficientemente representativa de la futura experiencia. Por tanto, la sesión humana completa queda pospuesta hasta disponer de un **greybox de interfaz final**: sin ilustraciones, animaciones, audio ni ornamentación definitiva, pero con la jerarquía, proporciones, posiciones y flujo que se pretende conservar.
+
+El tablero y las cartas dominan visualmente; la mano propia permanece abajo y la rival arriba; Vida y Energía se integran en las cabeceras; Territorio, Baraja, Cementerio y materiales de Fusión son zonas compactas; la banda de fases queda fuera del centro jugable; y el lateral se limita a ficha de carta, decisiones contextuales e historial subordinado. Las casillas vacías no repiten texto administrativo salvo cuando deben comunicar un destino legal.
+
+Esta decisión **no cambia ninguna regla del duelo**. La interfaz continúa consumiendo únicamente vistas, eventos filtrados y acciones legales de `UniversalCardEngine`; no puede calcular reglas por su cuenta ni acceder al estado privado bruto. Las herramientas de diagnóstico y modo local 2P pueden permanecer disponibles, pero no deben dirigir la lectura normal de la partida.
+
+El contrato completo está en `docs/diseno/GREYBOX_INTERFAZ_FINAL_V0_1.md`. La fase no se considera cerrada por estar escrita: necesita parser/runtime en Godot 4.7, puertas proporcionales de interfaz e inspección de una captura real por el diseñador antes de iniciar la sesión humana completa.
