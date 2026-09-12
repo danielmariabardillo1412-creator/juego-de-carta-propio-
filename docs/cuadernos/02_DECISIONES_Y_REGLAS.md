@@ -170,7 +170,7 @@ Los resultados de `validate_action()` conservan el contrato estricto de tres cla
 
 ### JCP-DEC-027 — F011 Banda de Antorchas como cuarta Fusión — vigente para prototipo
 
-F011-NF se forma con un Goblin Neutral y un Goblin de Fuego propios y visibles, en cualquier orden, mediante el mismo ciclo físico y límite por turno de las Fusiones anteriores. Es una Formación Goblin Neutral/Fuego, Humanoide, Sapiente y Manipuladora, de coste de referencia 3 y cifras 3/2.
+F011-NF se forma con un Goblin Neutral y uno de Fuego propios y visibles, en cualquier orden, mediante el mismo ciclo físico y límite por turno de las Fusiones anteriores. Es una Formación Goblin Neutral/Fuego, Humanoide, Sapiente y Manipuladora, de coste de referencia 3 y cifras 3/2.
 
 Cada vez que declara un ataque obtiene +1 ATQ solo durante ese combate. Si en ese momento controla además otro Goblin boca arriba, obtiene también +1 DEF durante ese combate. La propia Banda no cuenta como «otro Goblin» y una criatura colocada no activa ni revela indirectamente la condición. El disparo ocurre antes de elecciones y respuestas y se registra como evento público. Su recorrido vertical usa robos y despliegues naturales y conserva replay exacto.
 
@@ -343,3 +343,13 @@ La investigación de comunidad queda **conservada pero fuera del alcance inmedia
 Hasta que esa mesa representativa supere parser/runtime, pruebas proporcionales, captura real y una primera sesión humana, no se abrirán fases de implementación para `EFECTOS ACTIVOS`, `¿por qué no puedo?`, tooltips avanzados, contadores de QoL, historial enriquecido ni otras mejoras derivadas de foros. Esas ideas permanecen documentadas en `CUADERNO_BENCHMARK_COMUNIDAD_Y_FOROS_V0_1.md` para recuperarlas después sin repetir investigación.
 
 Esta decisión no invalida JCP-DEC-042: conserva su filtro de viabilidad y arquitectura. Solo cambia el **orden de trabajo** para evitar intentar construir mesa, onboarding, ayudas y calidad de vida simultáneamente.
+
+### JCP-DEC-044 — Métricas de mesa 63:88 y U=72 para el greybox — vigente para prototipo
+
+Fuentes de reglas consultadas: S00 y S01; sus documentos de Drive no muestran una modificación posterior a las fechas registradas en `SOURCE_MANIFEST.json` al iniciar este corte. Referencia visual: `docs/diseno/CUADERNO_BENCHMARK_INTERFAZ_TCG_V0_1.md`.
+
+Para dejar de ajustar la mesa con números independientes, la primera validación gráfica de escritorio adopta **63:88** como proporción de carta y `1 U = 72 px` a 1600×900. La carta de campo mide 72×101, Guardia 101×72, la envolvente de cada posición es 101×101, la separación de las cinco columnas es 11 px, la mano usa 86×120, el preview 180×251, las zonas laterales 60×90, el HUD de jugador 33 px y el rail contextual 274 px. El núcleo de cinco posiciones mide 549 px y, con una zona auxiliar a cada lado, aproximadamente 701 px.
+
+Las manos mantienen las cartas rectas y reducen primero la separación antes de reducir escala: paso 94 px para 1–5 cartas, 76 para 6–7, 60 para 8–9 y 48 para 10 o más. Este estándar se calibra para la captura inicial a 1600×900; otras resoluciones deberán derivarse después de la misma unidad o cambiar a composición responsive cuando sea necesario, sin volver a introducir tamaños arbitrarios aislados.
+
+Esta es una decisión **solo de presentación**. No cambia reglas, acciones, privacidad, replay, persistencia ni UCE. JCP-DEC-043 continúa vigente: las mejoras comunitarias de QoL permanecen fuera de este corte hasta validar la mesa.
