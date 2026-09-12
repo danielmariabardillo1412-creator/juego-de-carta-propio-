@@ -1,5 +1,16 @@
 # Cuaderno 3 — Bitácora de trabajo
 
+## 2026-09-12 — Cuaderno de benchmark de interfaces TCG
+
+- Antes de seguir afinando la mesa por ensayo visual, el diseñador pidió reunir primero en un único cuaderno las soluciones maduras de otros juegos de cartas y usar esa base para evitar decenas de correcciones ya resueltas por la industria.
+- Se creó `docs/diseno/CUADERNO_BENCHMARK_INTERFAZ_TCG_V0_1.md` y se registró JCP-DEC-041.
+- La investigación no se limita a Yu-Gi-Oh! y Magic. Se documentaron piezas aprovechables de Yu-Gi-Oh!, MTG Arena, Legends of Runeterra, Shadowverse, Pokémon TCG/TCG Live, Marvel Snap, Flesh and Blood, Disney Lorcana, Shadowverse: Evolve y Eternal; Hearthstone, Gwent, Duel Links, Pokémon TCG Pocket y otros quedan anotados para una segunda pasada si aportan una solución mejor.
+- El método queda fijado como benchmark modular: elegir de cada producto únicamente el problema que resuelve especialmente bien —campo, orientación, mano, selección, respuestas, cadena, adjuntos, Fusión, turno o lectura— y reconstruirlo con identidad propia. No se copian assets, marcos, iconos, ornamentación ni una interfaz completa.
+- El cuaderno propone como candidato de proporción base 63:88 y una unidad común `U` derivada del ancho de carta. Para 1600×900 se anota una primera escala de trabajo de 72×101 px en campo, 101×72 en guardia, ~86×120 en mano y ~180×251 en preview; son medidas de síntesis pendientes de consolidación, no valores definitivos de código.
+- También quedan recogidas las ideas de cartas jugables resaltadas, carta→destino, equipo unido al portador, Fusión como entidad única con materiales inspeccionables, mini-cadena temporal de respuestas, fase/energía/fin de turno de lectura inmediata y una posible previsión `si se resolviera ahora` calculada solo con información pública por el motor.
+- La implementación greybox V0.1 ya escrita se mantiene en la rama como andamio, pero no se seguirá puliendo a ojo. El siguiente corte visual debe derivarse de la síntesis del nuevo cuaderno y después pasar las puertas runtime ya previstas.
+- No se modificó código, motor, reglas, catálogo, replay ni persistencia en esta revisión documental; por tanto no corresponde atribuir nuevos resultados runtime.
+
 ## 2026-09-12 — Greybox representativo de interfaz final V0.1
 
 - El diseñador detuvo la sesión humana completa porque la mesa anterior, aunque funcional y probada, seguía siendo demasiado cercana a una herramienta de laboratorio para medir con sentido la experiencia que se pretende conservar. Se fija que las pruebas humanas de claridad, comodidad y ritmo comenzarán después de disponer de un greybox representativo de la distribución final, todavía sin arte definitivo.
@@ -239,7 +250,7 @@
 - Se descargó Godot 4.7 estable desde la distribución oficial a una carpeta temporal externa al proyecto y se verificó su SHA-256 antes de ejecutarlo.
 - Identidades y compatibilidad: PASS, 157 comprobaciones.
 - Catálogo F001/F010/F067: PASS, 37 comprobaciones.
-- Fundamento genérico de Fusiones: PASS, 46/46.
+- Fundamento genérico de Fusiones: 46/46.
 - Las quince suites específicas suman 850/850; las nueve generales, 441/441.
 - Diagnóstico: 15 PASS, 0 FAIL, 0 SKIP, 0 WARN.
 - Experimento integral: 80/80.
