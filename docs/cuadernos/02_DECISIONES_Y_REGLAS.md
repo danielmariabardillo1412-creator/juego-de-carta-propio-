@@ -50,7 +50,7 @@ Cada copia activa de E04 puede trasladar un equipo una vez por turno entre dos c
 
 ### JCP-DEC-012 — Una carta física porta el Terreno transformado — vigente
 
-La zona de Terreno continúa teniendo capacidad uno. Al jugar un segundo Terreno, la receta consulta en orden la identidad vigente más la definición entrante. Si hay receta, la carta anterior pasa al Cementerio y la entrante conserva en metadatos la identidad, el nombre y los dos componentes ordenados del resultado. Si no hay receta, la entrante sustituye a la anterior como Terreno base. No se crean instancias adicionales ni se alteran las 40 cartas físicas de cada jugador.
+La zona de Terreno continúa teniendo capacidad uno. Al jugar un segundo Terreno, la receta consulta en orden la identidad vigente más la definición entrante. Si hay receta, la carta anterior pasa al Cementerio y la entrante conserva en metadatos la identidad, el nombre y los dos componentes ordenados del resultado. Si no hay receta, la entrante sustituye al anterior como Terreno base. No se crean instancias adicionales ni se alteran las 40 cartas físicas de cada jugador.
 
 Los documentos solo fijan por ahora la identidad ambiental de los seis resultados. Hasta que sus efectos se definan expresamente, una forma transformada no hereda el bono de su carta portadora ni recibe efectos inventados.
 
@@ -140,7 +140,7 @@ F010-NEU se habilita como única receta ejecutable dentro del duelo. La acción 
 
 La primera carta física indicada actúa como portadora de la identidad generada y continúa ocupando una casilla. La otra pasa a la zona pública `fusion_materials`, enlazada recíprocamente con la portadora. Esta representación conserva exactamente las 80 cartas físicas y permite que estadísticas, coste, familia, anatomía y aptitudes procedan de Banda Goblin en vez de heredarse accidentalmente de la carta portadora.
 
-La Formación entra boca arriba, en ataque o guardia a elección del jugador, y cuenta como recién llegada. Los equipos de ambos materiales se revalidan contra su perfil Humanoide, Sapiente y Manipulador: los compatibles se religan a la portadora y los incompatibles van al Cementerio.
+La Formación entra boca arriba en ataque o guardia a elección del jugador, y cuenta como recién llegada. Los equipos de ambos materiales se revalidan contra su perfil Humanoide, Sapiente y Manipulador: los compatibles se religan a la portadora y los incompatibles van al Cementerio.
 
 Su habilidad `activate_fusion_ability` se usa una vez por turno y por Banda durante una fase principal propia: paga 1 de Energía y concede +1 ATQ hasta final del turno a una criatura propia boca arriba, incluida ella misma. La destrucción y la devolución aplican JCP-DEC-021. En esta fase F001/F067 todavía quedaban en catálogo; JCP-DEC-025 las habilita posteriormente.
 
@@ -327,3 +327,11 @@ Antes de seguir afinando el greybox por ensayo visual, se documenta un benchmark
 El método es **modular**: cada producto se usa solo para el problema que resuelve especialmente bien —campo, orientación, mano, objetivos, prioridad, cadena, adjuntos, Fusión/identidades apiladas, turno o legibilidad—. No se copiará una interfaz completa ni su identidad visual. La siguiente revisión del greybox debe derivar tamaños y espaciados de una unidad de carta común, conservar las reglas propias y adoptar únicamente patrones funcionales aceptados.
 
 Como candidatos de trabajo, no como reglas de duelo, quedan registrados: relación de carta 63:88; resaltado de cartas jugables; selección carta→destino; equipo visualmente unido al portador; mini-cadena temporal para respuestas; preview de carta bajo demanda; fase/energía/fin de turno de lectura inmediata; y una posible previsión `si se resolviera ahora` calculada solo con información pública y por la autoridad del motor. La implementación visual V0.1 ya escrita se considera un **andamio provisional** hasta contrastarla con esta base.
+
+### JCP-DEC-042 — Feedback comunitario filtrado por viabilidad — vigente para prototipo
+
+Antes de congelar el estándar del greybox, el benchmark comercial se contrasta con feedback de jugadores en `docs/diseno/CUADERNO_BENCHMARK_COMUNIDAD_Y_FOROS_V0_1.md`. Las sugerencias de foros no se adoptan por popularidad: deben resolver un problema aplicable a JCP, ser viables con UI 2D/2.5D y datos del motor, respetar privacidad/replay/determinismo y no introducir una carga desproporcionada para un proyecto pequeño.
+
+Se excluyen como requisito de esta fase cinemáticas 3D, monstruos animados que salen de la carta y VFX complejos. Sí se consideran de alto valor: efectos activos con fuente/duración, texto de carta estructurado, usos restantes visibles, reducción de clics sin decisión real, inspección del tablero durante decisiones y un punto de commit claro que permita cancelar selección antes de `perform_action()` pero no rebobinar acciones resueltas.
+
+La idea comunitaria `¿por qué no puedo?` se acepta como **dirección futura**, no como código inmediato: si se implementa, la explicación deberá proceder de UCE o de los mismos códigos de validación, nunca de una segunda copia de reglas en la interfaz. Ninguna sugerencia comunitaria altera por sí sola las reglas del duelo.
