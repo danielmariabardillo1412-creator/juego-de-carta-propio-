@@ -3,7 +3,7 @@
 Última actualización: **2026-09-12**  
 Módulo: **`zapiti.juego_cartas_propio`**  
 Versión: **`0.24.0-stress-hardening`**  
-Estado: **prototipo de reglas con mesa visual de duelo local; motor con último RUNTIME PASS en Godot 4.7 estable; fase visual greybox V0.1 abierta y aún pendiente de verificación runtime**
+Estado: **prototipo de reglas con mesa visual de duelo local; motor con último RUNTIME PASS en Godot 4.7 estable; fase visual greybox V0.1 abierta, con benchmark de interfaz activo antes de consolidar medidas y todavía pendiente de verificación runtime**
 
 ## Límites del trabajo
 
@@ -148,4 +148,16 @@ El 2026-09-12 se cambió el orden de la prueba humana: antes de jugar una sesió
 - Las casillas vacías conservan su forma pero dejan de repetir `VACÍA`; el texto fuerte aparece cuando son un destino legal como `JUGAR AQUÍ` o `ATAQUE DIRECTO`.
 - No se ha modificado `UniversalCardEngine`, el módulo `juego_cartas_propio_module.gd`, el catálogo, reglas, replay ni persistencia.
 
-**Estado de esta fase:** implementación escrita, pero **no cerrada**. Desde esta conexión no se ha ejecutado Godot 4.7 ni se ha inspeccionado una captura runtime de la nueva escena. Antes de declarar el greybox válido deben pasar parser/runtime y las puertas de mesa, ataque e IA, y el diseñador debe revisar una captura real. Solo después se reanuda la partida humana completa.
+La primera implementación escrita de esta rama se conserva como **andamio**, no como autoridad definitiva de medidas. Antes de seguir puliéndola se consolidará el benchmark de interfaces TCG descrito a continuación.
+
+## Benchmark de interfaz activo — 2026-09-12
+
+El documento de referencia de esta etapa es `docs/diseno/CUADERNO_BENCHMARK_INTERFAZ_TCG_V0_1.md`. Su función es preservar el contexto y evitar que ChatGPT, Codex u otra sesión vuelvan a inventar desde cero problemas de interfaz ya resueltos por juegos de cartas maduros.
+
+- Se estudian de forma modular Yu-Gi-Oh!, MTG Arena, Legends of Runeterra, Shadowverse, Pokémon TCG/TCG Live, Marvel Snap, Flesh and Blood, Disney Lorcana, Shadowverse: Evolve y Eternal. Otras referencias quedan reservadas para una segunda pasada si aportan una solución concreta superior.
+- La referencia no significa copia de identidad visual: se extraen proporciones, jerarquías, patrones de interacción y métodos de comunicar estado; no assets, marcos, iconos distintivos, ornamentación ni una composición completa ajena.
+- Candidato de proporción de carta: **63:88**. Las medidas de mano, campo, guardia, preview, montones, cabeceras y separación deben derivarse de una unidad común `U` en vez de números independientes.
+- Entre las ideas candidatas figuran: cartas jugables resaltadas, selección carta→destino, equipo visualmente unido a su portador, Fusión como una entidad con materiales inspeccionables, mini-cadena temporal para respuestas, prioridad inequívoca, fase/energía/fin de turno de lectura inmediata y previsión opcional `si se resolviera ahora` usando exclusivamente información pública y cálculo autorizado por el motor.
+- Estas propuestas no importan reglas de otros juegos y no cambian UCE. Primero se decidirá la síntesis; después se actualizará el contrato del greybox y solo entonces se adaptará el código.
+
+**Estado de la fase:** abierta. El motor conserva su último PASS cerrado; el benchmark es documental y el greybox consolidado todavía no ha pasado parser/runtime ni inspección gráfica. Próximo paso: cerrar el estándar de interfaz desde el cuaderno de benchmark, aplicarlo al andamio y después ejecutar las puertas de Godot y captura antes de la partida humana completa.
