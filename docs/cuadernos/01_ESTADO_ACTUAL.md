@@ -3,7 +3,7 @@
 Última actualización: **2026-09-12**  
 Módulo: **`zapiti.juego_cartas_propio`**  
 Versión: **`0.24.0-stress-hardening`**  
-Estado: **prototipo de reglas con mesa visual de duelo local; motor con último RUNTIME PASS en Godot 4.7 estable; fase visual greybox V0.1 abierta y prioridad inmediata puesta en consolidar la mesa. El benchmark comunitario queda documentado y aparcado para una fase posterior de UX**
+Estado: **prototipo de reglas con mesa visual de duelo local; motor con último RUNTIME PASS en Godot 4.7 estable; fase visual greybox V0.1 abierta y estándar métrico 63:88/U=72 ya escrito en rama, todavía pendiente de parser/runtime y captura real. El benchmark comunitario queda aparcado para una fase posterior de UX**
 
 ## Límites del trabajo
 
@@ -166,4 +166,10 @@ La prioridad inmediata es exclusivamente:
 
 Solo después se reabrirá el benchmark comunitario para decidir qué mejoras de UX merece implementar. No se introducirán ahora `EFECTOS ACTIVOS`, `¿por qué no puedo?`, contadores adicionales, tooltips avanzados ni otras capas de QoL salvo que una de ellas resulte imprescindible para que la propia mesa sea jugable.
 
-**Estado de la fase:** abierta. El motor conserva su último PASS cerrado; el trabajo activo vuelve a ser la mesa/greybox. El benchmark comunitario está documentado y preservado, pero no está en ejecución.
+## Corte métrico escrito — pendiente de runtime
+
+JCP-DEC-044 y `GREYBOX_INTERFAZ_FINAL_V0_1.md` fijan ya el primer estándar concreto para 1600×900: carta de campo 72×101, Guardia 101×72, envolvente 101×101, separación 11, fila 105, carta de mano 86×120, preview 180×251, zonas laterales 60×90, HUD 33 y rail 274. El núcleo de cinco columnas ocupa 549 px y el conjunto con zonas auxiliares ronda 701 px.
+
+`demo/card_tile.gd` y `demo/juego_cartas_table_greybox.gd` están adaptados a esas métricas. La mano mantiene tamaño y reduce primero su paso horizontal (94/76/60/48 px según densidad). No se ha tocado UCE, reglas ni motor.
+
+**Estado de la fase:** abierta. El código métrico está escrito, pero todavía **no** se declara PASS: faltan parser/runtime en Godot 4.7, suites proporcionales y captura real a 1600×900. El último PASS cerrado sigue perteneciendo a la mesa anterior del 2026-09-11.
