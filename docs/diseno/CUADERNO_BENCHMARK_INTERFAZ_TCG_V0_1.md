@@ -542,3 +542,199 @@ La intención de este orden es evitar veinte o cincuenta microcorrecciones que y
 - Dire Wolf Digital — *Eternal Advanced Rules*.
 
 Las fuentes sirven para extraer principios funcionales. Ningún asset externo forma parte del proyecto.
+
+## Segunda pasada de referencias — 2026-09-12
+
+La segunda pasada no busca aumentar la lista por cantidad. Solo se incorporan referencias que cubren huecos que todavía no estaban resueltos con suficiente precisión: apuntado, compresión, móvil y ayuda contextual.
+
+### 11. Hearthstone — apuntado legible, cartas jugables y llamada de fin de turno
+
+La documentación oficial de Blizzard confirma dos señales visuales especialmente útiles: cartas jugables que brillan en verde y un botón de fin de turno cuyo estado visual cambia según el contexto. Notas oficiales históricas también documentan la flecha de apuntado entre origen y objetivo.
+
+**Qué aporta de verdad:**
+
+- una línea/flecha temporal entre carta seleccionada y objetivo hace evidente *qué está apuntando a qué*;
+- una carta jugable se distingue antes de pulsarla;
+- la llamada de fin de turno puede cambiar de énfasis sin ocupar más espacio ni crear más botones.
+
+**Adaptación propia:** el control canónico seguirá siendo **clic/tap para seleccionar y clic/tap para destino**. La flecha no obliga a arrastrar: puede aparecer al seleccionar atacante/carta dirigida y seguir al cursor o conectar visualmente origen y objetivo al pasar sobre él. Así conservamos la claridad de Hearthstone sin hacer del drag una obligación en móvil o accesibilidad.
+
+No importamos su tablero sin casillas ni su gramática de héroes.
+
+Fuentes oficiales: `https://hearthstone.blizzard.com/en-us/news/24187196/` y `https://hearthstone.blizzard.com/en-us/news/11144301/hearthstone-closed-beta-patch-notes`.
+
+### 12. GWENT — densidad horizontal y jerarquía cuando hay muchas cartas
+
+GWENT trabaja con filas horizontales de muchas cartas y mantiene el objetivo de puntuación muy visible. Para nuestro reglamento de cinco casillas no necesitamos copiar sus filas ni puntuación, pero sí es una referencia útil para **qué hacer cuando aumenta la densidad sin destruir la lectura**.
+
+**Qué aporta de verdad:**
+
+- comprimir separación antes que empequeñecer cartas hasta volverlas ilegibles;
+- mantener una cifra crítica grande y estable aunque el tablero tenga mucha información;
+- usar filas como agrupación visual fuerte sin convertir cada carta en una caja independiente con texto alrededor.
+
+**Adaptación propia:** el campo de cinco casillas nunca necesita compresión extrema, pero la mano sí. Primero se reduce la separación, después se permite solape horizontal controlado y solo al final se reduce escala. Vida, Energía y fase no deben encogerse para hacer sitio a la mano.
+
+Fuentes oficiales: `https://www.playgwent.com/es/news/19721/guia-de-gwent-para-principiantes` y galería oficial `https://www.playgwent.com/en/media`.
+
+### 13. Yu-Gi-Oh! Duel Links — compactación para pantalla pequeña
+
+Duel Links demuestra que un reglamento de TCG con bastante información puede reorganizarse para móvil sin trasladar literalmente la composición de escritorio. Las páginas oficiales lo presentan explícitamente como experiencia de Yu-Gi-Oh! en móvil y sus capturas muestran un campo compacto con información principal superpuesta y carta inspeccionada ampliada.
+
+**Qué aporta de verdad:**
+
+- el diseño móvil necesita un **breakpoint**, no simplemente multiplicar todas las medidas por un factor menor;
+- la carta inspeccionada puede ocupar temporalmente más espacio que el tablero sin cambiar la geometría permanente;
+- utilidades y menús pueden plegarse fuera del área de duelo.
+
+**Adaptación propia:** la primera versión de escritorio no debe bloquear un futuro modo móvil. La unidad `U` escala hasta un mínimo legible; por debajo de ese mínimo se cambia a composición móvil: lateral contextual pasa a overlay, montones auxiliares se agrupan y la mano usa solape mayor. Las cinco criaturas y cinco apoyos siguen siendo nuestras reglas y no se reducen a las zonas de Duel Links.
+
+Fuentes oficiales: `https://www.konami.com/yugioh/duel_links/en/game/` y `https://www.konami.com/yugioh/duel_links/en/guide/`.
+
+### 14. Pokémon TCG Pocket — ayuda contextual y aprendizaje en el propio cliente
+
+La documentación oficial de Pokémon TCG Pocket remite a guías de batalla dentro de la aplicación y a botones de ayuda `?` disponibles en distintas pantallas. Su aportación útil aquí no es copiar su campo, sino evitar que las reglas poco frecuentes obliguen a llenar la mesa de instrucciones permanentes.
+
+**Qué aporta de verdad:**
+
+- ayuda bajo demanda en el contexto donde aparece la duda;
+- tutorial guiado separado de la interfaz de partida normal;
+- explicación avanzada disponible sin convertir cada turno en un tutorial.
+
+**Adaptación propia:** en el greybox no habrá carteles permanentes explicando cada tipo de carta. Un icono discreto de ayuda o tooltip contextual puede explicar Fusión, prioridad, Terreno o una decisión rara. El primer uso de una mecánica puede enseñar una ayuda breve y después desaparecer.
+
+Fuentes oficiales: `https://support.pokemon.com/hc/en-us/articles/30330309361172-Pok%C3%A9mon-TCG-Pocket-Gameplay-FAQ` y `https://www.pokemon.com/es/estrategia/como-desbloquear-las-partidas-en-jcc-pokemon-pocket`.
+
+## Matriz: qué referencia gana cada problema
+
+La intención no es mezclar estilos enteros. Para cada problema se elige un referente principal y, como máximo, uno secundario.
+
+| Problema nuestro | Referente principal | Secundario | Síntesis para JCP |
+| --- | --- | --- | --- |
+| geometría 5 criaturas + 5 apoyos | Yu-Gi-Oh! | Shadowverse: Evolve | dos filas permanentes y zonas auxiliares claras |
+| proporción de carta | estándar occidental 63:88 | Yu-Gi-Oh! como contraste | 63:88 por mayor anchura útil |
+| carta jugable ahora | Shadowverse | Hearthstone | halo suave + interacción habilitada |
+| inspección de carta | MTG Arena | Duel Links | preview grande bajo demanda |
+| atacante → objetivo | Hearthstone | MTG Arena | selección por clic/tap + flecha/relación visual temporal |
+| prioridad y cadena | Legends of Runeterra | Flesh and Blood | mini-cadena temporal + quién decide + Pasar |
+| previsión de consecuencias | Legends of Runeterra | deckbuilders solo como referencia secundaria | `si se resolviera ahora`, solo con información pública |
+| equipo vinculado | Pokémon TCG | Flesh and Blood | pestañas/miniaturas físicamente unidas al portador |
+| identidad de Fusión y materiales | Disney Lorcana como analogía visual | solución propia | una entidad activa + materiales inspeccionables |
+| turno/energía/fin de turno | Marvel Snap | Shadowverse/Hearthstone | widget estable, grande y sin panel administrativo |
+| mano con muchas cartas | GWENT | MTG Arena | reducir separación → solape → reducir escala |
+| móvil | Duel Links | MTG Arena / TCG Pocket | breakpoint real, no simple escalado |
+| ayuda/tutorial | Pokémon TCG Pocket | Duel Links | ayuda contextual y tutorial separado de partida normal |
+| historial/debug | solución propia | — | oculto/plegado salvo necesidad |
+
+## Incompatibilidades: cosas buenas que NO deben mezclarse literalmente
+
+Este apartado evita que “coger lo mejor de todos” termine produciendo una interfaz sobrecargada.
+
+### Orientación reservada exclusivamente a Ataque/Guardia
+
+Lorcana y otros juegos usan girar la carta para indicar que está usada. Nosotros **no podemos reutilizar esa señal**, porque horizontal ya significa Guardia. Por tanto:
+
+- vertical = Ataque;
+- horizontal = Guardia;
+- ataque consumido/acción usada = icono pequeño, marca o atenuación, nunca otra rotación.
+
+### Clic/tap es la interacción canónica; arrastrar es opcional
+
+Obligar a drag complica móvil, mando y accesibilidad. La regla de interfaz será:
+
+`seleccionar carta → mostrar destinos → seleccionar destino`.
+
+Un drag futuro puede ser atajo, nunca la única forma de jugar. La flecha de apuntado es feedback visual, no requisito mecánico.
+
+### Un estado no necesita cinco efectos simultáneos
+
+Cada estado debe usar **una señal primaria y una secundaria**. Ejemplo: selección = elevación + borde; destino legal = borde + pulso leve. No combinar brillo, cambio de color, texto, animación, icono y sonido para comunicar lo mismo.
+
+### La mini-cadena solo existe mientras hay algo pendiente
+
+No habrá una “zona de cadena” vacía ocupando el centro todo el tiempo. Aparece con `pending_response`, desaparece al resolver y el historial conserva después el resultado.
+
+### Preview grande no significa lateral grande permanente
+
+En escritorio el lateral puede contener el preview; en móvil será overlay. El campo no se estrecha permanentemente para reservar una ficha gigante que muchas veces está vacía.
+
+### La ayuda no sustituye una interfaz clara
+
+Tooltips y tutorial explican excepciones; no se usarán para justificar botones ambiguos o estados que deberían entenderse visualmente.
+
+## Viabilidad geométrica de la unidad `U`
+
+La orientación de Guardia introduce un detalle importante: una carta horizontal ocupa más ancho que una carta vertical. Por eso una **casilla de criatura** no debe medir solo `1 U` de ancho.
+
+Con proporción 63:88:
+
+- carta vertical = `1 U × 1,397 U`;
+- carta horizontal = `1,397 U × 1 U`;
+- envolvente mínima de una casilla de criatura = aproximadamente `1,397 U × 1,397 U`;
+- la carta se centra dentro de esa envolvente y puede rotar sin invadir la casilla vecina.
+
+Para cinco columnas y separación aproximada de `0,15 U`:
+
+`5 × 1,397 U + 4 × 0,15 U = 7,585 U`.
+
+Con `U = 72 px`, el núcleo de cinco columnas ocupa aproximadamente **546 px**. Añadiendo dos zonas laterales compactas de unos `0,85 U` y sus márgenes, el bloque funcional ronda **700–720 px**, por lo que cabe con holgura en una región de tablero de 1600×900 incluso reservando lateral contextual.
+
+En vertical, con cuatro filas de campo, dos manos, dos HUD y la banda de fase, el presupuesto aproximado permanece por debajo de 900 px a `U = 72`, dejando margen para separaciones. Por tanto, la escala candidata no nace solo de “que se vea bien”: **es geométricamente compatible con las diez casillas por lado y con Guardia horizontal**.
+
+### Escalado de escritorio candidato
+
+Para 16:9 se puede tomar como primera aproximación:
+
+`U ≈ alto_del_viewport / 12,5`.
+
+Esto da:
+
+- 1280×720 → `U ≈ 58 px`;
+- 1600×900 → `U = 72 px`;
+- 1920×1080 → `U ≈ 86 px`.
+
+La anchura debe actuar también como límite, pero en 16:9 el alto será normalmente la restricción principal. Esta fórmula es de diseño, no se considera todavía API cerrada de código.
+
+## Síntesis V0.2 de alta confianza
+
+Después de las dos pasadas, estas piezas ya tienen suficiente respaldo cruzado como para tratarlas como **base preferida**, aunque el documento sigue abierto hasta trasladarlas al contrato del greybox:
+
+1. carta 63:88 y tamaños derivados de `U`;
+2. casilla de criatura con envolvente cuadrada suficiente para vertical/horizontal sin cambiar escala;
+3. cinco criaturas + cinco apoyos fijos y simétricos;
+4. clic/tap como interacción canónica; drag solo como posible atajo futuro;
+5. cartas jugables resaltadas suavemente antes de seleccionarlas;
+6. carta seleccionada elevada + preview contextual;
+7. destinos legales visibles sobre el propio tablero;
+8. flecha/relación visual temporal para ataques y efectos dirigidos;
+9. equipo unido físicamente a su portador;
+10. Fusión mostrada como una entidad activa con materiales inspeccionables;
+11. respuesta/prioridad en mini-cadena temporal, no en lista administrativa;
+12. previsión pública `si se resolviera ahora` solo cuando UCE pueda calcularla sin información privada;
+13. fase, turno, Vida, Energía y fin de turno como información persistente de primer nivel;
+14. mano densa mediante separación menor y solape antes de reducir tamaño;
+15. breakpoint móvil real en vez de encoger toda la interfaz;
+16. tutorial/ayuda contextual separados de la partida normal;
+17. historial y debug plegados y subordinados.
+
+## Preguntas que todavía deben cerrarse antes de modificar el greybox
+
+No son dudas sobre la dirección general; son parámetros que conviene fijar una sola vez:
+
+- ancho exacto del lateral contextual en unidades `U` y cuándo pasa a overlay;
+- umbrales de número de cartas para empezar solape de mano y para cambiar de escala;
+- si la previsión `si se resolviera ahora` aparece siempre al elegir objetivo o solo al mantener/inspeccionar;
+- forma final de la mini-cadena: horizontal sobre el eje o pila compacta lateral al combate;
+- vocabulario/iconos propios para Magia instantánea, persistente, Trampa, Equipo, Terreno y Fusión.
+
+Estas decisiones pueden tomarse en el siguiente corte documental sin necesidad de tocar todavía el motor ni el código visual.
+
+## Fuentes añadidas en la segunda pasada
+
+- Blizzard — Hearthstone 32.0 Patch Notes: cartas jugables con brillo verde y estado visual del botón de fin de turno.
+- Blizzard — Hearthstone Closed Beta Patch Notes: flecha de apuntado del oponente.
+- CD PROJEKT RED — *Guía de GWENT para principiantes* y galería oficial de medios.
+- Konami — *Yu-Gi-Oh! Duel Links Introduction* y *Beginner's Guide*.
+- The Pokémon Company — *Pokémon TCG Pocket Gameplay FAQ* y guía oficial de desbloqueo/aprendizaje de batallas.
+
+La segunda pasada refuerza el cuaderno pero **no cambia reglas del duelo ni autoriza todavía cambios de código**. El siguiente paso sigue siendo cerrar los pocos parámetros abiertos, trasladar la síntesis al contrato del greybox y entonces implementar una sola base coherente.
