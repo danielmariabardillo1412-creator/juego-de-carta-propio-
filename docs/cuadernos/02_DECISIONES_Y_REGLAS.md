@@ -335,3 +335,11 @@ Antes de congelar el estándar del greybox, el benchmark comercial se contrasta 
 Se excluyen como requisito de esta fase cinemáticas 3D, monstruos animados que salen de la carta y VFX complejos. Sí se consideran de alto valor: efectos activos con fuente/duración, texto de carta estructurado, usos restantes visibles, reducción de clics sin decisión real, inspección del tablero durante decisiones y un punto de commit claro que permita cancelar selección antes de `perform_action()` pero no rebobinar acciones resueltas.
 
 La idea comunitaria `¿por qué no puedo?` se acepta como **dirección futura**, no como código inmediato: si se implementa, la explicación deberá proceder de UCE o de los mismos códigos de validación, nunca de una segunda copia de reglas en la interfaz. Ninguna sugerencia comunitaria altera por sí sola las reglas del duelo.
+
+### JCP-DEC-043 — Mesa primero; QoL comunitario después — vigente para prototipo
+
+La investigación de comunidad queda **conservada pero fuera del alcance inmediato**. La prioridad vuelve a ser cerrar la mesa/greybox: proporciones, unidad `U`, geometría de las casillas, distribución de mano/campo/HUD, zonas auxiliares, preview/lateral y señales mínimas de selección y destino necesarias para jugar.
+
+Hasta que esa mesa representativa supere parser/runtime, pruebas proporcionales, captura real y una primera sesión humana, no se abrirán fases de implementación para `EFECTOS ACTIVOS`, `¿por qué no puedo?`, tooltips avanzados, contadores de QoL, historial enriquecido ni otras mejoras derivadas de foros. Esas ideas permanecen documentadas en `CUADERNO_BENCHMARK_COMUNIDAD_Y_FOROS_V0_1.md` para recuperarlas después sin repetir investigación.
+
+Esta decisión no invalida JCP-DEC-042: conserva su filtro de viabilidad y arquitectura. Solo cambia el **orden de trabajo** para evitar intentar construir mesa, onboarding, ayudas y calidad de vida simultáneamente.
