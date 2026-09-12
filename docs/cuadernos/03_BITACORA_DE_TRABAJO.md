@@ -1,5 +1,17 @@
 # Cuaderno 3 — Bitácora de trabajo
 
+## 2026-09-12 — Benchmark comunitario y foros de UX
+
+- El diseñador pidió ampliar el benchmark con feedback de jugadores reales, buscando mejoras de interfaz y calidad de vida que un proyecto pequeño pueda implementar. Se excluyen como requisito de esta fase las peticiones de grandes animaciones 3D, monstruos que salgan de la carta, escenarios reconstruidos por VFX o producción equivalente a un equipo de animación.
+- Se revisaron discusiones de Reddit, Steam Community y BoardGameGeek alrededor de Master Duel, Hearthstone, MTG Arena y deckbuilders digitales, priorizando patrones repetidos sobre comentarios aislados.
+- Se creó `docs/diseno/CUADERNO_BENCHMARK_COMUNIDAD_Y_FOROS_V0_1.md` y se registró JCP-DEC-042. El documento clasifica cada idea por valor, coste técnico y fase recomendada.
+- Las propuestas comunitarias de mejor relación valor/trabajo son: consultar efectos activos con fuente y duración; texto de carta estructurado y cláusula actual resaltada; usos restantes visibles; menos ventanas cuando no hay una elección real; poder inspeccionar el tablero durante una decisión; y cancelar/reseleccionar libremente antes del punto de commit.
+- La propuesta `¿por qué no puedo?` se conserva como dirección de alto valor, pero no se implementará copiando reglas en la UI: requerirá una consulta no mutante de UCE o reutilizar los mismos códigos de validación del motor.
+- Se reafirma que una acción puede corregirse mientras solo existe selección local; después de enviarse a `UniversalCardEngine.perform_action()` no se ofrece undo ordinario, porque podría romper privacidad, replay, determinismo y futuro multijugador.
+- Las animaciones futuras se plantean como feedback 2D corto, opcional y prescindible para entender la regla. Se reserva desde el diseño una opción de reducción de movimiento/velocidad, sin depender de cinemáticas.
+- La segunda pasada del benchmark comercial añadió además Hearthstone, GWENT, Duel Links y Pokémon TCG Pocket, y corrigió la geometría de la casilla de criatura para que una carta 63:88 pueda rotar a Guardia sin invadir la vecina.
+- No se modificó código, motor, catálogo, reglas, replay ni persistencia. No corresponde ejecutar ni atribuir nuevos resultados runtime; el último PASS cerrado continúa siendo el del 2026-09-11.
+
 ## 2026-09-12 — Cuaderno de benchmark de interfaces TCG
 
 - Antes de seguir afinando la mesa por ensayo visual, el diseñador pidió reunir primero en un único cuaderno las soluciones maduras de otros juegos de cartas y usar esa base para evitar decenas de correcciones ya resueltas por la industria.
