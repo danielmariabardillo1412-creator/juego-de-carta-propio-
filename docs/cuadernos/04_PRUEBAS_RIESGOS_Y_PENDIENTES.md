@@ -2,36 +2,43 @@
 
 Última ejecución completa: **2026-09-11 — PASS**
 
-## Fase visual abierta 2026-09-12 — PENDIENTE DE VERIFICACIÓN
+## Fase visual abierta 2026-09-12 — PENDIENTE DE CONSOLIDACIÓN Y VERIFICACIÓN
 
 - Rama: `chatgpt/greybox-ui-v1`.
 - La escena `demo/juego_cartas_table.tscn` apunta en esta rama a `demo/juego_cartas_table_greybox.gd`, que hereda la mesa funcional anterior y cambia únicamente presentación y jerarquía visual.
 - Se añadió `demo/duel_table_backdrop_greybox.gd` y el contrato `docs/diseno/GREYBOX_INTERFAZ_FINAL_V0_1.md`.
+- Antes de seguir puliendo esa implementación por ensayo visual se creó `docs/diseno/CUADERNO_BENCHMARK_INTERFAZ_TCG_V0_1.md`. El greybox escrito queda considerado **andamio provisional** hasta consolidar las medidas, estados e interacciones que se acepten de ese benchmark.
+- El benchmark no se limita a Yu-Gi-Oh!/Magic: compara también Legends of Runeterra, Shadowverse, Pokémon TCG, Marvel Snap, Flesh and Blood, Disney Lorcana, Shadowverse: Evolve y Eternal, con referencias adicionales reservadas para una segunda pasada si aportan una solución mejor.
 - `UniversalCardEngine`, `juego_cartas_propio_module.gd`, catálogo, reglas, replay y persistencia no se han modificado.
-- Los resultados PASS del 2026-09-11 siguen siendo la última autoridad cerrada del motor y de la mesa anterior; **no se atribuyen al greybox V0.1**.
+- Los resultados PASS del 2026-09-11 siguen siendo la última autoridad cerrada del motor y de la mesa anterior; **no se atribuyen al greybox V0.1 ni al benchmark documental**.
 - Esta conexión no dispone del Godot 4.7 local del proyecto ni de ejecución gráfica del PC, por lo que todavía no existe una captura runtime revisada de esta versión.
 
 Puertas mínimas antes de cerrar la fase:
 
-1. cargar `demo/juego_cartas_table.tscn` en Godot 4.7 sin error de parser/runtime;
-2. `run_juego_cartas_propio_manual_table.gd`;
-3. `run_juego_cartas_propio_table_attack_flow.gd`;
-4. `run_juego_cartas_propio_basic_ai.gd`;
-5. vertical de criaturas 38/38 y vertical de ocho Fusiones 82/82 como regresión proporcional de interacción;
-6. captura gráfica de la mesa —preferentemente 1600×900— y revisión humana de jerarquía, proporciones, mano, campo, lateral, fases y destinos legales;
-7. si la captura revela problemas estructurales, corregir el greybox y repetir las puertas afectadas antes de iniciar una partida humana completa.
+1. consolidar el benchmark en un estándar de interfaz: proporción de carta, unidad `U`, tamaños relativos, gramática de estados, mano/campo/HUD, respuesta/cadena, equipo, Terreno y Fusión;
+2. trasladar únicamente la síntesis aceptada a `GREYBOX_INTERFAZ_FINAL_V0_1.md` y adaptar el andamio de código a ese estándar;
+3. cargar `demo/juego_cartas_table.tscn` en Godot 4.7 sin error de parser/runtime;
+4. `run_juego_cartas_propio_manual_table.gd`;
+5. `run_juego_cartas_propio_table_attack_flow.gd`;
+6. `run_juego_cartas_propio_basic_ai.gd`;
+7. vertical de criaturas 38/38 y vertical de ocho Fusiones 82/82 como regresión proporcional de interacción;
+8. captura gráfica de la mesa —preferentemente 1600×900— y revisión humana de jerarquía, proporciones, mano, campo, lateral, fases y destinos legales;
+9. si la captura revela problemas estructurales, corregirlos con el estándar como autoridad y repetir las puertas afectadas antes de iniciar una partida humana completa.
 
 ## Cola vigente desde 2026-09-12
 
-Esta cola sustituye temporalmente el orden anterior que empezaba directamente por una partida humana completa.
+Esta cola sustituye temporalmente el orden anterior que empezaba directamente por una partida humana completa o por pulir el primer greybox a ojo.
 
-1. Verificar parser/runtime y pruebas proporcionales del greybox V0.1.
-2. Abrir la escena gráficamente, obtener una captura real y revisar si representa suficientemente la futura experiencia sin arte definitivo.
-3. Corregir solo problemas estructurales reproducibles del greybox hasta que tablero, cartas, HUD y lateral tengan la jerarquía aprobada.
-4. Solo entonces realizar una sesión humana completa y registrar problemas observables de comodidad, claridad y ritmo.
-5. Mantener las pruebas verticales de criaturas y de las ocho Fusiones como puertas al tocar interacción, combate o catálogo.
-6. Recoger en partidas los indicadores definidos por la auditoría métrica de F001/F067 antes de ajustar cifras.
-7. Después: alcance mínimo del narrador/locutor, prueba pequeña de efectos latentes, bots específicos, red, arte definitivo e integración con Zapity.
+1. Revisar y completar `CUADERNO_BENCHMARK_INTERFAZ_TCG_V0_1.md`; añadir una referencia solo si aporta una solución concreta mejor.
+2. Convertir la síntesis aceptada en un estándar de interfaz con proporciones y estados cerrados, evitando números aislados sin relación entre sí.
+3. Actualizar `GREYBOX_INTERFAZ_FINAL_V0_1.md` y adaptar el andamio actual a ese estándar.
+4. Verificar parser/runtime y pruebas proporcionales del greybox consolidado.
+5. Abrir la escena gráficamente, obtener una captura real y revisar si representa suficientemente la futura experiencia sin arte definitivo.
+6. Corregir solo problemas estructurales reproducibles; no volver al diseño por retoques arbitrarios.
+7. Solo entonces realizar una sesión humana completa y registrar problemas observables de comodidad, claridad y ritmo.
+8. Mantener las pruebas verticales de criaturas y de las ocho Fusiones como puertas al tocar interacción, combate o catálogo.
+9. Recoger en partidas los indicadores definidos por la auditoría métrica de F001/F067 antes de ajustar cifras.
+10. Después: alcance mínimo del narrador/locutor, prueba pequeña de efectos latentes, bots específicos, red, arte definitivo e integración con Zapity.
 
 ## Ejecución larga completada — PASS
 
@@ -128,6 +135,8 @@ Resultado vigente:
 30. La matriz de trazabilidad cubre las decisiones cerradas del núcleo S01, pero no convierte sus apartados abiertos en requisitos implementables. Toda ampliación deberá conservar esa separación.
 31. El greybox V0.1 hereda una mesa grande y sobreescribe construcción visual; cualquier incompatibilidad de herencia, acceso a miembros o llamada `super` debe detectarse en Godot antes de considerarlo una base válida.
 32. Una interfaz visualmente más limpia no puede ocultar decisiones obligatorias, prioridad, privacidad ni destinos legales. La reducción de texto es solo de presentación; las mismas acciones deben seguir siendo alcanzables y verificables.
+33. El benchmark debe reutilizar **principios funcionales**, no la identidad de un producto. Copiar marcos, iconos distintivos, ornamentación, composición reconocible o assets ajenos convertiría una referencia legítima en una dependencia visual que no se desea.
+34. Si las medidas vuelven a fijarse como números de píxeles independientes, reaparecerán incoherencias entre mano, campo, guardia, preview y resoluciones. La siguiente implementación debe derivarlas de la proporción de carta y de una unidad común `U`, con excepciones explícitas y justificadas.
 
 ## Cola ordenada — histórica hasta 2026-09-11
 
