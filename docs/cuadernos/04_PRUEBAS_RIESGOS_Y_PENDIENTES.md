@@ -2,6 +2,37 @@
 
 Última ejecución completa: **2026-09-11 — PASS**
 
+## Fase visual abierta 2026-09-12 — PENDIENTE DE VERIFICACIÓN
+
+- Rama: `chatgpt/greybox-ui-v1`.
+- La escena `demo/juego_cartas_table.tscn` apunta en esta rama a `demo/juego_cartas_table_greybox.gd`, que hereda la mesa funcional anterior y cambia únicamente presentación y jerarquía visual.
+- Se añadió `demo/duel_table_backdrop_greybox.gd` y el contrato `docs/diseno/GREYBOX_INTERFAZ_FINAL_V0_1.md`.
+- `UniversalCardEngine`, `juego_cartas_propio_module.gd`, catálogo, reglas, replay y persistencia no se han modificado.
+- Los resultados PASS del 2026-09-11 siguen siendo la última autoridad cerrada del motor y de la mesa anterior; **no se atribuyen al greybox V0.1**.
+- Esta conexión no dispone del Godot 4.7 local del proyecto ni de ejecución gráfica del PC, por lo que todavía no existe una captura runtime revisada de esta versión.
+
+Puertas mínimas antes de cerrar la fase:
+
+1. cargar `demo/juego_cartas_table.tscn` en Godot 4.7 sin error de parser/runtime;
+2. `run_juego_cartas_propio_manual_table.gd`;
+3. `run_juego_cartas_propio_table_attack_flow.gd`;
+4. `run_juego_cartas_propio_basic_ai.gd`;
+5. vertical de criaturas 38/38 y vertical de ocho Fusiones 82/82 como regresión proporcional de interacción;
+6. captura gráfica de la mesa —preferentemente 1600×900— y revisión humana de jerarquía, proporciones, mano, campo, lateral, fases y destinos legales;
+7. si la captura revela problemas estructurales, corregir el greybox y repetir las puertas afectadas antes de iniciar una partida humana completa.
+
+## Cola vigente desde 2026-09-12
+
+Esta cola sustituye temporalmente el orden anterior que empezaba directamente por una partida humana completa.
+
+1. Verificar parser/runtime y pruebas proporcionales del greybox V0.1.
+2. Abrir la escena gráficamente, obtener una captura real y revisar si representa suficientemente la futura experiencia sin arte definitivo.
+3. Corregir solo problemas estructurales reproducibles del greybox hasta que tablero, cartas, HUD y lateral tengan la jerarquía aprobada.
+4. Solo entonces realizar una sesión humana completa y registrar problemas observables de comodidad, claridad y ritmo.
+5. Mantener las pruebas verticales de criaturas y de las ocho Fusiones como puertas al tocar interacción, combate o catálogo.
+6. Recoger en partidas los indicadores definidos por la auditoría métrica de F001/F067 antes de ajustar cifras.
+7. Después: alcance mínimo del narrador/locutor, prueba pequeña de efectos latentes, bots específicos, red, arte definitivo e integración con Zapity.
+
 ## Ejecución larga completada — PASS
 
 - Run id: `long_20260911_073150`; estado e informe final persistentes en `diagnostic_logs/`.
@@ -91,12 +122,14 @@ Resultado vigente:
 24. F018 guarda el turno global de su regeneración. Su paso forzado a guardia no activa reglas de cambio voluntario y T06 puede destruirlo después; cualquier nueva prevención debe distinguir destrucción de combate de destrucción por efecto.
 25. La mesa mantiene privada la identidad inspeccionada por M12; cualquier presentación futura debe conservar que el evento público solo indica que hubo inspección.
 26. M13 introduce una decisión obligatoria del defensor antes de las respuestas ordinarias. Interfaz y bots deben ofrecer aceptar o rechazar y, si se redirige, reconstruir las opciones de trampa contra el nuevo objetivo.
-27. La primera prueba humana detectó que la antigua lista no comunicaba una mesa. El flujo visual aprobado ya resuelve fases administrativas, acciones duplicadas, casillas equivalentes, historial y fin rápido; sigue pendiente una partida humana completa sobre esta revisión para medir claridad real.
+27. La primera prueba humana detectó que la antigua lista no comunicaba una mesa. El flujo visual aprobado ya resuelve fases administrativas, acciones duplicadas, casillas equivalentes, historial y fin rápido; sigue pendiente una partida humana completa sobre una interfaz representativa para medir claridad real.
 28. La derrota por baraja agotada está cerrada y probada mediante un recorrido largo. Las futuras cartas que eviten, sustituyan o castiguen el robo deberán declarar expresamente si alteran este desenlace.
 29. Ataque inmediato no significa entrada universal sin restricciones: solo la invocación normal boca arriba lo permite. El primer turno inicial, la colocación oculta y la Fusión recién formada conservan sus prohibiciones específicas.
 30. La matriz de trazabilidad cubre las decisiones cerradas del núcleo S01, pero no convierte sus apartados abiertos en requisitos implementables. Toda ampliación deberá conservar esa separación.
+31. El greybox V0.1 hereda una mesa grande y sobreescribe construcción visual; cualquier incompatibilidad de herencia, acceso a miembros o llamada `super` debe detectarse en Godot antes de considerarlo una base válida.
+32. Una interfaz visualmente más limpia no puede ocultar decisiones obligatorias, prioridad, privacidad ni destinos legales. La reducción de texto es solo de presentación; las mismas acciones deben seguir siendo alcanzables y verificables.
 
-## Cola ordenada
+## Cola ordenada — histórica hasta 2026-09-11
 
 1. Realizar una sesión humana completa con `FLUJO_DE_PARTIDA_E_INTERACCION_V0_1.md` ya implementado y registrar problemas observables de comodidad, claridad o ritmo.
 2. Corregir únicamente los problemas reproducibles de esa sesión antes de ampliar arte o contenido.
@@ -167,7 +200,7 @@ Resultado vigente:
 - Catálogo de Fusión 59/59; acción 70/70; efectos de combate 131/131; vertical de ocho Fusiones 82/82.
 - Nueve suites UCE: 441/441; diagnóstico 15/15; experimento integral 80/80; escena principal headless PASS.
 - Auditoría estática: 22.462 comprobaciones sobre 87 archivos GDScript, cero fallos. Fuentes locales: 6/6; S01 y S03 sin cambios en Drive.
-- Integridad histórica: 100 archivos comprobados, cero ausentes, siete diferencias conocidas y cero errores. No se regeneró el manifiesto.
+- Integridad histórica: 100 archivos comprobados, cero ausentes y siete diferencias conocidas; no se regeneró el manifiesto.
 
 ## Ejecución completa 0.20.0 y octava Fusión — 2026-09-10
 
@@ -248,7 +281,8 @@ Resultado vigente:
 - Dieciocho suites específicas: 973/973.
 - Prueba vertical de las tres Fusiones: 21/21, con replay exacto del snapshot runtime.
 - Nueve suites generales: 441/441.
-- Diagnóstico: 15/15; experimento integral: 80/80; escena principal headless: PASS.
+- Diagnóstico: 15/15.
+- Experimento integral: 80/80; escena principal headless: PASS.
 - Auditoría estática: 20.120 comprobaciones sobre 84 archivos GDScript, cero fallos.
 - Godot: 4.7.stable.official.5b4e0cb0f desde `C:/Godot/4.7`.
 
