@@ -319,3 +319,11 @@ El tablero y las cartas dominan visualmente; la mano propia permanece abajo y la
 Esta decisión **no cambia ninguna regla del duelo**. La interfaz continúa consumiendo únicamente vistas, eventos filtrados y acciones legales de `UniversalCardEngine`; no puede calcular reglas por su cuenta ni acceder al estado privado bruto. Las herramientas de diagnóstico y modo local 2P pueden permanecer disponibles, pero no deben dirigir la lectura normal de la partida.
 
 El contrato completo está en `docs/diseno/GREYBOX_INTERFAZ_FINAL_V0_1.md`. La fase no se considera cerrada por estar escrita: necesita parser/runtime en Godot 4.7, puertas proporcionales de interfaz e inspección de una captura real por el diseñador antes de iniciar la sesión humana completa.
+
+### JCP-DEC-041 — Benchmark modular antes de fijar medidas del greybox — vigente para prototipo
+
+Antes de seguir afinando el greybox por ensayo visual, se documenta un benchmark de varios juegos de cartas digitales y físicos en `docs/diseno/CUADERNO_BENCHMARK_INTERFAZ_TCG_V0_1.md`. Yu-Gi-Oh! y Magic son referencias importantes, pero no exclusivas: también se estudian Legends of Runeterra, Shadowverse, Pokémon TCG, Marvel Snap, Flesh and Blood, Disney Lorcana, Shadowverse: Evolve y Eternal, y se dejan otras referencias en reserva.
+
+El método es **modular**: cada producto se usa solo para el problema que resuelve especialmente bien —campo, orientación, mano, objetivos, prioridad, cadena, adjuntos, Fusión/identidades apiladas, turno o legibilidad—. No se copiará una interfaz completa ni su identidad visual. La siguiente revisión del greybox debe derivar tamaños y espaciados de una unidad de carta común, conservar las reglas propias y adoptar únicamente patrones funcionales aceptados.
+
+Como candidatos de trabajo, no como reglas de duelo, quedan registrados: relación de carta 63:88; resaltado de cartas jugables; selección carta→destino; equipo visualmente unido al portador; mini-cadena temporal para respuestas; preview de carta bajo demanda; fase/energía/fin de turno de lectura inmediata; y una posible previsión `si se resolviera ahora` calculada solo con información pública y por la autoridad del motor. La implementación visual V0.1 ya escrita se considera un **andamio provisional** hasta contrastarla con esta base.
