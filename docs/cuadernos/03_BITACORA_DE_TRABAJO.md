@@ -1,5 +1,13 @@
 # Cuaderno 3 — Bitácora de trabajo
 
+## 2026-09-12 — Prioridad reordenada: mesa primero
+
+- Tras completar la investigación comercial y comunitaria de interfaz, el diseñador decidió no intentar implementar todas las mejoras de UX al mismo tiempo.
+- El benchmark de foros se conserva íntegro como material futuro, pero deja de ser requisito para cerrar el greybox actual.
+- Se registra JCP-DEC-043: primero se consolidará la mesa —proporciones, unidad `U`, Ataque/Guardia, manos, HUD, zonas auxiliares, preview/lateral y señales mínimas de selección/destino—; después se validará en Godot y con una partida humana representativa.
+- `EFECTOS ACTIVOS`, `¿por qué no puedo?`, tooltips avanzados, contadores de QoL, historial enriquecido y demás ideas comunitarias quedan aparcadas hasta que la mesa esté estable. No se pierden ni se descartan; simplemente cambian de orden.
+- No se modificó código, motor, reglas, catálogo, replay ni persistencia en este ajuste de prioridad. El último PASS cerrado sigue siendo el del 2026-09-11.
+
 ## 2026-09-12 — Benchmark comunitario y foros de UX
 
 - El diseñador pidió ampliar el benchmark con feedback de jugadores reales, buscando mejoras de interfaz y calidad de vida que un proyecto pequeño pueda implementar. Se excluyen como requisito de esta fase las peticiones de grandes animaciones 3D, monstruos que salgan de la carta, escenarios reconstruidos por VFX o producción equivalente a un equipo de animación.
