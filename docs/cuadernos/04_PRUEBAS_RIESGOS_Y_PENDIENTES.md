@@ -2,53 +2,53 @@
 
 Última ejecución completa: **2026-09-11 — PASS**
 
-## Fase visual abierta 2026-09-12 — PENDIENTE DE CONSOLIDACIÓN Y VERIFICACIÓN
+## Fase visual abierta 2026-09-12 — ESTÁNDAR MÉTRICO ESCRITO, RUNTIME PENDIENTE
 
 - Rama: `chatgpt/greybox-ui-v1`.
 - La escena `demo/juego_cartas_table.tscn` apunta en esta rama a `demo/juego_cartas_table_greybox.gd`, que hereda la mesa funcional anterior y cambia únicamente presentación y jerarquía visual.
 - Se añadió `demo/duel_table_backdrop_greybox.gd` y el contrato `docs/diseno/GREYBOX_INTERFAZ_FINAL_V0_1.md`.
-- Antes de seguir puliendo esa implementación por ensayo visual se creó `docs/diseno/CUADERNO_BENCHMARK_INTERFAZ_TCG_V0_1.md`. El greybox escrito queda considerado **andamio provisional** hasta consolidar las medidas, estados e interacciones que se acepten de ese benchmark.
 - El benchmark comercial cubre Yu-Gi-Oh!/Master Duel, MTG Arena, Legends of Runeterra, Shadowverse, Pokémon TCG, Marvel Snap, Flesh and Blood, Disney Lorcana, Shadowverse: Evolve, Eternal, Hearthstone, GWENT, Duel Links y Pokémon TCG Pocket. Las referencias se usan por problema concreto y no como una interfaz a copiar.
 - `docs/diseno/CUADERNO_BENCHMARK_COMUNIDAD_Y_FOROS_V0_1.md` conserva feedback de jugadores sobre UX/QoL, pero por JCP-DEC-043 queda **aparcado** hasta estabilizar la mesa. No es puerta de cierre del greybox actual.
-- La prioridad inmediata es mesa: proporción de carta, unidad `U`, envolvente Ataque/Guardia, manos, HUD, zonas auxiliares, preview/lateral y señales mínimas de selección/destinos.
-- `UniversalCardEngine`, `juego_cartas_propio_module.gd`, catálogo, reglas, replay y persistencia no se han modificado durante esta investigación.
-- Los resultados PASS del 2026-09-11 siguen siendo la última autoridad cerrada del motor y de la mesa anterior; **no se atribuyen al greybox V0.1 ni a los benchmarks documentales**.
-- Esta conexión no dispone del Godot 4.7 local del proyecto ni de ejecución gráfica del PC, por lo que todavía no existe una captura runtime revisada de esta versión.
+- JCP-DEC-044 fija ya la primera métrica de mesa: carta 63:88, `U=72` a 1600×900, campo 72×101, Guardia 101×72, envolvente 101×101, gap 11, fila 105, mano 86×120, preview 180×251, zonas laterales 60×90, HUD 33 y rail 274.
+- `demo/card_tile.gd` y `demo/juego_cartas_table_greybox.gd` están adaptados a ese estándar. La mano usa pasos 94/76/60/48 px según densidad y conserva el mismo tamaño de carta para ambos jugadores.
+- S00 y S01 no muestran en Drive una modificación posterior a las fechas del manifiesto durante este corte. No se ha cambiado ninguna regla del duelo.
+- `UniversalCardEngine`, `juego_cartas_propio_module.gd`, catálogo, reglas, replay y persistencia no se han modificado.
+- Los resultados PASS del 2026-09-11 siguen siendo la última autoridad cerrada del motor y de la mesa anterior; **no se atribuyen al greybox métrico**.
+- Esta conexión no dispone del Godot 4.7 local del proyecto ni de ejecución gráfica del PC, por lo que todavía no existe una captura runtime revisada de esta versión. Tampoco se ha regenerado el acceso directo local.
 
 Puertas mínimas antes de cerrar la fase:
 
-1. cerrar el estándar **de la mesa** usando reglas propias + benchmark comercial: proporción 63:88, unidad `U`, tamaños relativos, envolvente de guardia, mano/campo/HUD, zonas auxiliares, lateral/preview y señales mínimas de selección/destino;
-2. trasladar esa síntesis a `GREYBOX_INTERFAZ_FINAL_V0_1.md` y adaptar el andamio de código sin introducir todavía la capa comunitaria de QoL;
-3. cargar `demo/juego_cartas_table.tscn` en Godot 4.7 sin error de parser/runtime;
-4. `run_juego_cartas_propio_manual_table.gd`;
-5. `run_juego_cartas_propio_table_attack_flow.gd`;
-6. `run_juego_cartas_propio_basic_ai.gd`;
-7. vertical de criaturas 38/38 y vertical de ocho Fusiones 82/82 como regresión proporcional de interacción;
-8. captura gráfica de la mesa —preferentemente 1600×900— y revisión humana de jerarquía, proporciones, mano, campo, lateral, fases y destinos legales;
-9. corregir problemas estructurales reproducibles de la mesa y repetir las puertas afectadas;
-10. realizar la primera sesión humana completa sobre la mesa representativa;
-11. solo después reabrir `CUADERNO_BENCHMARK_COMUNIDAD_Y_FOROS_V0_1.md` para seleccionar mejoras de UX posteriores.
+1. cargar `demo/juego_cartas_table.tscn` en Godot 4.7 sin error de parser/runtime;
+2. `run_juego_cartas_propio_manual_table.gd`;
+3. `run_juego_cartas_propio_table_attack_flow.gd`;
+4. `run_juego_cartas_propio_basic_ai.gd`;
+5. vertical de criaturas 38/38 y vertical de ocho Fusiones 82/82 como regresión proporcional de interacción;
+6. captura gráfica de la mesa a **1600×900** y revisión humana de jerarquía, proporciones, Guardia dentro de envolvente, mano, campo, lateral, fases y destinos legales;
+7. corregir solo problemas estructurales reproducibles de la mesa y repetir las puertas afectadas;
+8. comprobar/regenerar localmente `Juego de Cartas Propio - Pruebas.lnk` si esta mesa pasa a ser la candidata de trabajo local;
+9. realizar la primera sesión humana completa sobre la mesa representativa;
+10. solo después reabrir `CUADERNO_BENCHMARK_COMUNIDAD_Y_FOROS_V0_1.md` para seleccionar mejoras de UX posteriores.
 
 ## Cola vigente desde 2026-09-12
 
-Esta cola sustituye el intento anterior de consolidar a la vez mesa y todas las mejoras comunitarias.
+Las tareas documentales y de código de geometría previstas antes del runtime ya están escritas. La cola inmediata pasa a verificación real:
 
-1. Cerrar proporciones y geometría de la mesa desde `CUADERNO_BENCHMARK_INTERFAZ_TCG_V0_1.md` y las reglas propias.
-2. Fijar lateral/preview, densidad de mano, zonas auxiliares, HUD/fases y gramática mínima de selección/destinos.
-3. Convertir esa síntesis en estándar de interfaz y actualizar `GREYBOX_INTERFAZ_FINAL_V0_1.md`.
-4. Adaptar el andamio actual a ese estándar, sin añadir por ahora `EFECTOS ACTIVOS`, `¿por qué no puedo?`, tooltips avanzados, contadores extra ni historial enriquecido.
-5. Verificar parser/runtime y pruebas proporcionales del greybox consolidado.
-6. Abrir la escena gráficamente, obtener una captura real y revisar si representa suficientemente la futura experiencia sin arte definitivo.
-7. Corregir solo problemas estructurales reproducibles; no volver al diseño por retoques arbitrarios.
-8. Realizar una sesión humana completa y registrar problemas observables de comodidad, claridad y ritmo.
-9. Mantener las pruebas verticales de criaturas y de las ocho Fusiones como puertas al tocar interacción, combate o catálogo.
+1. Ejecutar parser/runtime del greybox métrico en Godot 4.7.
+2. Ejecutar mesa manual, flujo de ataque e IA básica.
+3. Ejecutar las verticales de criaturas y ocho Fusiones como regresión de interacción.
+4. Obtener captura real a 1600×900.
+5. Revisar si las cinco posiciones, Guardia 101×72, zonas laterales, manos y rail contextual caben y mantienen la jerarquía prevista.
+6. Corregir únicamente fallos estructurales observables; no volver a variar píxeles independientes sin modificar el estándar.
+7. Regenerar el acceso directo local si corresponde.
+8. Realizar una sesión humana completa y registrar comodidad, claridad y ritmo.
+9. Mantener las pruebas verticales como puertas al tocar interacción, combate o catálogo.
 10. Reabrir entonces el benchmark comunitario y decidir qué mejoras de UX merece implementar en una fase separada.
 11. Recoger en partidas los indicadores definidos por la auditoría métrica de F001/F067 antes de ajustar cifras.
 12. Después: alcance mínimo del narrador/locutor, prueba pequeña de efectos latentes, bots específicos, red, arte definitivo e integración con Zapity.
 
 ## Investigación documental de comunidad — 2026-09-12
 
-- No se ejecutaron pruebas runtime porque no cambió código ni contrato ejecutable.
+- No se ejecutaron pruebas runtime porque no cambió código ni contrato ejecutable durante aquella investigación.
 - La investigación comunitaria no se considera evidencia cuantitativa de preferencias universales: son patrones cualitativos repetidos en discusiones de jugadores y se filtran por aplicabilidad a JCP.
 - JCP-DEC-042 impide que una sugerencia de foro altere por sí sola reglas del duelo; JCP-DEC-043 aplaza su implementación hasta después de estabilizar y probar la mesa.
 - Cualquier implementación futura de `¿por qué no puedo?` debe obtener la causa desde UCE o desde los mismos códigos de validación; una segunda lógica de reglas en UI sería un fallo de arquitectura.
@@ -158,6 +158,8 @@ Resultado vigente:
 38. El cancelado pre-commit debe permanecer puramente local. Un undo posterior a una acción resuelta puede revelar o borrar información y necesitaría una arquitectura separada para replay/PvP; no se incluye en el greybox.
 39. Las sugerencias de foros son evidencia cualitativa y sesgada hacia quienes participan. Se usarán para descubrir problemas y soluciones candidatas, no como encuesta representativa ni como autoridad superior a las pruebas humanas propias.
 40. Añadir cada mejora de QoL simultáneamente podría volver a sobrecargar la mesa. JCP-DEC-043 fija explícitamente que estas mejoras permanecen aparcadas hasta completar mesa, runtime y primera prueba humana representativa.
+41. El estándar U=72 está calibrado para 1600×900. Forzar esos mismos píxeles en resoluciones menores puede producir desbordamiento vertical; cualquier adaptación deberá escalar desde la misma unidad o usar otro layout responsive, no corregir cada control por separado.
+42. `card_tile.gd` también sirve a la mesa padre. Sus nuevos tamaños deben pasar las regresiones de la escena greybox y la interacción completa antes de promoverse; un PASS de la mesa anterior no cubre esta modificación.
 
 ## Cola ordenada — histórica hasta 2026-09-11
 
