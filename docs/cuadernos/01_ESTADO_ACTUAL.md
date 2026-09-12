@@ -1,9 +1,9 @@
 # Cuaderno 1 — Estado actual
 
-Última actualización: **2026-09-11**  
+Última actualización: **2026-09-12**  
 Módulo: **`zapiti.juego_cartas_propio`**  
 Versión: **`0.24.0-stress-hardening`**  
-Estado: **prototipo de reglas con mesa visual de duelo local; RUNTIME PASS en Godot 4.7 estable**
+Estado: **prototipo de reglas con mesa visual de duelo local; motor con último RUNTIME PASS en Godot 4.7 estable; fase visual greybox V0.1 abierta y aún pendiente de verificación runtime**
 
 ## Límites del trabajo
 
@@ -131,4 +131,21 @@ La invocación normal boca arriba permite atacar ese mismo turno, como fija S01.
 
 La revisión de `FLUJO_DE_PARTIDA_E_INTERACCION_V0_1.md` quedó aprobada e implementada. Inicio y Robo ordinarios son automáticos; la banda muestra las seis fases; existen controles separados para Combate y terminar turno con confirmación; las cartas se distinguen provisionalmente por tipo/elemento; las zonas auxiliares parecen montones; el historial comienza plegado; los equipos se rotulan bajo su portador; y dos criaturas compatibles pueden seleccionarse directamente para abrir la elección de Fusión. Una transformación conocida de Terreno se aplica mostrando su resultado y una sustitución sin receta avisa antes de perder el Terreno anterior.
 
-Última puerta proporcional de esta mesa: manual 78/78, flujo de ataque visual 11/11, IA básica 9/9, vertical de criaturas 38/38, vertical de ocho Fusiones 82/82, escena headless PASS, tres capturas 1600×900 PASS y auditoría estática 26.333 comprobaciones sobre 97 GDScript. Siguiente fase: partida humana completa sobre esta base y corrección de problemas observables antes de ampliar arte, cartas o comentalista.
+Última puerta proporcional de la mesa anterior: manual 78/78, flujo de ataque visual 11/11, IA básica 9/9, vertical de criaturas 38/38, vertical de ocho Fusiones 82/82, escena headless PASS, tres capturas 1600×900 PASS y auditoría estática 26.333 comprobaciones sobre 97 GDScript. Estos resultados **no se atribuyen todavía** al nuevo greybox V0.1.
+
+## Fase visual abierta — greybox representativo V0.1
+
+El 2026-09-12 se cambió el orden de la prueba humana: antes de jugar una sesión completa se construirá una representación suficientemente cercana a la disposición final del juego, aunque siga sin ilustraciones, animaciones, audio ni arte definitivo. El objetivo es que una prueba humana mida el flujo que realmente se pretende conservar y no una pantalla de diagnóstico destinada a ser sustituida.
+
+- Contrato visual: `docs/diseno/GREYBOX_INTERFAZ_FINAL_V0_1.md`.
+- Rama de trabajo aislada: `chatgpt/greybox-ui-v1`.
+- `demo/juego_cartas_table_greybox.gd` hereda la mesa funcional y cambia solo presentación y jerarquía visual.
+- `demo/duel_table_backdrop_greybox.gd` sustituye la cuadrícula técnica por una superficie enfrentada con guías discretas.
+- `demo/juego_cartas_table.tscn` apunta provisionalmente a la capa greybox dentro de esta rama.
+- La banda de fases se desplaza al borde superior del tablero; deja de ocupar el centro jugable.
+- Vida y Energía permanecen integradas en las cabeceras de ambos jugadores.
+- El lateral pasa a ser contextual: ficha de carta y decisiones; historial, cambio de vista y cortina 2P quedan subordinados.
+- Las casillas vacías conservan su forma pero dejan de repetir `VACÍA`; el texto fuerte aparece cuando son un destino legal como `JUGAR AQUÍ` o `ATAQUE DIRECTO`.
+- No se ha modificado `UniversalCardEngine`, el módulo `juego_cartas_propio_module.gd`, el catálogo, reglas, replay ni persistencia.
+
+**Estado de esta fase:** implementación escrita, pero **no cerrada**. Desde esta conexión no se ha ejecutado Godot 4.7 ni se ha inspeccionado una captura runtime de la nueva escena. Antes de declarar el greybox válido deben pasar parser/runtime y las puertas de mesa, ataque e IA, y el diseñador debe revisar una captura real. Solo después se reanuda la partida humana completa.
