@@ -8,37 +8,51 @@
 - La escena `demo/juego_cartas_table.tscn` apunta en esta rama a `demo/juego_cartas_table_greybox.gd`, que hereda la mesa funcional anterior y cambia únicamente presentación y jerarquía visual.
 - Se añadió `demo/duel_table_backdrop_greybox.gd` y el contrato `docs/diseno/GREYBOX_INTERFAZ_FINAL_V0_1.md`.
 - Antes de seguir puliendo esa implementación por ensayo visual se creó `docs/diseno/CUADERNO_BENCHMARK_INTERFAZ_TCG_V0_1.md`. El greybox escrito queda considerado **andamio provisional** hasta consolidar las medidas, estados e interacciones que se acepten de ese benchmark.
-- El benchmark no se limita a Yu-Gi-Oh!/Magic: compara también Legends of Runeterra, Shadowverse, Pokémon TCG, Marvel Snap, Flesh and Blood, Disney Lorcana, Shadowverse: Evolve y Eternal, con referencias adicionales reservadas para una segunda pasada si aportan una solución mejor.
-- `UniversalCardEngine`, `juego_cartas_propio_module.gd`, catálogo, reglas, replay y persistencia no se han modificado.
-- Los resultados PASS del 2026-09-11 siguen siendo la última autoridad cerrada del motor y de la mesa anterior; **no se atribuyen al greybox V0.1 ni al benchmark documental**.
+- El benchmark comercial ya cubre Yu-Gi-Oh!/Master Duel, MTG Arena, Legends of Runeterra, Shadowverse, Pokémon TCG, Marvel Snap, Flesh and Blood, Disney Lorcana, Shadowverse: Evolve, Eternal, Hearthstone, GWENT, Duel Links y Pokémon TCG Pocket. Las referencias se usan por problema concreto y no como una interfaz a copiar.
+- Se añadió `docs/diseno/CUADERNO_BENCHMARK_COMUNIDAD_Y_FOROS_V0_1.md` para contrastar esa base con feedback de jugadores en Reddit, Steam Community y BoardGameGeek. Solo pasan al diseño candidatas realistas para UI 2D/2.5D y datos del motor; cinemáticas 3D y VFX complejos quedan fuera del alcance actual.
+- Las joyas comunitarias de mayor interés son: efectos activos con fuente/duración, texto estructurado, usos restantes visibles, menos clics sin elección real, inspección del tablero durante decisiones, cancelación antes del commit y una futura explicación `¿por qué no puedo?` procedente de UCE.
+- `UniversalCardEngine`, `juego_cartas_propio_module.gd`, catálogo, reglas, replay y persistencia no se han modificado durante esta investigación.
+- Los resultados PASS del 2026-09-11 siguen siendo la última autoridad cerrada del motor y de la mesa anterior; **no se atribuyen al greybox V0.1 ni a los benchmarks documentales**.
 - Esta conexión no dispone del Godot 4.7 local del proyecto ni de ejecución gráfica del PC, por lo que todavía no existe una captura runtime revisada de esta versión.
 
 Puertas mínimas antes de cerrar la fase:
 
-1. consolidar el benchmark en un estándar de interfaz: proporción de carta, unidad `U`, tamaños relativos, gramática de estados, mano/campo/HUD, respuesta/cadena, equipo, Terreno y Fusión;
-2. trasladar únicamente la síntesis aceptada a `GREYBOX_INTERFAZ_FINAL_V0_1.md` y adaptar el andamio de código a ese estándar;
-3. cargar `demo/juego_cartas_table.tscn` en Godot 4.7 sin error de parser/runtime;
-4. `run_juego_cartas_propio_manual_table.gd`;
-5. `run_juego_cartas_propio_table_attack_flow.gd`;
-6. `run_juego_cartas_propio_basic_ai.gd`;
-7. vertical de criaturas 38/38 y vertical de ocho Fusiones 82/82 como regresión proporcional de interacción;
-8. captura gráfica de la mesa —preferentemente 1600×900— y revisión humana de jerarquía, proporciones, mano, campo, lateral, fases y destinos legales;
-9. si la captura revela problemas estructurales, corregirlos con el estándar como autoridad y repetir las puertas afectadas antes de iniciar una partida humana completa.
+1. cruzar benchmark comercial + benchmark comunitario + reglas propias y clasificar cada propuesta como **obligatoria antes de prueba humana**, **deseable después del greybox** o **futura**;
+2. consolidar el resultado en un estándar de interfaz: proporción de carta, unidad `U`, tamaños relativos, gramática de estados, mano/campo/HUD, respuesta/cadena, equipo, Terreno, Fusión, texto y comportamiento pre-commit;
+3. trasladar únicamente la síntesis aceptada a `GREYBOX_INTERFAZ_FINAL_V0_1.md` y adaptar el andamio de código a ese estándar;
+4. cargar `demo/juego_cartas_table.tscn` en Godot 4.7 sin error de parser/runtime;
+5. `run_juego_cartas_propio_manual_table.gd`;
+6. `run_juego_cartas_propio_table_attack_flow.gd`;
+7. `run_juego_cartas_propio_basic_ai.gd`;
+8. vertical de criaturas 38/38 y vertical de ocho Fusiones 82/82 como regresión proporcional de interacción;
+9. captura gráfica de la mesa —preferentemente 1600×900— y revisión humana de jerarquía, proporciones, mano, campo, lateral, fases, destinos legales y claridad de decisiones;
+10. si la captura revela problemas estructurales, corregirlos con el estándar como autoridad y repetir las puertas afectadas antes de iniciar una partida humana completa.
 
 ## Cola vigente desde 2026-09-12
 
 Esta cola sustituye temporalmente el orden anterior que empezaba directamente por una partida humana completa o por pulir el primer greybox a ojo.
 
-1. Revisar y completar `CUADERNO_BENCHMARK_INTERFAZ_TCG_V0_1.md`; añadir una referencia solo si aporta una solución concreta mejor.
-2. Convertir la síntesis aceptada en un estándar de interfaz con proporciones y estados cerrados, evitando números aislados sin relación entre sí.
-3. Actualizar `GREYBOX_INTERFAZ_FINAL_V0_1.md` y adaptar el andamio actual a ese estándar.
-4. Verificar parser/runtime y pruebas proporcionales del greybox consolidado.
-5. Abrir la escena gráficamente, obtener una captura real y revisar si representa suficientemente la futura experiencia sin arte definitivo.
-6. Corregir solo problemas estructurales reproducibles; no volver al diseño por retoques arbitrarios.
-7. Solo entonces realizar una sesión humana completa y registrar problemas observables de comodidad, claridad y ritmo.
-8. Mantener las pruebas verticales de criaturas y de las ocho Fusiones como puertas al tocar interacción, combate o catálogo.
-9. Recoger en partidas los indicadores definidos por la auditoría métrica de F001/F067 antes de ajustar cifras.
-10. Después: alcance mínimo del narrador/locutor, prueba pequeña de efectos latentes, bots específicos, red, arte definitivo e integración con Zapity.
+1. Consolidar ambos cuadernos de benchmark en tres grupos: imprescindible para la primera prueba humana, siguiente corte de UX y futuro/aparcado.
+2. Cerrar los parámetros restantes del estándar: lateral/overlay, densidad de mano, mini-cadena, previsión pública, texto estructurado, señales de usos y punto de commit.
+3. Convertir la síntesis aceptada en un estándar de interfaz con proporciones y estados cerrados, evitando números aislados sin relación entre sí.
+4. Actualizar `GREYBOX_INTERFAZ_FINAL_V0_1.md` y adaptar el andamio actual a ese estándar.
+5. Verificar parser/runtime y pruebas proporcionales del greybox consolidado.
+6. Abrir la escena gráficamente, obtener una captura real y revisar si representa suficientemente la futura experiencia sin arte definitivo.
+7. Corregir solo problemas estructurales reproducibles; no volver al diseño por retoques arbitrarios.
+8. Solo entonces realizar una sesión humana completa y registrar problemas observables de comodidad, claridad y ritmo.
+9. Mantener las pruebas verticales de criaturas y de las ocho Fusiones como puertas al tocar interacción, combate o catálogo.
+10. Tras estabilizar layout, valorar una fase propia para `¿por qué no puedo?` y `EFECTOS ACTIVOS`, ampliando UCE si hace falta sin duplicar reglas en la UI.
+11. Recoger en partidas los indicadores definidos por la auditoría métrica de F001/F067 antes de ajustar cifras.
+12. Después: alcance mínimo del narrador/locutor, prueba pequeña de efectos latentes, bots específicos, red, arte definitivo e integración con Zapity.
+
+## Investigación documental de comunidad — 2026-09-12
+
+- No se ejecutaron pruebas runtime porque no cambió código ni contrato ejecutable.
+- La investigación comunitaria no se considera evidencia cuantitativa de preferencias universales: son patrones cualitativos repetidos en discusiones de jugadores y se filtran por aplicabilidad a JCP.
+- JCP-DEC-042 impide que una sugerencia de foro altere por sí sola reglas del duelo.
+- Cualquier implementación de `¿por qué no puedo?` debe obtener la causa desde UCE o desde los mismos códigos de validación; una segunda lógica de reglas en UI sería un fallo de arquitectura.
+- Cualquier vista `EFECTOS ACTIVOS` debe respetar el mismo saneado de información que las vistas existentes: no puede revelar cartas preparadas, identidad privada de M12, materiales ocultos o procedencias no públicas.
+- Cancelar antes del commit es una operación puramente de interfaz; no puede transformarse en undo de acciones ya resueltas sin una decisión expresa sobre privacidad/replay/multijugador.
 
 ## Ejecución larga completada — PASS
 
@@ -137,6 +151,12 @@ Resultado vigente:
 32. Una interfaz visualmente más limpia no puede ocultar decisiones obligatorias, prioridad, privacidad ni destinos legales. La reducción de texto es solo de presentación; las mismas acciones deben seguir siendo alcanzables y verificables.
 33. El benchmark debe reutilizar **principios funcionales**, no la identidad de un producto. Copiar marcos, iconos distintivos, ornamentación, composición reconocible o assets ajenos convertiría una referencia legítima en una dependencia visual que no se desea.
 34. Si las medidas vuelven a fijarse como números de píxeles independientes, reaparecerán incoherencias entre mano, campo, guardia, preview y resoluciones. La siguiente implementación debe derivarlas de la proporción de carta y de una unidad común `U`, con excepciones explícitas y justificadas.
+35. Una futura vista `EFECTOS ACTIVOS` puede convertirse en fuga de información si deduce fuentes ocultas. Debe construirse desde una vista saneada del jugador correspondiente y mostrar únicamente causa/duración que las reglas permitan conocer.
+36. La función `¿por qué no puedo?` sería peligrosa si la UI reimplementa validación: produciría mensajes que pueden divergir de `get_legal_actions()`/`validate_action()`. Debe pertenecer al contrato de UCE o derivarse de sus mismos códigos.
+37. El deseo comunitario de “menos prompts” no autoriza automatizar decisiones opcionales. Solo se eliminan confirmaciones redundantes o pasos sin elección real; prioridad, respuestas y elecciones reglamentarias continúan perteneciendo al jugador.
+38. El cancelado pre-commit debe permanecer puramente local. Un undo posterior a una acción resuelta puede revelar o borrar información y necesitaría una arquitectura separada para replay/PvP; no se incluye en el greybox.
+39. Las sugerencias de foros son evidencia cualitativa y sesgada hacia quienes participan. Se usarán para descubrir problemas y soluciones candidatas, no como encuesta representativa ni como autoridad superior a las pruebas humanas propias.
+40. Añadir cada mejora de QoL simultáneamente podría volver a sobrecargar la mesa. La consolidación debe fijar qué entra en la primera prueba y qué se pospone aunque sea una buena idea.
 
 ## Cola ordenada — histórica hasta 2026-09-11
 
