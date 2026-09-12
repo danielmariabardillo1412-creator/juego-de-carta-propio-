@@ -1,5 +1,17 @@
 # Cuaderno 3 — Bitácora de trabajo
 
+## 2026-09-12 — Greybox representativo de interfaz final V0.1
+
+- El diseñador detuvo la sesión humana completa porque la mesa anterior, aunque funcional y probada, seguía siendo demasiado cercana a una herramienta de laboratorio para medir con sentido la experiencia que se pretende conservar. Se fija que las pruebas humanas de claridad, comodidad y ritmo comenzarán después de disponer de un greybox representativo de la distribución final, todavía sin arte definitivo.
+- Se creó `docs/diseno/GREYBOX_INTERFAZ_FINAL_V0_1.md` y se registró JCP-DEC-040. La referencia a juegos comerciales sirve solo para jerarquía visual y lenguaje espacial; no se copian identidad gráfica, assets ni reglas ajenas.
+- Trabajo aislado en la rama `chatgpt/greybox-ui-v1`. `demo/juego_cartas_table_greybox.gd` hereda la mesa actual para reutilizar intacta toda su lógica, acciones, privacidad, IA, guardado/carga y flujo; únicamente sustituye construcción y jerarquía visual. `demo/juego_cartas_table.tscn` apunta a esta capa dentro de la rama.
+- Se añadió `demo/duel_table_backdrop_greybox.gd`: fondo casi cenital con dos territorios, eje limpio y guías de filas discretas en vez de una cuadrícula técnica dominante.
+- El HUD superior conserva solo controles de partida; la banda de seis fases sale del centro jugable y pasa al borde superior del tablero. Vida y Energía continúan integradas en las cabeceras de ambos jugadores.
+- El lateral queda como apoyo contextual: ficha ampliada, decisiones y acciones excepcionales. Guardado/carga, historial y herramientas locales 2P se conservan pero se subordinan visualmente. No se elimina funcionalidad de diagnóstico necesaria para pruebas.
+- Las casillas vacías mantienen silueta y códigos C1–C5/A1–A5, pero dejan de repetir `VACÍA`. Cuando una casilla es un destino legal sigue mostrando `JUGAR AQUÍ` o `ATAQUE DIRECTO`, conservando además el contrato esperado por las pruebas existentes.
+- No se modificaron `UniversalCardEngine`, `juego_cartas_propio_module.gd`, catálogo, reglas, replay ni persistencia. El módulo continúa en `0.24.0-stress-hardening`.
+- **Verificación pendiente:** desde esta conexión no existe acceso al Godot 4.7 local ni a la ejecución gráfica del PC. La fase no se declara PASS. Deben ejecutarse parser/runtime, mesa manual, flujo de ataque, IA básica y las regresiones verticales proporcionales; después se revisará una captura real antes de iniciar la partida humana completa.
+
 ## 2026-09-11 — Rediseño 2,5D de mesa y corrección del ataque visual
 
 - Tras revisar de nuevo las referencias aportadas por el diseñador se retiraron las dos grandes cajas planas. El tablero es ahora un trapecio original en perspectiva, pero la profundidad no altera la escala de juego: cartas, casillas y zonas laterales de ambos jugadores tienen idéntico tamaño. Ambas manos aparecen completas y en fila recta. Las casillas tienen silueta de carta; se conservan marco provisional, reverso, color semántico y ficha ampliada lateral a 1600×900.
@@ -214,7 +226,7 @@
 - Estadísticas, coste, familia, anatomía y aptitudes de la entidad generada alimentan vistas, combate, equipo y comprobaciones de cartas.
 - Los equipos de ambos materiales se revalidan y se religan si siguen siendo compatibles.
 - Se implementaron los destinos acordados: destrucción a Cementerio para materiales y vínculos; devolución a mano para materiales y a Cementerio para vínculos.
-- Se conectó la habilidad de Banda Goblin: una vez por turno, en fase principal propia, paga 1 de Energía para dar +1 ATQ temporal a una criatura propia visible.
+- Se conectó la habilidad de Banda Goblin: una vez por turno, en fase principal propia, paga 1 de Energía y concede +1 ATQ temporal a una criatura propia visible.
 - F001-NAT y F067-AGU se rechazan con código específico aunque permanezcan disponibles en el catálogo puro. Las cadenas y la separación voluntaria siguen deshabilitadas.
 - La nueva suite `run_juego_cartas_propio_fusion_action.gd` supera 56 comprobaciones; `run_juego_cartas_propio_zones.gd` se amplió a ocho zonas por jugador.
 - Las dieciséis suites específicas superan 910/910; las nueve generales 441/441; diagnóstico 15/15; experimento integral 80/80; escena principal headless PASS.
@@ -227,7 +239,7 @@
 - Se descargó Godot 4.7 estable desde la distribución oficial a una carpeta temporal externa al proyecto y se verificó su SHA-256 antes de ejecutarlo.
 - Identidades y compatibilidad: PASS, 157 comprobaciones.
 - Catálogo F001/F010/F067: PASS, 37 comprobaciones.
-- Fundamento genérico de Fusiones: PASS, 46 comprobaciones.
+- Fundamento genérico de Fusiones: PASS, 46/46.
 - Las quince suites específicas suman 850/850; las nueve generales, 441/441.
 - Diagnóstico: 15 PASS, 0 FAIL, 0 SKIP, 0 WARN.
 - Experimento integral: 80/80.
