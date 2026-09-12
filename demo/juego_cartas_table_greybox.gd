@@ -8,6 +8,22 @@ extends "res://demo/juego_cartas_table.gd"
 const GreyboxBackdrop = preload("res://demo/duel_table_backdrop_greybox.gd")
 const GreyboxCardTile = preload("res://demo/card_tile.gd")
 
+# Estándar métrico V0.2. La referencia de validación es 1600x900 y 1 U = 72 px.
+# La silueta 63:88 produce una carta de campo de 72x101 y una Guardia de 101x72.
+# La casilla usa una envolvente cuadrada para que rotar nunca invada la vecina.
+const DESIGN_U := 72.0
+const FIELD_ATTACK_SIZE := Vector2(72, 101)
+const FIELD_GUARD_SIZE := Vector2(101, 72)
+const FIELD_ENVELOPE_SIZE := Vector2(101, 101)
+const FIELD_GAP := 11.0
+const FIELD_ROW_HEIGHT := 105.0
+const HAND_ROW_HEIGHT := 124.0
+const PLAYER_HUD_HEIGHT := 33.0
+const SIDE_ZONE_SIZE := Vector2(60, 90)
+const SIDE_ZONE_GAP := 16.0
+const CONTEXT_RAIL_WIDTH := 274.0
+const PHASE_HUD_HEIGHT := 26.0
+
 
 func _build_interface() -> void:
 	var background := ColorRect.new()
@@ -130,7 +146,8 @@ func _build_interface() -> void:
 	_main_content = HSplitContainer.new()
 	_main_content.name = "MainContent"
 	_main_content.size_flags_vertical = Control.SIZE_EXPAND_FILL
-	_main_content.split_offset = 1120
+	# A 1600 px deja al tablero ~80 % del ancho y un rail contextual compacto.
+	_main_content.split_offset = 1280
 	root_box.add_child(_main_content)
 
 	_board_surface = PanelContainer.new()
@@ -155,7 +172,7 @@ func _build_interface() -> void:
 	phase_panel.offset_left = -255
 	phase_panel.offset_top = 4
 	phase_panel.offset_right = 255
-	phase_panel.offset_bottom = 29
+	phase_panel.offset_bottom = 4 + PHASE_HUD_HEIGHT
 	phase_panel.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	phase_panel.add_theme_stylebox_override("panel", _style_box(Color("0b1419df"), Color("6f694d"), 1, 12))
 	_board_surface.add_child(phase_panel)
@@ -166,7 +183,7 @@ func _build_interface() -> void:
 	var board_margin := MarginContainer.new()
 	board_margin.add_theme_constant_override("margin_left", 12)
 	board_margin.add_theme_constant_override("margin_right", 12)
-	board_margin.add_theme_constant_override("margin_top", 31)
+	board_margin.add_theme_constant_override("margin_top", 32)
 	board_margin.add_theme_constant_override("margin_bottom", 5)
 	_board_surface.add_child(board_margin)
 	_board_box = VBoxContainer.new()
@@ -179,7 +196,7 @@ func _build_interface() -> void:
 	# Lateral contextual: carta grande primero, decisiones después. Deja de ser un
 	# listado de depuración que compita visualmente con el tablero.
 	var action_panel := PanelContainer.new()
-	action_panel.custom_minimum_size.x = 276
+	action_panel.custom_minimum_size.x = CONTEXT_RAIL_WIDTH
 	action_panel.add_theme_stylebox_override("panel", _style_box(Color("0d161c"), Color("34464f"), 1, 7))
 	_main_content.add_child(action_panel)
 	var action_margin := MarginContainer.new()
@@ -405,7 +422,7 @@ func _build_player_half(game: Dictionary, player_id: int, opponent: bool) -> Con
 	var energy: Dictionary = game["energy"][str(player_id)]
 	heading.text = "%s     ❤ %d     ◆ %d/%d" % [PLAYER_NAMES[player_id], life, energy["available"], energy["maximum"]]
 	heading.alignment = HORIZONTAL_ALIGNMENT_CENTER
-	heading.custom_minimum_size.y = 26
+	heading.custom_minimum_size.y = PLAYER_HUD_HEIGHT
 	heading.add_theme_stylebox_override("normal", _style_box(Color("111a20df"), Color("766846"), 1, 12))
 	heading.add_theme_stylebox_override("hover", _style_box(Color("27312fe8"), Color("dfc66d"), 2, 12))
 	heading.add_theme_font_size_override("font_size", 14)
@@ -433,15 +450,53 @@ func _build_player_half(game: Dictionary, player_id: int, opponent: bool) -> Con
 	return panel
 
 
+func _build_hand_row(table: Dictionary, player_id: int) -> Control:
+	var zone: Dictionary = table["zones"]["hand:%d" % player_id]
+	var hand := Control.new()
+	hand.name = "HandFan"
+	hand.custom_minimum_size.y = HAND_ROW_HEIGHT
+	hand.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	var cards: Array = zone["cards"] if zone["identities_visible"] else range(zone["count"])
+	var count := cards.size()
+	# Convención de densidad: primero se reduce separación y después se solapan
+	# cartas. No se empequeñece la carta de mano mientras quepa el ancho normal.
+	var step := 94.0
+	if count >= 10:
+		step = 48.0
+	elif count >= 8:
+		step = 60.0
+	elif count >= 6:
+		step = 76.0
+	var total := step * maxi(0, count - 1)
+	for index in range(count):
+		var tile: Button
+		if zone["identities_visible"]:
+			tile = _tile_from_card(cards[index], player_id, "hand")
+		else:
+			tile = _make_card_tile("", "CARTA", "oculta", false, -1, "", -1, "", "", "", false, "opponent_hand")
+			tile.tooltip_text = "Carta %d de la mano rival" % (index + 1)
+		var tile_size: Vector2 = tile.custom_minimum_size
+		tile.set_anchors_preset(Control.PRESET_CENTER_TOP)
+		var x := -total * 0.5 + index * step - tile_size.x * 0.5
+		tile.offset_left = x
+		tile.offset_right = x + tile_size.x
+		tile.offset_top = 2
+		tile.offset_bottom = 2 + tile_size.y
+		tile.rotation_degrees = 0
+		tile.z_index = index
+		hand.add_child(tile)
+	return hand
+
+
 func _build_field_row(table: Dictionary, player_id: int, kind: String, opponent: bool) -> Control:
 	var row := Control.new()
 	row.name = ("Opponent" if opponent else "Player") + ("SupportRow" if kind == "support" else "CreatureRow")
-	row.custom_minimum_size.y = 98
+	row.custom_minimum_size.y = FIELD_ROW_HEIGHT
 	row.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	var zone: Dictionary = table["zones"]["%s:%d" % [kind, player_id]]
 	var capacity: int = zone["definition"]["capacity"]
-	var envelope_size := Vector2(106, 96)
-	var gap := 14.0
+	var envelope_size := FIELD_ENVELOPE_SIZE
+	var gap := FIELD_GAP
 	var total_width := capacity * envelope_size.x + (capacity - 1) * gap
 	var cards_by_slot := {}
 	for slot in zone["slots"]:
@@ -464,11 +519,11 @@ func _build_field_row(table: Dictionary, player_id: int, kind: String, opponent:
 			empty.name = "CreatureSlot" if kind == "creatures" else "SupportSlot"
 			empty.set_meta("board_role", "creature_slot" if kind == "creatures" else "support_slot")
 			empty.set_anchors_preset(Control.PRESET_CENTER_TOP)
-			var slot_size := Vector2(70, 94)
+			var slot_size := FIELD_ATTACK_SIZE
 			empty.offset_left = left + (envelope_size.x - slot_size.x) * 0.5
 			empty.offset_right = empty.offset_left + slot_size.x
-			empty.offset_top = 2
-			empty.offset_bottom = 2 + slot_size.y
+			empty.offset_top = (FIELD_ROW_HEIGHT - slot_size.y) * 0.5
+			empty.offset_bottom = empty.offset_top + slot_size.y
 			var direct_attack := player_id != _viewer_id and kind == "creatures" and _selected_direct_attack_available()
 			var direct_destination := (player_id == _viewer_id and _selected_card_can_enter(kind)) or direct_attack
 			var slot_code := ("A" if kind == "support" else "C") + str(slot_index + 1)
@@ -496,8 +551,8 @@ func _build_field_row(table: Dictionary, player_id: int, kind: String, opponent:
 			holder.set_anchors_preset(Control.PRESET_CENTER_TOP)
 			holder.offset_left = left
 			holder.offset_right = left + envelope_size.x
-			holder.offset_top = 0
-			holder.offset_bottom = envelope_size.y
+			holder.offset_top = (FIELD_ROW_HEIGHT - envelope_size.y) * 0.5
+			holder.offset_bottom = holder.offset_top + envelope_size.y
 			var tile: Button
 			if card is Dictionary and card.get("hidden", false):
 				var hidden_targetable := _hidden_slot_attack_available(player_id, card["engine_slot"])
@@ -529,8 +584,8 @@ func _build_field_row(table: Dictionary, player_id: int, kind: String, opponent:
 					equipment.add_theme_font_size_override("font_size", 9)
 					equipment.add_theme_color_override("font_color", Color("e2ca81"))
 					equipment.set_anchors_preset(Control.PRESET_CENTER_BOTTOM)
-					equipment.offset_left = -52
-					equipment.offset_right = 52
+					equipment.offset_left = -50
+					equipment.offset_right = 50
 					equipment.offset_top = -13
 					equipment.offset_bottom = 0
 					holder.add_child(equipment)
@@ -540,14 +595,32 @@ func _build_field_row(table: Dictionary, player_id: int, kind: String, opponent:
 	return row
 
 
+func _add_field_side_zones(
+	row: Control, table: Dictionary, player_id: int, kind: String, opponent: bool,
+	capacity: int, envelope_size: Vector2, gap: float
+) -> void:
+	var total_width := capacity * envelope_size.x + (capacity - 1) * gap
+	var left_x := -total_width * 0.5 - SIDE_ZONE_GAP - SIDE_ZONE_SIZE.x
+	var right_x := total_width * 0.5 + SIDE_ZONE_GAP
+	if kind == "support":
+		var materials: int = table["zones"]["fusion_materials:%d" % player_id]["count"]
+		_add_side_pile(row, "FUSIÓN", materials, left_x, SIDE_ZONE_SIZE, opponent)
+		var deck: int = table["zones"]["deck:%d" % player_id]["count"]
+		_add_side_pile(row, "BARAJA", deck, right_x, SIDE_ZONE_SIZE, opponent)
+	else:
+		_add_terrain_side(row, table, player_id, opponent, left_x, SIDE_ZONE_SIZE)
+		var graveyard: int = table["zones"]["graveyard:%d" % player_id]["count"]
+		_add_side_pile(row, "CEMENTERIO", graveyard, right_x, SIDE_ZONE_SIZE, opponent)
+
+
 func _add_side_pile(row: Control, title: String, count: int, x: float, side_size: Vector2, opponent: bool) -> void:
 	var pile := Button.new()
 	pile.set_meta("board_role", "pile_zone")
 	pile.set_anchors_preset(Control.PRESET_CENTER_TOP)
 	pile.offset_left = x
 	pile.offset_right = x + side_size.x
-	pile.offset_top = 4
-	pile.offset_bottom = 4 + side_size.y - 6
+	pile.offset_top = (FIELD_ROW_HEIGHT - side_size.y) * 0.5
+	pile.offset_bottom = pile.offset_top + side_size.y
 	pile.text = "%s\n%d" % [title, count]
 	pile.tooltip_text = "%s: %d cartas" % [title.capitalize(), count]
 	pile.disabled = true
@@ -566,8 +639,8 @@ func _add_terrain_side(row: Control, table: Dictionary, player_id: int, opponent
 	terrain.set_anchors_preset(Control.PRESET_CENTER_TOP)
 	terrain.offset_left = x
 	terrain.offset_right = x + side_size.x
-	terrain.offset_top = 4
-	terrain.offset_bottom = 4 + side_size.y - 6
+	terrain.offset_top = (FIELD_ROW_HEIGHT - side_size.y) * 0.5
+	terrain.offset_bottom = terrain.offset_top + side_size.y
 	var terrain_name := "—"
 	if zone["count"] > 0:
 		terrain_name = zone["cards"][0].get("terrain_identity", {}).get("display_name", "ACTIVO")
