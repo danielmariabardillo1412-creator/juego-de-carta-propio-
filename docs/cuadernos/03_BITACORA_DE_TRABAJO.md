@@ -1,5 +1,17 @@
 # Cuaderno 3 — Bitácora de trabajo
 
+## 2026-09-12 — Estándar métrico y primera adaptación de mesa
+
+- Se releyeron los cuatro cuadernos, el protocolo de continuidad, el índice de fuentes, el benchmark comercial y el contrato del greybox antes de tocar código. La fase abierta continúa siendo el greybox representativo; el último cierre runtime sigue siendo la mesa anterior del 2026-09-11.
+- Para S00 y S01 se comprobó en Drive que no existe una modificación posterior a las fechas registradas en `SOURCE_MANIFEST.json`. Este corte no modifica ninguna regla: usa esos documentos únicamente para conservar el contrato de cinco posiciones, Ataque/Guardia, zonas y flujo ya vigente.
+- Se registra JCP-DEC-044 y se actualiza `docs/diseno/GREYBOX_INTERFAZ_FINAL_V0_1.md`. La referencia de escritorio queda calibrada a 1600×900 con carta 63:88 y `U=72`: campo 72×101, Guardia 101×72, envolvente 101×101, separación de columnas 11, filas 105, mano 86×120, preview 180×251, zonas laterales 60×90, HUD 33 y rail contextual 274.
+- `demo/card_tile.gd` deja de mantener tamaños independientes 70×94 / 94×70 / 84×112 / 190×258 y adopta las métricas comunes. La orientación de Guardia sigue siendo una rotación dimensional, no una reducción de escala.
+- `demo/juego_cartas_table_greybox.gd` sustituye las antiguas envolventes 106×96 por 101×101, usa 11 px entre columnas y centra zonas auxiliares compactas. Cinco posiciones forman un núcleo de 549 px; con una zona auxiliar por lado el ancho funcional ronda 701 px.
+- La mano se sobreescribe solo en la capa greybox: mantiene cartas rectas y de igual tamaño para ambos jugadores; el paso horizontal baja de 94 a 76, 60 y 48 px al crecer de 5 a 7, 9 y 10+ cartas. Primero se solapa y solo una futura prueba justificaría reducir escala.
+- El tablero recibe aproximadamente el 80 % del ancho de referencia y el lateral queda como rail secundario. No se añadieron `EFECTOS ACTIVOS`, `¿por qué no puedo?`, contadores extra, tooltips avanzados ni historial enriquecido: JCP-DEC-043 sigue limitando este corte a la mesa.
+- No se modificaron `UniversalCardEngine`, `juego_cartas_propio_module.gd`, catálogo, acciones, privacidad, replay ni persistencia.
+- **Verificación pendiente:** este entorno no ejecuta el Godot 4.7 local ni puede regenerar el acceso directo del escritorio. No se atribuye ningún PASS nuevo. El siguiente paso es parser/runtime, mesa manual, flujo de ataque, IA, verticales y captura real 1600×900 antes de otro retoque visual.
+
 ## 2026-09-12 — Prioridad reordenada: mesa primero
 
 - Tras completar la investigación comercial y comunitaria de interfaz, el diseñador decidió no intentar implementar todas las mejoras de UX al mismo tiempo.
