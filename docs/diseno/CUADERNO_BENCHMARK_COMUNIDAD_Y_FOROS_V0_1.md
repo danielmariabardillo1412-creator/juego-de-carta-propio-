@@ -1,9 +1,11 @@
 # Cuaderno de benchmark — comunidad y foros V0.1
 
-Estado: **cuaderno de investigación activo; anexo del benchmark de interfaz**  
+Estado: **investigación conservada y aparcada; no bloquea el greybox de mesa**  
 Fecha: **2026-09-12**  
 Ámbito: **ideas de UX/QoL propuestas por jugadores y filtradas por viabilidad técnica para JCP**  
 Documento relacionado: `docs/diseno/CUADERNO_BENCHMARK_INTERFAZ_TCG_V0_1.md`
+
+> **Prioridad vigente (JCP-DEC-043):** este cuaderno se conserva íntegro para una fase posterior. Primero se cierra, verifica y prueba humanamente la mesa/greybox. Las ideas de este documento no se implementan ahora salvo que una resulte imprescindible para que la propia mesa sea jugable.
 
 ## Propósito
 
@@ -64,7 +66,7 @@ Debe mostrar **fuente + efecto + duración**, no solo un icono misterioso.
 
 ### Prioridad
 
-**ALTA. Candidata para el estándar previo a prueba humana.**
+**ALTA como QoL futura. Aparcada hasta estabilizar la mesa.**
 
 ## Patrón comunitario 2 — «¿Por qué no puedo hacer esto?»
 
@@ -119,7 +121,7 @@ En la carta pequeña solo se mantiene el resumen mínimo; no intentaremos meter 
 
 ### Prioridad
 
-**ALTA.**
+**ALTA como mejora posterior; no requisito del cierre actual de mesa.**
 
 ## Patrón comunitario 4 — Mostrar la procedencia de cada bono, penalización o inmunidad
 
@@ -145,7 +147,7 @@ Esto encaja con `EFECTOS ACTIVOS`; no debe convertirse en otro sistema paralelo.
 
 ### Prioridad
 
-**ALTA-MEDIA.**
+**ALTA-MEDIA, aparcada con `EFECTOS ACTIVOS`.**
 
 ## Patrón comunitario 5 — Contadores y usos restantes visibles
 
@@ -170,7 +172,7 @@ En lugar de texto grande:
 
 ### Prioridad
 
-**ALTA.** Especialmente porque nuestro juego ya contiene varios efectos `una vez por turno`.
+**ALTA como QoL posterior.**
 
 ## Patrón comunitario 6 — Menos ventanas y menos clics inútiles
 
@@ -193,7 +195,7 @@ Jugadores de Master Duel y otras adaptaciones digitales se quejan mucho más de 
 
 ### Prioridad
 
-**ALTA.**
+**ALTA como mejora de flujo posterior a la mesa estable.**
 
 ## Patrón comunitario 7 — Poder mirar el tablero mientras decides
 
@@ -216,7 +218,7 @@ Las decisiones excepcionales —F067, redirección M13, Fusión, selección de o
 
 ### Prioridad
 
-**ALTA-MEDIA.**
+**ALTA-MEDIA, posterior a la mesa.**
 
 ## Patrón comunitario 8 — Confirmar solo donde importa; cancelar antes de comprometer
 
@@ -241,7 +243,7 @@ No implementaremos un rebobinado de acciones ya resueltas: complicaría informac
 
 ### Prioridad
 
-**ALTA.**
+**ALTA como QoL posterior; la mesa actual solo debe conservar un flujo que no impida añadirlo.**
 
 ## Patrón comunitario 9 — Animaciones opcionales, rápidas y nunca necesarias para comprender
 
@@ -266,7 +268,7 @@ Esto encaja especialmente bien con nuestras limitaciones técnicas:
 
 ### Prioridad
 
-**MEDIA, pero debe condicionarnos desde ya.**
+**MEDIA, pero debe condicionarnos desde ya sin requerir implementación.**
 
 ## Patrón comunitario 10 — Historial útil, no vertedero técnico
 
@@ -290,7 +292,7 @@ Al pulsar una entrada podría abrirse el preview de la carta/efecto si esa ident
 
 ### Prioridad
 
-**MEDIA.**
+**MEDIA, posterior al greybox.**
 
 ## Patrón comunitario 11 — Tooltips configurables; no tutorial perpetuo
 
@@ -372,12 +374,12 @@ Se rechaza. Reducir prompts no significa quitar decisiones. Una respuesta opcion
 
 | Idea | Valor para jugador | Coste técnico | Fase recomendada |
 | --- | --- | --- | --- |
-| texto estructurado y cláusula relevante | muy alto | bajo-medio | greybox consolidado |
-| contadores/usos visibles | alto | bajo-medio | greybox consolidado |
-| cancelar selección antes de commit | alto | bajo | greybox consolidado |
-| reducir clics sin elección real | alto | bajo-medio | greybox consolidado |
-| inspeccionar tablero durante decisión | alto | bajo-medio | greybox consolidado |
-| efectos activos con fuente/duración | muy alto | medio | greybox / siguiente corte |
+| texto estructurado y cláusula relevante | muy alto | bajo-medio | después de estabilizar mesa |
+| contadores/usos visibles | alto | bajo-medio | después de estabilizar mesa |
+| cancelar selección antes de commit | alto | bajo | después de estabilizar mesa |
+| reducir clics sin elección real | alto | bajo-medio | después de estabilizar mesa |
+| inspeccionar tablero durante decisión | alto | bajo-medio | después de estabilizar mesa |
+| efectos activos con fuente/duración | muy alto | medio | fase QoL posterior |
 | procedencia de buffs/debuffs | alto | medio | junto a efectos activos |
 | `¿por qué no puedo?` desde UCE | muy alto | medio-alto | fase propia tras layout |
 | historial humano/clicable | medio-alto | medio | tras greybox |
@@ -399,17 +401,10 @@ Estas cuatro ideas no requieren 3D, animación de personajes ni producción art�
 
 ## Consecuencia para el benchmark principal
 
-Este anexo no autoriza todavía código nuevo. Antes de adaptar el greybox, la síntesis final debe cruzar:
+Este anexo no autoriza código nuevo. Por JCP-DEC-043, la secuencia vigente es:
 
-- benchmark de productos existentes (`CUADERNO_BENCHMARK_INTERFAZ_TCG_V0_1.md`);
-- este benchmark comunitario;
-- reglas y privacidad propias de JCP;
-- coste real de implementación.
+1. cerrar y verificar la mesa/greybox con el benchmark comercial y las reglas propias;
+2. realizar una primera partida humana representativa;
+3. reabrir este cuaderno y seleccionar las mejoras de UX que realmente merezcan una fase de implementación.
 
-La siguiente consolidación debe distinguir tres grupos:
-
-- **obligatorio en el greybox humano**;
-- **deseable después de validar la mesa**;
-- **aparcado para una fase futura**.
-
-Así evitamos tanto copiar las limitaciones de los grandes juegos como intentar satisfacer cada deseo de un foro.
+El contenido queda preservado para evitar repetir investigación, pero no amplía el alcance de la mesa actual.
