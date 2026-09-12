@@ -3,6 +3,16 @@ extends Button
 
 signal card_selected(instance_id: String)
 
+# Métricas visuales de referencia para el greybox. La relación 63:88 se usa
+# como proporción TCG base y todos los modos principales conservan esa silueta.
+const CARD_REFERENCE_WIDTH := 63.0
+const CARD_REFERENCE_HEIGHT := 88.0
+const CARD_ASPECT_RATIO := CARD_REFERENCE_WIDTH / CARD_REFERENCE_HEIGHT
+const FIELD_ATTACK_SIZE := Vector2(72, 101)
+const FIELD_GUARD_SIZE := Vector2(101, 72)
+const HAND_CARD_SIZE := Vector2(86, 120)
+const PREVIEW_CARD_SIZE := Vector2(180, 251)
+
 var instance_id := ""
 var card_type := ""
 var element := ""
@@ -113,18 +123,16 @@ func _build_face(title: String, detail: String) -> void:
 
 func _card_size() -> Vector2:
 	if display_mode == "preview":
-		return Vector2(190, 258)
-	if display_mode == "hand":
-		return Vector2(84, 112)
-	if display_mode == "opponent_hand":
-		return Vector2(84, 112)
+		return PREVIEW_CARD_SIZE
+	if display_mode in ["hand", "opponent_hand"]:
+		return HAND_CARD_SIZE
 	if display_mode == "opponent_field":
-		return Vector2(94, 70) if card_posture == "guard" else Vector2(70, 94)
+		return FIELD_GUARD_SIZE if card_posture == "guard" else FIELD_ATTACK_SIZE
 	if display_mode == "terrain":
 		return Vector2(112, 54)
 	if card_posture == "guard":
-		return Vector2(94, 70)
-	return Vector2(70, 94)
+		return FIELD_GUARD_SIZE
+	return FIELD_ATTACK_SIZE
 
 
 func _apply_card_style(interactive: bool, selected: bool = false) -> void:
