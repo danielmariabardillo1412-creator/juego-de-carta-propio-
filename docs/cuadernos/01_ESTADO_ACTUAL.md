@@ -3,7 +3,7 @@
 Última actualización: **2026-09-12**  
 Módulo: **`zapiti.juego_cartas_propio`**  
 Versión: **`0.24.0-stress-hardening`**  
-Estado: **prototipo de reglas con mesa visual de duelo local; motor con último RUNTIME PASS en Godot 4.7 estable; fase visual greybox V0.1 abierta, con benchmark comercial y comunitario activo antes de consolidar medidas y todavía pendiente de verificación runtime**
+Estado: **prototipo de reglas con mesa visual de duelo local; motor con último RUNTIME PASS en Godot 4.7 estable; fase visual greybox V0.1 abierta y prioridad inmediata puesta en consolidar la mesa. El benchmark comunitario queda documentado y aparcado para una fase posterior de UX**
 
 ## Límites del trabajo
 
@@ -150,23 +150,20 @@ El 2026-09-12 se cambió el orden de la prueba humana: antes de jugar una sesió
 
 La primera implementación escrita de esta rama se conserva como **andamio**, no como autoridad definitiva de medidas. Antes de seguir puliéndola se consolidará el benchmark de interfaces TCG descrito a continuación.
 
-## Benchmark de interfaz activo — 2026-09-12
+## Benchmark de interfaz y prioridad vigente — 2026-09-12
 
-El documento principal de esta etapa es `docs/diseno/CUADERNO_BENCHMARK_INTERFAZ_TCG_V0_1.md`. Ya contiene dos pasadas de referencias comerciales: además de Yu-Gi-Oh!/Magic estudia Runeterra, Shadowverse, Pokémon, Marvel Snap, Flesh and Blood, Lorcana, Shadowverse: Evolve, Eternal, Hearthstone, GWENT, Duel Links y Pokémon TCG Pocket. La síntesis de alta confianza usa carta 63:88, unidad `U`, casilla capaz de alojar Ataque/Guardia sin variar escala, clic/tap como control canónico, objetivos sobre tablero, mini-cadena temporal y breakpoint móvil real.
+El documento principal para **cerrar la mesa** es `docs/diseno/CUADERNO_BENCHMARK_INTERFAZ_TCG_V0_1.md`. Ya contiene dos pasadas de referencias comerciales: además de Yu-Gi-Oh!/Magic estudia Runeterra, Shadowverse, Pokémon, Marvel Snap, Flesh and Blood, Lorcana, Shadowverse: Evolve, Eternal, Hearthstone, GWENT, Duel Links y Pokémon TCG Pocket. La síntesis de alta confianza usa carta 63:88, unidad `U`, casilla capaz de alojar Ataque/Guardia sin variar escala, clic/tap como control canónico, objetivos sobre tablero, mini-cadena temporal y breakpoint móvil real.
 
-Se añadió además `docs/diseno/CUADERNO_BENCHMARK_COMUNIDAD_Y_FOROS_V0_1.md`, dedicado a feedback real de jugadores en Reddit, Steam y BoardGameGeek. El filtro es explícitamente técnico: no se incorporan peticiones de cinemáticas 3D ni VFX fuera de alcance; se priorizan mejoras de información, flujo y accesibilidad que un proyecto pequeño puede mantener.
+El anexo `docs/diseno/CUADERNO_BENCHMARK_COMUNIDAD_Y_FOROS_V0_1.md` conserva las mejoras de QoL halladas en foros —efectos activos, `¿por qué no puedo?`, texto estructurado, usos visibles, menos clics, inspección durante decisiones, cancelación pre-commit y feedback 2D ligero—, pero **queda aparcado como fuente de una fase posterior**. No bloquea ni amplía el alcance del greybox actual.
 
-Hallazgos comunitarios de mayor valor para JCP:
+La prioridad inmediata es exclusivamente:
 
-- vista contextual de **efectos activos** con fuente y duración;
-- futura consulta del motor **`¿por qué no puedo?`** para explicar una acción bloqueada sin duplicar reglas en UI;
-- texto de carta estructurado y resaltado de la cláusula que se está resolviendo;
-- indicadores discretos de usos restantes, habilidades consumidas y duraciones;
-- menos ventanas y clics cuando no existe elección real;
-- permitir inspeccionar el tablero mientras una decisión contextual está pendiente;
-- cancelar/reseleccionar libremente antes del punto de commit, pero no deshacer acciones ya resueltas por UCE;
-- animaciones 2D breves, opcionales y nunca necesarias para entender una regla.
+1. cerrar proporciones, unidad `U`, envolvente de Ataque/Guardia y distribución de la mesa;
+2. fijar mano, HUD, zonas laterales, lateral/preview y gramática mínima de selección/destinos necesaria para jugar;
+3. trasladar ese estándar al contrato del greybox y adaptar el andamio existente;
+4. ejecutar parser/runtime, pruebas proporcionales y captura real;
+5. corregir problemas estructurales de la mesa y realizar la primera partida humana representativa.
 
-Estas ideas siguen siendo candidatas de interfaz, no nuevas reglas del duelo. El greybox escrito continúa como andamio hasta clasificar la síntesis en `obligatorio antes de prueba humana`, `después del greybox` y `futuro`.
+Solo después se reabrirá el benchmark comunitario para decidir qué mejoras de UX merece implementar. No se introducirán ahora `EFECTOS ACTIVOS`, `¿por qué no puedo?`, contadores adicionales, tooltips avanzados ni otras capas de QoL salvo que una de ellas resulte imprescindible para que la propia mesa sea jugable.
 
-**Estado de la fase:** abierta. El motor conserva su último PASS cerrado; la investigación de interfaz es documental y el greybox consolidado todavía no ha pasado parser/runtime ni inspección gráfica. Próximo paso: cerrar el estándar de interfaz cruzando benchmark comercial + comunidad + reglas propias, aplicarlo al andamio y después ejecutar las puertas de Godot y captura antes de la partida humana completa.
+**Estado de la fase:** abierta. El motor conserva su último PASS cerrado; el trabajo activo vuelve a ser la mesa/greybox. El benchmark comunitario está documentado y preservado, pero no está en ejecución.
