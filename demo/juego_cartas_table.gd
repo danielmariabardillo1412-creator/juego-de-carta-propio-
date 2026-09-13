@@ -11,6 +11,8 @@ const CardTile = preload("res://demo/card_tile.gd")
 const ProjectedFieldPiece = preload("res://demo/projected_field_piece.gd")
 const FieldTemplateLayer = preload("res://demo/field_template_layer.gd")
 const DuelTableBackdrop = preload("res://demo/duel_table_backdrop.gd")
+const TableInteractionState = preload("res://demo/table_interaction_state.gd")
+const CreatureDropSlot = preload("res://demo/creature_drop_slot.gd")
 
 # Contrato visual greybox 63:88, medido sobre una referencia de 1600×900.
 const DESIGN_U := 72.0
@@ -62,6 +64,8 @@ var _visible_card_locations: Dictionary = {}
 var _visual_slot_assignments: Dictionary = {}
 var _pending_visual_placement: Dictionary = {}
 var _ai_running := false
+var _creature_interaction = TableInteractionState.new()
+var _last_committed_action: Dictionary = {}
 
 var _summary_label: Label
 var _viewer_label: Label
@@ -90,6 +94,8 @@ var _field_layer: Control
 var _choice_overlay: PanelContainer
 var _choice_overlay_title: Label
 var _choice_overlay_list: VBoxContainer
+var _creature_mode_popup: PanelContainer
+var _creature_mode_buttons: HBoxContainer
 var _end_turn_dialog: ConfirmationDialog
 var _terrain_dialog: ConfirmationDialog
 var _pending_terrain_action: Dictionary = {}
@@ -112,6 +118,8 @@ func start_match(seed: int = DEFAULT_SEED, config_overrides: Dictionary = {}) ->
 	_visual_slot_assignments = {}
 	_pending_visual_placement = {}
 	_ai_running = false
+	_creature_interaction.reset()
+	_last_committed_action = {}
 	if not _engine.is_ready():
 		_status_message = "No se pudo construir el motor: %s" % str(_engine.construction_error())
 		_refresh()
@@ -138,6 +146,7 @@ func set_viewer(player_id: int, require_reveal: bool = true) -> void:
 	_privacy_hidden = require_reveal
 	_selected_card_id = ""
 	_choice_actions = []
+	_creature_interaction.reset()
 	_status_message = "Vista preparada para %s." % PLAYER_NAMES[player_id]
 	_refresh()
 
@@ -196,6 +205,7 @@ func load_match(path: String = DEFAULT_SAVE_PATH) -> bool:
 	_request_number = _engine.state_version()
 	_selected_card_id = ""
 	_choice_actions = []
+	_creature_interaction.reset()
 	_privacy_hidden = true
 	_status_message = "Partida cargada y verificada; revela la mesa para continuar."
 	_refresh()
@@ -228,6 +238,10 @@ func debug_snapshot() -> Dictionary:
 		"related_action_count": related_count,
 		"choice_action_count": _choice_actions.size(),
 		"choice_overlay_visible": _choice_overlay.visible if _choice_overlay != null else false,
+		"creature_interaction": _creature_interaction.snapshot(),
+		"creature_mode_popup_visible": _creature_mode_popup.visible if _creature_mode_popup != null else false,
+		"request_number": _request_number,
+		"last_committed_action": _last_committed_action.duplicate(true),
 		"card_detail_text": _card_detail.text if _card_detail != null else "",
 		"result_visible": _result_panel.visible if _result_panel != null else false,
 		"result_text": _result_label.text if _result_label != null else "",
@@ -529,6 +543,16 @@ func _build_interface() -> void:
 	_choice_overlay_list = VBoxContainer.new()
 	_choice_overlay_list.add_theme_constant_override("separation", 6)
 	choice_box.add_child(_choice_overlay_list)
+	_creature_mode_popup = PanelContainer.new()
+	_creature_mode_popup.name = "CreatureModePopup"
+	_creature_mode_popup.visible = false
+	_creature_mode_popup.z_index = 21
+	_creature_mode_popup.custom_minimum_size = Vector2(186, 38)
+	_creature_mode_popup.add_theme_stylebox_override("panel", _style_box(Color("111b22ed"), Color("b9a566"), 1, 5))
+	add_child(_creature_mode_popup)
+	_creature_mode_buttons = HBoxContainer.new()
+	_creature_mode_buttons.add_theme_constant_override("separation", 4)
+	_creature_mode_popup.add_child(_creature_mode_buttons)
 
 
 func _refresh() -> void:
@@ -544,6 +568,8 @@ func _refresh() -> void:
 	_clear_children(_action_list)
 	_clear_children(_choice_overlay_list)
 	_choice_overlay.visible = false
+	_clear_children(_creature_mode_buttons)
+	_creature_mode_popup.visible = false
 	if _engine == null or not _engine.is_ready() or _engine.lifecycle_name() == "CREATED":
 		_summary_label.text = _status_message
 		return
@@ -581,6 +607,7 @@ func _refresh() -> void:
 	var visible_cards: Dictionary = _visible_cards_by_id(game["card_table"])
 	if not _selected_card_id.is_empty() and not visible_index.has(_selected_card_id):
 		_selected_card_id = ""
+		_creature_interaction.reset()
 	_card_detail.visible = not _selected_card_id.is_empty()
 	_card_detail.text = _card_detail_text(visible_cards.get(_selected_card_id, {})) if _card_detail.visible else ""
 	_clear_children(_card_preview_box)
@@ -594,6 +621,8 @@ func _refresh() -> void:
 		if choice_action in actions:
 			valid_choices.append(choice_action)
 	_choice_actions = valid_choices
+	if _creature_interaction.phase == TableInteractionState.Phase.MODE_SELECTION:
+		_render_creature_mode_popup(actions)
 	if not _choice_actions.is_empty():
 		_action_heading.text = "ELECCIÓN"
 		_selection_label.text = "Confirma la postura u opción en la ventana central."
@@ -750,6 +779,7 @@ func _build_pile_row(table: Dictionary, player_id: int) -> Control:
 func _build_field_row(table: Dictionary, player_id: int, kind: String, opponent: bool) -> Control:
 	var row := Control.new()
 	row.name = ("Opponent" if opponent else "Player") + ("SupportRow" if kind == "support" else "CreatureRow")
+	row.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	row.custom_minimum_size.y = FIELD_ROW_HEIGHT
 	row.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	var zone: Dictionary = table["zones"]["%s:%d" % [kind, player_id]]
@@ -771,7 +801,7 @@ func _build_field_row(table: Dictionary, player_id: int, kind: String, opponent:
 		var card = cards_by_slot.get(slot_index, null)
 		var left := 0.0 # La posición final sale exclusivamente de FieldTemplateLayer.
 		if card == null:
-			var empty := Button.new()
+			var empty := CreatureDropSlot.new()
 			empty.name = "CreatureSlot" if kind == "creatures" else "SupportSlot"
 			empty.set_meta("board_role", "creature_slot" if kind == "creatures" else "support_slot")
 			empty.set_anchors_preset(Control.PRESET_CENTER_TOP)
@@ -781,7 +811,8 @@ func _build_field_row(table: Dictionary, player_id: int, kind: String, opponent:
 			empty.offset_top = (FIELD_ENVELOPE_SIZE.y - slot_size.y) * 0.5
 			empty.offset_bottom = empty.offset_top + slot_size.y
 			var direct_attack := player_id != _viewer_id and kind == "creatures" and _selected_direct_attack_available()
-			var direct_destination := (player_id == _viewer_id and _selected_card_can_enter(kind)) or direct_attack
+			var creature_destination: bool = player_id == _viewer_id and kind == "creatures" and _creature_interaction.source_id == _selected_card_id and slot_index in _creature_interaction.legal_destinations
+			var direct_destination: bool = (creature_destination if kind == "creatures" and _creature_interaction.phase != TableInteractionState.Phase.IDLE else (player_id == _viewer_id and _selected_card_can_enter(kind))) or direct_attack
 			var destination_text := "ATAQUE DIRECTO" if direct_attack else ("JUGAR AQUÍ" if direct_destination else "")
 			empty.text = ("A" if kind == "support" else "C") + "%d%s" % [slot_index + 1, "\n" + destination_text if not destination_text.is_empty() else ""]
 			empty.tooltip_text = "Selecciona una carta y después esta casilla."
@@ -790,6 +821,8 @@ func _build_field_row(table: Dictionary, player_id: int, kind: String, opponent:
 			empty.add_theme_stylebox_override("normal", _style_box(Color("263b31b8") if direct_destination else Color("09131530"), Color("e2c977") if direct_destination else Color("77908780"), 2 if direct_destination else 1, 5, true))
 			empty.add_theme_stylebox_override("hover", _style_box(Color("294139"), Color("e2c977"), 2, 5))
 			empty.pressed.connect(_on_empty_slot_pressed.bind(player_id, kind, slot_index))
+			empty.configure_drop(player_id, slot_index, _legal_creature_source_ids() if player_id == _viewer_id and kind == "creatures" else [])
+			empty.creature_dropped.connect(_on_creature_dropped)
 			row.add_child(empty)
 			empty.self_modulate = Color.TRANSPARENT
 			var guide = _projected_piece(empty.text.get_slice("\n", 0), destination_text, Color("263b31"), Color("e2c977") if direct_destination else Color("779087"), false, false, false, direct_destination)
@@ -1099,6 +1132,10 @@ func _make_card_tile(
 ) -> Button:
 	var tile = CardTile.new()
 	tile.setup(instance_id, title, detail, interactive, card_type, element, position, face_up, display_mode)
+	if kind == "hand" and player_id == _viewer_id and card_type == "creature":
+		tile.set_creature_drag_enabled(not _legal_creature_actions(instance_id).is_empty())
+		tile.creature_drag_started.connect(_on_creature_drag_started)
+		tile.creature_drag_failed.connect(_on_creature_drag_failed)
 	tile.set_selected(not instance_id.is_empty() and instance_id == _selected_card_id)
 	tile.set_targeted(not instance_id.is_empty() and _is_direct_target(instance_id, player_id, kind))
 	if player_id >= 0 and not kind.is_empty():
@@ -1290,12 +1327,61 @@ func _group_action_entries(entries: Array) -> Array:
 	return groups
 
 
-func _select_card(instance_id: String) -> void:
+func _legal_creature_actions(instance_id: String) -> Array:
+	var result: Array = []
+	if _engine == null or _privacy_hidden:
+		return result
+	var modes := {}
+	for action in _engine.get_legal_actions(_viewer_id):
+		if action["type"] in ["summon_creature", "set_creature"] and action["payload"].get("instance_id", "") == instance_id:
+			# Una habilidad de entrada puede ofrecer varios comandos de Ataque con
+			# objetivos distintos. Su elección pertenece a otra pasada de UX.
+			if modes.has(action["type"]):
+				return []
+			modes[action["type"]] = true
+			result.append(action)
+	return result
+
+
+func _legal_creature_source_ids() -> Array:
+	var result: Array = []
+	if _engine == null or _privacy_hidden:
+		return result
+	for action in _engine.get_legal_actions(_viewer_id):
+		if action["type"] in ["summon_creature", "set_creature"]:
+			var instance_id: String = action["payload"].get("instance_id", "")
+			if not instance_id.is_empty() and instance_id not in result and not _legal_creature_actions(instance_id).is_empty():
+				result.append(instance_id)
+	return result
+
+
+func _field_slot(kind: String, visual_slot: int) -> Control:
+	if _field_layer == null or visual_slot < 0 or visual_slot >= 5 or _field_layer.get_child_count() != 4:
+		return null
+	var row_index := 2 if kind == "creatures" else 3
+	return _field_layer.get_child(row_index).get_child(visual_slot)
+
+
+func _legal_empty_creature_slots() -> Array:
+	var result: Array = []
+	for slot_index in range(5):
+		if _field_slot("creatures", slot_index) is CreatureDropSlot:
+			result.append(slot_index)
+	return result
+
+
+func _select_card(instance_id: String, refresh_view: bool = true) -> void:
 	_selected_card_id = instance_id
 	_choice_actions = []
 	_pending_visual_placement = {}
 	var location: Dictionary = _visible_card_locations.get(instance_id, {})
 	var game: Dictionary = _engine.get_player_state(_viewer_id)["game"] if _engine != null else {}
+	var creature_actions := _legal_creature_actions(instance_id)
+	if location.get("kind", "") == "hand" and location.get("player_id", -1) == _viewer_id and not creature_actions.is_empty():
+		_creature_interaction.begin_source(instance_id, creature_actions)
+		_creature_interaction.set_destinations(_legal_empty_creature_slots())
+	else:
+		_creature_interaction.reset()
 	if location.get("kind", "") == "creatures" and location.get("player_id", -1) == _viewer_id:
 		if game.get("phase", "") == "COMBAT":
 			_status_message = "Atacante seleccionado: pulsa una criatura rival iluminada o la vida rival para ataque directo."
@@ -1303,7 +1389,23 @@ func _select_card(instance_id: String) -> void:
 			_status_message = "Criatura seleccionada. Para atacar, pulsa IR A COMBATE; para Fusionar, elige un material iluminado."
 	else:
 		_status_message = "Carta seleccionada: pulsa una casilla amarilla o una carta objetivo válida."
-	_refresh()
+	if refresh_view:
+		_refresh()
+	else:
+		_update_live_drag_highlights()
+
+
+func _update_live_drag_highlights() -> void:
+	if _end_turn_button != null:
+		_end_turn_button.disabled = _creature_interaction.phase != TableInteractionState.Phase.IDLE
+	for slot_index in range(5):
+		var slot := _field_slot("creatures", slot_index)
+		if slot is CreatureDropSlot:
+			for child in slot.get_children():
+				if child is ProjectedFieldPiece:
+					child.highlighted = slot_index in _creature_interaction.legal_destinations
+					child.detail = "JUGAR AQUÍ" if child.highlighted else ""
+					child.queue_redraw()
 
 
 func _selection_instruction(actions: Array, visible_index: Dictionary) -> String:
@@ -1348,6 +1450,49 @@ func _cancel_choices() -> void:
 func _perform_choice(action: Dictionary) -> void:
 	_choice_actions = []
 	_perform_action(action)
+
+
+func _render_creature_mode_popup(legal_actions: Array) -> void:
+	var valid: Array = []
+	for action in _creature_interaction.candidate_actions:
+		if action in legal_actions:
+			valid.append(action)
+	if valid.size() < 2:
+		_creature_interaction.reset()
+		_pending_visual_placement = {}
+		return
+	for action in valid:
+		var button := Button.new()
+		button.text = "ATAQUE" if action["type"] == "summon_creature" else "GUARDIA"
+		button.tooltip_text = "Boca arriba" if action["type"] == "summon_creature" else "Boca abajo"
+		button.custom_minimum_size = Vector2(88, 30)
+		button.pressed.connect(_commit_creature_mode.bind(action))
+		_creature_mode_buttons.add_child(button)
+	_creature_mode_popup.visible = true
+	call_deferred("_position_creature_mode_popup")
+
+
+func _position_creature_mode_popup() -> void:
+	if not _creature_mode_popup.visible:
+		return
+	var slot := _field_slot("creatures", _creature_interaction.target_slot)
+	if slot == null:
+		return
+	_creature_mode_popup.reset_size()
+	var slot_rect := slot.get_global_rect()
+	var width := maxf(_creature_mode_popup.size.x, 186.0)
+	var height := maxf(_creature_mode_popup.size.y, 38.0)
+	var bounds := _board_surface.get_global_rect()
+	var left := clampf(slot_rect.get_center().x - width * 0.5, bounds.position.x + 4.0, bounds.end.x - width - 4.0)
+	var top := slot_rect.position.y - height - 5.0
+	for child in slot.get_children():
+		if child is ProjectedFieldPiece:
+			var visual_top := INF
+			for corner in child.projected_corners():
+				visual_top = minf(visual_top, (child.get_global_transform() * corner).y)
+			top = visual_top - height - 3.0
+			break
+	_creature_mode_popup.global_position = Vector2(left, top)
 
 
 func _describe_action(action: Dictionary, cards: Dictionary) -> String:
@@ -1433,6 +1578,7 @@ func _perform_action(action: Dictionary, from_ai: bool = false) -> bool:
 		_refresh()
 		return false
 	_status_message = "Aplicada: %s" % action["label"]
+	_last_committed_action = {"type": action["type"], "actor_id": action["actor_id"], "payload": action["payload"].duplicate(true)}
 	if not from_ai and not _pending_visual_placement.is_empty():
 		var placement_key := "%s:%d" % [_pending_visual_placement["kind"], _pending_visual_placement["player_id"]]
 		if not _visual_slot_assignments.has(placement_key):
@@ -1441,6 +1587,7 @@ func _perform_action(action: Dictionary, from_ai: bool = false) -> bool:
 	_selected_card_id = ""
 	_choice_actions = []
 	_pending_visual_placement = {}
+	_creature_interaction.reset()
 	if _engine.lifecycle_name() == "RUNNING":
 		var public_game: Dictionary = _engine.get_public_state()["game"]
 		_auto_resolve_opening(public_game["active_player"])
@@ -1473,6 +1620,9 @@ func _restart_pressed() -> void:
 
 
 func _on_empty_slot_pressed(player_id: int, kind: String, visual_slot: int) -> void:
+	if kind == "creatures" and player_id == _viewer_id and _creature_interaction.phase != TableInteractionState.Phase.IDLE:
+		_choose_creature_slot(visual_slot)
+		return
 	if player_id != _viewer_id and kind == "creatures" and not _selected_card_id.is_empty():
 		for action in _engine.get_legal_actions(_viewer_id):
 			if action["type"] == "attack" and action["payload"].get("attacker_id", "") == _selected_card_id and action["payload"].get("target_slot", -2) == -1:
@@ -1497,6 +1647,80 @@ func _on_empty_slot_pressed(player_id: int, kind: String, visual_slot: int) -> v
 	else:
 		_status_message = "Elige cómo entra la criatura: visible en ataque u oculta en guardia."
 		_open_action_choices(candidates)
+
+
+func _choose_creature_slot(visual_slot: int) -> void:
+	if _privacy_hidden or _creature_interaction.phase not in [TableInteractionState.Phase.SOURCE_SELECTED, TableInteractionState.Phase.TARGET_SELECTION] or visual_slot not in _creature_interaction.legal_destinations or not (_field_slot("creatures", visual_slot) is CreatureDropSlot):
+		_status_message = "Esa casilla no es un destino legal para la criatura seleccionada."
+		_refresh()
+		return
+	var candidates := _legal_creature_actions(_creature_interaction.source_id)
+	if candidates.is_empty():
+		_cancel_creature_interaction()
+		return
+	_pending_visual_placement = {"kind": "creatures", "player_id": _viewer_id, "slot": visual_slot, "instance_id": _creature_interaction.source_id}
+	if candidates.size() == 1:
+		_perform_action(candidates[0])
+		return
+	_creature_interaction.choose_target(visual_slot, candidates)
+	_status_message = "Elige Ataque o Guardia junto a la casilla."
+	_refresh()
+
+
+func _commit_creature_mode(action: Dictionary) -> void:
+	if _creature_interaction.phase != TableInteractionState.Phase.MODE_SELECTION or action not in _creature_interaction.candidate_actions or action not in _legal_creature_actions(_creature_interaction.source_id):
+		return
+	_creature_interaction.pending_mode = "attack" if action["type"] == "summon_creature" else "guard"
+	_perform_action(action)
+
+
+func _on_creature_drag_started(instance_id: String) -> void:
+	if not _legal_creature_actions(instance_id).is_empty():
+		_select_card(instance_id, false)
+
+
+func _on_creature_dropped(instance_id: String, player_id: int, visual_slot: int) -> void:
+	if player_id != _viewer_id or _legal_creature_actions(instance_id).is_empty():
+		_cancel_creature_interaction()
+		return
+	if _creature_interaction.source_id != instance_id:
+		_select_card(instance_id)
+	_choose_creature_slot(visual_slot)
+
+
+func _on_creature_drag_failed(instance_id: String) -> void:
+	if _creature_interaction.source_id == instance_id:
+		_cancel_creature_interaction()
+
+
+func _cancel_creature_interaction() -> void:
+	if _creature_interaction.phase == TableInteractionState.Phase.IDLE:
+		return
+	_creature_interaction.reset()
+	_selected_card_id = ""
+	_choice_actions = []
+	_pending_visual_placement = {}
+	_status_message = ""
+	_refresh()
+
+
+func _input(event: InputEvent) -> void:
+	if _creature_interaction.phase == TableInteractionState.Phase.IDLE:
+		return
+	if event is InputEventKey and event.pressed and not event.echo and event.keycode == KEY_ESCAPE:
+		_cancel_creature_interaction()
+		get_viewport().set_input_as_handled()
+	elif event is InputEventMouseButton and event.pressed and event.button_index == MOUSE_BUTTON_LEFT and _board_surface != null and _board_surface.get_global_rect().has_point(event.global_position):
+		var hovered := get_viewport().gui_get_hovered_control()
+		var over_button := false
+		while hovered != null:
+			if hovered is Button:
+				over_button = true
+				break
+			hovered = hovered.get_parent() as Control
+		if not over_button:
+			_cancel_creature_interaction()
+			get_viewport().set_input_as_handled()
 
 
 func _on_board_card_selected(instance_id: String, player_id: int, kind: String, _visual_slot: int) -> void:
@@ -1661,7 +1885,7 @@ func _update_advance_button(game: Dictionary) -> void:
 	var owns_turn: bool = game["active_player"] == _viewer_id
 	var blocked: bool = actor != _viewer_id or not owns_turn or _privacy_hidden or _engine.lifecycle_name() != "RUNNING" or game["response_window"].get("active", false)
 	_advance_button.disabled = blocked
-	_end_turn_button.disabled = blocked
+	_end_turn_button.disabled = blocked or _creature_interaction.phase != TableInteractionState.Phase.IDLE
 	if actor != _viewer_id:
 		_advance_button.text = "Turno del rival…"
 		return
@@ -1683,12 +1907,14 @@ func _advance_phase_pressed() -> void:
 
 
 func _end_turn_pressed() -> void:
+	if _creature_interaction.phase != TableInteractionState.Phase.IDLE:
+		return
 	if _end_turn_dialog != null:
 		_end_turn_dialog.popup_centered()
 
 
 func _confirm_end_turn() -> void:
-	if _engine == null or _engine.lifecycle_name() != "RUNNING":
+	if _engine == null or _engine.lifecycle_name() != "RUNNING" or _creature_interaction.phase != TableInteractionState.Phase.IDLE:
 		return
 	var starting_player: int = _engine.get_public_state()["game"]["active_player"]
 	if starting_player != _viewer_id:

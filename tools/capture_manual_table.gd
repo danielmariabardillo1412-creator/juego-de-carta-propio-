@@ -71,8 +71,16 @@ func _capture_placed_creature(action_type: String, posture: String, path: String
 		if action["type"] == action_type:
 			chosen = action
 			break
-	if chosen.is_empty() or not table.call("_perform_action", chosen):
+	if chosen.is_empty():
 		printerr("No se pudo colocar una criatura real en %s" % posture)
+		table.queue_free()
+		return false
+	table.call("_select_card", chosen["payload"]["instance_id"])
+	table.call("_on_empty_slot_pressed", 0, "creatures", 2)
+	if table.debug_snapshot()["creature_interaction"]["phase"] == "MODE_SELECTION":
+		table.call("_commit_creature_mode", chosen)
+	if table.debug_snapshot()["view"]["game"]["card_table"]["zones"]["creatures:0"]["count"] != 1:
+		printerr("La interacción no confirmó la criatura en %s" % posture)
 		table.queue_free()
 		return false
 	await process_frame

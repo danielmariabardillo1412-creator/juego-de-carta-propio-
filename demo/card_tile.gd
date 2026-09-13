@@ -2,6 +2,8 @@ extends Button
 ## Carta visual provisional con silueta, postura y reverso. Las reglas siguen perteneciendo al motor.
 
 signal card_selected(instance_id: String)
+signal creature_drag_started(instance_id: String)
+signal creature_drag_failed(instance_id: String)
 
 const FIELD_ATTACK_SIZE := Vector2(72, 101)
 const FIELD_GUARD_SIZE := Vector2(101, 72)
@@ -17,6 +19,8 @@ var face_up := true
 var display_mode := "field"
 var _selected := false
 var _targeted := false
+var _playable := false
+var _creature_drag_enabled := false
 
 
 func setup(
@@ -60,6 +64,35 @@ func set_selected(value: bool) -> void:
 func set_targeted(value: bool) -> void:
 	_targeted = value
 	_apply_card_style(not disabled, _selected)
+
+
+func set_creature_drag_enabled(value: bool) -> void:
+	_creature_drag_enabled = value
+	_playable = value
+	_apply_card_style(not disabled, _selected)
+
+
+func _get_drag_data(_at_position: Vector2) -> Variant:
+	if not _creature_drag_enabled or disabled or instance_id.is_empty():
+		return null
+	creature_drag_started.emit(instance_id)
+	var preview := PanelContainer.new()
+	preview.custom_minimum_size = HAND_SIZE
+	preview.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	var label := Label.new()
+	label.text = tooltip_text.get_slice("\n", 0)
+	label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+	label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	label.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	preview.add_child(label)
+	set_drag_preview(preview)
+	return {"kind": "creature_from_hand", "instance_id": instance_id}
+
+
+func _notification(what: int) -> void:
+	if what == NOTIFICATION_DRAG_END and _creature_drag_enabled and not get_viewport().gui_is_drag_successful():
+		creature_drag_failed.emit(instance_id)
 
 
 func _build_face(title: String, detail: String) -> void:
@@ -132,7 +165,7 @@ func _card_size() -> Vector2:
 func _apply_card_style(interactive: bool, selected: bool = false) -> void:
 	var normal := StyleBoxFlat.new()
 	normal.bg_color = _card_color() if face_up else Color("221b30")
-	normal.border_color = Color("fff09b") if selected or _targeted else (Color("c3a85d") if face_up else Color("786894"))
+	normal.border_color = Color("fff09b") if selected or _targeted else (Color("ddc56d") if _playable else (Color("c3a85d") if face_up else Color("786894")))
 	normal.set_border_width_all(4 if selected else (3 if _targeted else 2))
 	normal.set_corner_radius_all(4)
 	normal.shadow_color = Color("00000088")

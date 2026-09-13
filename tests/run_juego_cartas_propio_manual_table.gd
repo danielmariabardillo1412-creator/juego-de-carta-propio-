@@ -181,17 +181,18 @@ func _run() -> void:
 		if destination != null:
 			destination.emit_signal("pressed")
 		snapshot = table.debug_snapshot()
-		_expect(snapshot["choice_action_count"] >= 2, "pulsar una casilla pide elegir ataque o guardia")
-		_expect(snapshot["choice_overlay_visible"], "ataque o guardia aparece sobre el tablero y no en el lateral")
+		_expect_equal(snapshot["creature_interaction"]["phase"], "MODE_SELECTION", "pulsar una casilla pide elegir ataque o guardia antes de COMMIT")
+		_expect(snapshot["creature_mode_popup_visible"], "ataque o guardia aparece junto a la casilla")
+		_expect(not snapshot["choice_overlay_visible"], "la elección de criatura ya no usa la ventana central")
 		var summon_choice: Dictionary = {}
-		for choice_action in table.get("_choice_actions"):
+		for choice_action in table.get("_creature_interaction").candidate_actions:
 			if choice_action["type"] == "summon_creature":
 				summon_choice = choice_action
 				break
 		_expect(not summon_choice.is_empty(), "la elección directa conserva la invocación visible")
 		if not summon_choice.is_empty():
-			var choice_button: Button = _find_button_with_text(table.get("_choice_overlay_list"), "Invocar")
-			_expect(choice_button != null, "la ventana central contiene un botón de invocación real")
+			var choice_button: Button = _find_button_with_text(table.get("_creature_mode_buttons"), "ATAQUE")
+			_expect(choice_button != null, "el menú contextual contiene un botón real de Ataque")
 			if choice_button != null:
 				choice_button.emit_signal("pressed")
 		snapshot = table.debug_snapshot()

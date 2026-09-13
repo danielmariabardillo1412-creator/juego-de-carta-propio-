@@ -1,5 +1,13 @@
 # Cuaderno 3 — Bitácora de trabajo
 
+## 2026-09-13 — UX A/B de invocación de criatura
+
+- Se comprobaron el estado Git y el respaldo de perspectiva (`mesa_perspectiva_ok_v1` y copia física de diecisiete archivos), se leyeron `AGENTS.md`, índice y los cuatro cuadernos, y se confirmó la caché de diseño 6/6. Se preservó el estado de fondo negro previo a UX en un punto Git separado: `mesa_fondo_negro_preux` (`89bf866`). No hubo pull, descarga ni merge y el respaldo de perspectiva no se sobrescribió.
+- `demo/table_interaction_state.gd` encapsula fuente, acciones UCE candidatas, destinos legales, modo y cancelabilidad. `demo/card_tile.gd` inicia el drag desde la mano y `demo/creature_drop_slot.gd` valida la entrega. `demo/juego_cartas_table.gd` lleva tanto clic-clic como drag a la misma selección de casilla y solo ejecuta la acción UCE al elegir Ataque/Guardia —o la casilla si solo hay un modo—. Escape, clic vacío y drag fallido cancelan; Terminar turno queda bloqueado mientras falta un paso. Ningún otro tipo de carta recibe nueva UX.
+- La prueba de eventos GUI reales detectó que `PlayerSupportRow` interceptaba los clics de la mano pese a ser visualmente transparente; se ajustó únicamente su filtro de ratón, sin moverlo ni alterar la plantilla. El menú contextual se recolocó en el hueco entre territorios para no tapar cartas. Se añadieron pruebas de lógica y entrada gráfica y se adaptó la aserción antigua que esperaba el selector central de postura: la invocación ahora tiene una fase intermedia junto a la casilla. Las capturas de selección, menú y carta confirmada se generaron a 1600×900. Resultados finales y límites, en el cuaderno 4.
+- Las criaturas con varias acciones UCE distintas para el mismo modo, como una habilidad de entrada que exige objetivo, no se introducen artificialmente en este menú de dos modos: conservan el flujo anterior hasta abordar la UX de habilidades. La puerta final de suites se repitió tras esta salvaguarda.
+- Una aserción GUI adicional descubrió que los contenedores del campo consumían el clic en vacío antes de `_unhandled_input`; se movió la cancelación a `_input` y se distingue un botón real bajo el puntero de una superficie vacía. La prueba gráfica de clic vacío pasó sin mutación; el resto de botones no se intercepta.
+
 ## 2026-09-13 — Respaldo de la perspectiva y tapete casi negro
 
 - Antes de editar se comprobó `git status`, se leyeron `AGENTS.md` y los cuatro cuadernos, se consultó el índice temático y la caché local de diseño pasó 6/6. Este cambio de color procede solo del encargo del diseñador; S00/S01 no fijan colores. Los dieciséis archivos locales de la mesa y sus pruebas/capturas se confirmaron en `9f4ddd4` y se etiquetaron `mesa_perspectiva_ok_v1` sin pull, descarga ni merge.
