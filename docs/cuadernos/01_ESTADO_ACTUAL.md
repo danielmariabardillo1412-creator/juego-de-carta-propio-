@@ -1,6 +1,6 @@
 # Cuaderno 1 — Estado actual
 
-Última actualización: **2026-09-12**
+Última actualización: **2026-09-13**
 Módulo: **`zapiti.juego_cartas_propio`**  
 Versión: **`0.24.0-stress-hardening`**  
 Estado: **prototipo de reglas con mesa visual de duelo local; RUNTIME PASS en Godot 4.7 estable**
@@ -142,3 +142,5 @@ Puerta de perspectiva interna del 2026-09-12: mesa 120/120, ataque 11/11, IA 9/9
 Puerta de proyección real de piezas del 2026-09-12: la representación de las casillas, cartas jugadas y zonas auxiliares ya no es un rectángulo frontal de UI. La fase se ha retirado del centro. Pruebas y capturas con criatura real en Ataque y Guardia: véase el cuaderno 4.
 
 Puerta de plantilla medida del 2026-09-12: se abandona el ancho independiente por fila. Las cuatro bandas, veinte centros, casillas, cartas colocadas y zonas laterales derivan de la misma malla 1280×720. Mesa **207/207**, ataque **11/11**, IA **9/9**, criaturas **38/38** y fusiones **82/82**; capturas de Ataque/Guardia reales a 1600×900 en el cuaderno 4. Continúan abiertos la validación humana y la legibilidad en otras resoluciones.
+
+Pasada de fondo neutro del 2026-09-13 (JCP-DEC-049): la geometría anterior queda congelada como base válida en el commit local `9f4ddd4` y la etiqueta `mesa_perspectiva_ok_v1`, además de la copia física `artifacts/backup_mesa_perspectiva_ok_v1/`. Solo cambian los tres rellenos verdes del tapete por grises casi negros temporales. La plantilla, perspectiva, casillas, manos, rail, cabecera, fases y comportamiento no cambian. Las capturas de 1600×900 con campo vacío, criatura real en Ataque y criatura real en Guardia están en `artifacts/`; resultados de esta puerta en el cuaderno 4.

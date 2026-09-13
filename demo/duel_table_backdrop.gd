@@ -16,17 +16,17 @@ func _draw() -> void:
 	var bottom_right := Vector2(size.x * 0.985, size.y * 0.985)
 	var bottom_left := Vector2(size.x * 0.015, size.y * 0.985)
 	var table_shape := PackedVector2Array([top_left, top_right, bottom_right, bottom_left])
-	draw_colored_polygon(table_shape, Color("182925"))
+	draw_colored_polygon(table_shape, Color("101112"))
 	var far_band := PackedVector2Array([
 		top_left, top_right,
 		top_right.lerp(bottom_right, 0.49), top_left.lerp(bottom_left, 0.49),
 	])
-	draw_colored_polygon(far_band, Color("101d23b8"))
+	draw_colored_polygon(far_band, Color("0e1012b8"))
 	var near_band := PackedVector2Array([
 		top_left.lerp(bottom_left, 0.52), top_right.lerp(bottom_right, 0.52),
 		bottom_right, bottom_left,
 	])
-	draw_colored_polygon(near_band, Color("21403885"))
+	draw_colored_polygon(near_band, Color("12141685"))
 	# Las cartas y casillas ya dan estructura: solo tres costuras suaves en el tapete.
 	for fraction in [0.28, 0.50, 0.76]:
 		var left := top_left.lerp(bottom_left, fraction)

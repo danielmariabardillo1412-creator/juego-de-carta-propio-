@@ -1,5 +1,12 @@
 # Cuaderno 3 — Bitácora de trabajo
 
+## 2026-09-13 — Respaldo de la perspectiva y tapete casi negro
+
+- Antes de editar se comprobó `git status`, se leyeron `AGENTS.md` y los cuatro cuadernos, se consultó el índice temático y la caché local de diseño pasó 6/6. Este cambio de color procede solo del encargo del diseñador; S00/S01 no fijan colores. Los dieciséis archivos locales de la mesa y sus pruebas/capturas se confirmaron en `9f4ddd4` y se etiquetaron `mesa_perspectiva_ok_v1` sin pull, descarga ni merge.
+- Se creó `artifacts/backup_mesa_perspectiva_ok_v1/` con diecisiete archivos (cinco scripts de mesa, escena, cuatro cuadernos, prueba, capturador y cinco capturas) y se comparó el SHA-256 de cada copia con su origen. Conserva el estado geométrico anterior al cambio de color.
+- `demo/duel_table_backdrop.gd` solo sustituye tres colores de relleno verde por casi negro; no cambia una coordenada, vértice, banda, línea, hitbox ni lógica. `field_template_layer.gd`, `juego_cartas_table.gd`, `projected_field_piece.gd` y `card_tile.gd` permanecen idénticos al respaldo Git. Se regeneraron las cinco capturas reales 1600×900, incluidas Ataque y Guardia. Las fases siguen arriba, no en el centro.
+- Se actualizan los cuatro cuadernos por JCP-DEC-049; los resultados exactos de prueba y riesgos continúan en el cuaderno 4. El acceso directo del escritorio se regeneró y comprobó contra Godot 4.7, la raíz de F y la escena explícita de la mesa. El fondo negro queda como base temporal, no como arte final.
+
 ## 2026-09-12 — Malla geométrica única basada en 1280×720
 
 - Se conservaron todos los cambios locales previos, sin pull, descarga ni merge. Se leyeron `AGENTS.md`, el índice y los cuatro cuadernos; la caché de seis fuentes continúa íntegra. La geometría viene exclusivamente de las cuatro bandas y veinte centros medidos entregados por el diseñador. S00/S01 se consultaron solo para mantener zonas y fases reglamentarias.

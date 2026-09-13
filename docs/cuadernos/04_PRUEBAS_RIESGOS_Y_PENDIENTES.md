@@ -1,5 +1,14 @@
 # Cuaderno 4 — Pruebas, riesgos y pendientes
 
+## Verificación de fondo negro temporal y respaldo — 2026-09-13
+
+- Respaldo Git identificable: commit local `9f4ddd4`, etiqueta `mesa_perspectiva_ok_v1`. Respaldo físico: `artifacts/backup_mesa_perspectiva_ok_v1/`, diecisiete archivos contrastados por SHA-256. Ningún pull, rama remota ni merge.
+- Godot 4.7: mesa manual **207/207**, flujo de ataque **11/11**, IA básica **9/9**, habilidades de criaturas **38/38** y ocho Fusiones verticales **82/82**. Solo se repiten estas cinco suites proporcionales; no se atribuye una nueva ejecución de las suites generales del motor.
+- Capturas gráficas reales de **1600×900**: `artifacts/manual_table_preview.png` (general), `artifacts/manual_table_attack_projected.png` (criatura invocada en Ataque) y `artifacts/manual_table_guard_projected.png` (criatura colocada en Guardia). El capturador confirma la postura y la pieza proyectada. Revisión visual: fondo casi negro, casillas y zonas laterales en su posición, misma proyección de cartas, fase en HUD superior y centro libre de fases.
+- Comprobación de no regresión geométrica: el diff de `demo/duel_table_backdrop.gd` frente a la etiqueta contiene únicamente tres literales de color; `demo/field_template_layer.gd`, `demo/juego_cartas_table.gd`, `demo/projected_field_piece.gd` y `demo/card_tile.gd` siguen idénticos. No se modificaron reglas, motor, IA, privacidad, guardado/carga ni Fusión.
+- Acceso directo del escritorio regenerado y verificado: Godot 4.7 abre `res://demo/juego_cartas_table.tscn` con el proyecto vigente en F. `git diff --check` sin errores de espacios; los avisos de conversión LF/CRLF no alteran contenido.
+- Riesgos abiertos: una partida humana completa y la legibilidad/responsive fuera de 1600×900 siguen pendientes. El negro es temporal, no representa el arte final. Un cambio visual posterior debe empezar por otro respaldo de emergencia.
+
 ## Verificación de plantilla medida 1280×720 — 2026-09-12
 
 - Godot 4.7: mesa manual **207/207**, flujo de ataque **11/11**, IA básica **9/9**, habilidades de criaturas **38/38** y ocho Fusiones verticales **82/82**; cinco suites con código 0. La prueba nueva compara literalmente los 16 vértices y 20 centros de la referencia, escala uniforme, C3 centrada, separación progresiva, costura central fuera de casillas y esquinas de las piezas derivadas de su banda. La primera ejecución falló por aserciones antiguas que asumían un ancho fijo y una misma inclinación lateral para todas las piezas; se sustituyeron por comprobaciones de la malla medida y la puerta final pasó.
