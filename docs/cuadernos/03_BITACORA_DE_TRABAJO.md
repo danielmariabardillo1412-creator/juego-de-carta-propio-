@@ -1,5 +1,38 @@
 # Cuaderno 3 — Bitácora de trabajo
 
+## 2026-09-12 — Malla geométrica única basada en 1280×720
+
+- Se conservaron todos los cambios locales previos, sin pull, descarga ni merge. Se leyeron `AGENTS.md`, el índice y los cuatro cuadernos; la caché de seis fuentes continúa íntegra. La geometría viene exclusivamente de las cuatro bandas y veinte centros medidos entregados por el diseñador. S00/S01 se consultaron solo para mantener zonas y fases reglamentarias.
+- `demo/field_template_layer.gd` registra literalmente las coordenadas 1280×720, aplica una escala uniforme según el rectángulo disponible y centra C3. Dibuja las cuatro bandas de la malla. `demo/juego_cartas_table.gd` ya no usa anchos de fila elegidos por separado: coloca los controles de las cuatro filas sobre esa capa y da a cada visual de casilla/carta un cuadrilátero interpolado de la banda medida. Las zonas Fusión/Territorio/Baraja/Cementerio extrapolan los mismos bordes. Manos, cabecera, fase compacta, rail, fondo externo, UCE y señales se conservan.
+- La prueba de mesa compara literalmente las cuatro bandas y veinte centros con la referencia, exige escala uniforme, C3 centrada, apertura progresiva y verifica que cada pieza coincide con la banda o sus flancos. En la primera captura la costura central del fondo cruzaba la tercera banda; una traslación común mínima la dejó entre bandos sin tocar el fondo ni alterar proporciones. Se repitieron capturas 1600×900 con criatura real en Ataque y Guardia, no solo mesa vacía. Resultados exactos en el cuaderno 4.
+
+## 2026-09-12 — Proyección real del campo y fase fuera del centro
+
+- Se conservaron los cambios locales previos sin pull ni merge. Lectura de `AGENTS.md`, índice y cuatro cuadernos; caché de diseño 6/6. Fuente visual: corrección expresa del diseñador; S00/S01 solo delimitan las zonas y las seis fases mecánicas. No se cambió el fondo trapezoidal, la posición general, rail, colores ni tamaños base.
+- `demo/projected_field_piece.gd` dibuja superficies trapezoidales con plano, borde y sombra discretos. `demo/juego_cartas_table.gd` las usa para las veinte casillas, cada carta efectivamente jugada en Ataque o Guardia y las ocho zonas laterales. Los botones y `CardTile` se conservan como hitboxes invisibles: señales, selección, objetivos y datos visibles continúan por la ruta anterior. La mano propia y rival no se proyectan. La banda de fases sale del centro; el HUD superior muestra solo la fase actual.
+- `tests/run_juego_cartas_propio_manual_table.gd` comprueba proyección, número de zonas y ausencia de la banda central. `tools/capture_manual_table.gd` añade escenarios de partida con una criatura real en Ataque y otra oculta en Guardia; comprueba estado y componente proyectado antes de guardar sus capturas. La primera revisión gráfica mostró rótulos desplazados; se corrigió el origen horizontal del texto y se repitieron las imágenes.
+- Cinco suites PASS y cinco capturas reales 1600×900 revisadas; los resultados y riesgos constan en el cuaderno 4. No se tocaron UCE, reglas, IA, privacidad, replay, persistencia ni Fusión.
+
+## 2026-09-12 — Perspectiva interna de filas y zonas
+
+- Se trabajó sobre la copia local con cambios anteriores sin confirmar; no hubo pull, descarga remota ni merge. Se leyeron las instrucciones y cuadernos. `docs/diseno/GREYBOX_INTERFAZ_FINAL_V0_1.md`, `docs/diseno/CUADERNO_BENCHMARK_INTERFAZ_TCG_V0_1.md` y `demo/juego_cartas_table_greybox.gd` no existen localmente, por lo que no se les atribuyó contenido. Encargo explícito del diseñador como fuente de geometría; S00/S01 solo delimitan zonas y autoridad mecánica; caché local de seis fuentes coherente.
+- `demo/juego_cartas_table.gd`: el tapete exterior y los tamaños nominales se conservaron. Las cinco casillas de cada fila usan un ancho específico según su profundidad (549/570/590/625 px, de rival lejano a propio cercano), y las zonas laterales se sitúan respecto a ese mismo ancho. `tests/run_juego_cartas_propio_manual_table.gd` comprueba las cuatro distribuciones y ambos flancos, además de las métricas previas.
+- Capturas reales de vista inicial, selección y elección en 1600×900 revisadas: lado propio más abierto, rival más recogido, zonas laterales alineadas y sin clipping observado. Cinco suites proporcionales PASS; detalles en el cuaderno 4. No se modificaron motor, reglas, catálogo, IA, privacidad, combate, Fusión, replay, persistencia ni interacción.
+
+## 2026-09-12 — Perspectiva oblicua de jugador sentado
+
+- Se continuó sobre los cambios locales no confirmados de la iteración de métricas, sin descartarlos ni hacer pull o merge. Los documentos `GREYBOX_INTERFAZ_FINAL_V0_1.md` y `CUADERNO_BENCHMARK_INTERFAZ_TCG_V0_1.md` siguen ausentes localmente; se siguió solo el encargo explícito y las fuentes S00/S01 para conservar límites mecánicos.
+- `demo/duel_table_backdrop.gd` sustituye la cuadrícula técnica por un tapete trapezoidal con borde cercano, fondo rival estrecho y tres costuras suaves. `demo/juego_cartas_table.gd` conserva las medidas nominales de JCP-DEC-044, pero escala visualmente filas rivales mediante envoltorios neutros (la primera captura reveló que Godot anulaba la escala aplicada directamente a hijos de `Container`). El HUD rival se estrechó; el propio mantiene más presencia.
+- La cabecera principal queda reducida a mandos de partida. Vistas, cortina y semilla se pliegan bajo Herramientas. Estado breve contextual, rail sin pared de instrucciones y selección con preview se conservan. No se modificaron reglas, motor, catálogo, privacidad, replay, persistencia, IA ni flujo de Fusión.
+- `tests/run_juego_cartas_propio_manual_table.gd` cubre la escala visual y el acceso a Herramientas. Capturas y resultados exactos de esta pasada quedan en el cuaderno 4.
+
+## 2026-09-12 — Métricas greybox locales a 1600×900
+
+- El repositorio local estaba limpio antes de editar. Los archivos `docs/diseno/GREYBOX_INTERFAZ_FINAL_V0_1.md`, `docs/diseno/CUADERNO_BENCHMARK_INTERFAZ_TCG_V0_1.md` y `demo/juego_cartas_table_greybox.gd` no existen en esta copia ni en el taller local; no se hizo pull ni se atribuyó contenido a ellos. Se reutilizó la escena y la mesa actuales.
+- `demo/card_tile.gd` y `demo/juego_cartas_table.gd` adoptan las métricas de JCP-DEC-044: campo 72×101/101×72 en envolvente 101×101, hueco 11, manos 86×120 con paso decreciente, preview 180×251, auxiliares 60×90 y rail 274. Las guías vacías dejan de repetir `VACÍA`. Guardar/Cargar bajan al pie del rail para que el título y la selección sean legibles.
+- `tests/run_juego_cartas_propio_manual_table.gd` incorpora comprobaciones explícitas de tamaños y pasos de mano. El render real se capturó a 1600×900 con vista inicial, selección y elección. No se modificó `UniversalCardEngine`, el módulo de reglas, catálogo, replay ni persistencia.
+- Pruebas y acceso directo: véase la sección de verificación greybox en el cuaderno 4. Fuente consultada para este corte de presentación: encargo del diseñador, índice local de S00/S01 y caché de fuentes 6/6.
+
 ## 2026-09-11 — Rediseño 2,5D de mesa y corrección del ataque visual
 
 - Tras revisar de nuevo las referencias aportadas por el diseñador se retiraron las dos grandes cajas planas. El tablero es ahora un trapecio original en perspectiva, pero la profundidad no altera la escala de juego: cartas, casillas y zonas laterales de ambos jugadores tienen idéntico tamaño. Ambas manos aparecen completas y en fila recta. Las casillas tienen silueta de carta; se conservan marco provisional, reverso, color semántico y ficha ampliada lateral a 1600×900.

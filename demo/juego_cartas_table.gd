@@ -8,7 +8,25 @@ const SaveFileStore = preload("res://src/persistence/save_file_store.gd")
 const ReplayService = preload("res://src/persistence/replay_service.gd")
 const GameModule = preload("res://games/juego_cartas_propio/juego_cartas_propio_module.gd")
 const CardTile = preload("res://demo/card_tile.gd")
+const ProjectedFieldPiece = preload("res://demo/projected_field_piece.gd")
+const FieldTemplateLayer = preload("res://demo/field_template_layer.gd")
 const DuelTableBackdrop = preload("res://demo/duel_table_backdrop.gd")
+
+# Contrato visual greybox 63:88, medido sobre una referencia de 1600×900.
+const DESIGN_U := 72.0
+const FIELD_ATTACK_SIZE := Vector2(72, 101)
+const FIELD_GUARD_SIZE := Vector2(101, 72)
+const FIELD_ENVELOPE_SIZE := Vector2(101, 101)
+const FIELD_GAP := 11.0
+const FIELD_ROW_HEIGHT := 105.0
+const HAND_CARD_SIZE := Vector2(86, 120)
+const HAND_ROW_HEIGHT := 124.0
+const PLAYER_HUD_HEIGHT := 33.0
+const SIDE_ZONE_SIZE := Vector2(60, 90)
+const CONTEXT_RAIL_WIDTH := 274.0
+const PHASE_HUD_HEIGHT := 26.0
+const HAND_STEPS := [94.0, 76.0, 60.0, 48.0]
+const OPPONENT_HAND_DEPTH_SCALE := 0.90
 
 const DEFAULT_SEED := 210921
 const DEFAULT_SAVE_PATH := "user://juego_cartas_propio/partida_manual.json"
@@ -67,7 +85,8 @@ var _board_surface: PanelContainer
 var _ai_enabled: CheckButton
 var _advance_button: Button
 var _end_turn_button: Button
-var _phase_labels: Dictionary = {}
+var _phase_indicator: Label
+var _field_layer: Control
 var _choice_overlay: PanelContainer
 var _choice_overlay_title: Label
 var _choice_overlay_list: VBoxContainer
@@ -213,17 +232,17 @@ func debug_snapshot() -> Dictionary:
 		"result_visible": _result_panel.visible if _result_panel != null else false,
 		"result_text": _result_label.text if _result_label != null else "",
 		"board_player_count": _board_box.get_child_count() if _board_box != null else 0,
-		"visual_board_layout": "perspective-opponent-divider-player",
-		"creature_slot_count": _count_nodes_with_role(_board_box, "creature_slot"),
-		"support_slot_count": _count_nodes_with_role(_board_box, "support_slot"),
-		"terrain_lane_count": _count_nodes_with_role(_board_box, "terrain_lane"),
-		"side_pile_count": _count_nodes_with_role(_board_box, "pile_zone"),
+		"visual_board_layout": "measured-template-1280x720",
+		"creature_slot_count": _count_nodes_with_role(_board_surface, "creature_slot"),
+		"support_slot_count": _count_nodes_with_role(_board_surface, "support_slot"),
+		"terrain_lane_count": _count_nodes_with_role(_board_surface, "terrain_lane"),
+		"side_pile_count": _count_nodes_with_role(_board_surface, "pile_zone"),
 		"ai_enabled": _ai_enabled.button_pressed if _ai_enabled != null else false,
 		"ai_running": _ai_running,
-		"rendered_card_count": _count_card_tiles(_board_box) if _board_box != null else 0,
+		"rendered_card_count": _count_card_tiles(_board_surface) if _board_surface != null else 0,
 		"rendered_action_count": _action_list.get_child_count() if _action_list != null else 0,
 		"event_expanded": _event_expanded,
-		"phase_track_count": _phase_labels.size(),
+		"phase_track_count": 1 if _phase_indicator != null else 0,
 		"event_text": _event_log.text if _event_log != null else "",
 		"view": envelope,
 	}
@@ -248,37 +267,49 @@ func _build_interface() -> void:
 	root_box.add_theme_constant_override("separation", 5)
 	margin.add_child(root_box)
 
-	var title := Label.new()
-	title.text = "ZAPITY · MESA DE DUELO"
-	title.add_theme_font_size_override("font_size", 19)
-	title.add_theme_color_override("font_color", Color("f3d58a"))
-	root_box.add_child(title)
-
 	var controls := HBoxContainer.new()
 	controls.add_theme_constant_override("separation", 8)
 	root_box.add_child(controls)
+	var title := Label.new()
+	title.text = "MESA DE DUELO"
+	title.add_theme_font_size_override("font_size", 16)
+	title.add_theme_color_override("font_color", Color("d9c896"))
+	controls.add_child(title)
+	var debug_controls := HBoxContainer.new()
+	debug_controls.name = "TestTools"
+	debug_controls.visible = false
+	debug_controls.add_theme_constant_override("separation", 8)
+	root_box.add_child(debug_controls)
 	_viewer_label = Label.new()
 	_viewer_label.custom_minimum_size.x = 105
-	controls.add_child(_viewer_label)
+	debug_controls.add_child(_viewer_label)
 	for player_id in [0, 1]:
 		var viewer_button := Button.new()
 		viewer_button.text = "Ver J%d" % (player_id + 1)
 		viewer_button.pressed.connect(set_viewer.bind(player_id, true))
-		controls.add_child(viewer_button)
+		debug_controls.add_child(viewer_button)
 	var curtain_button := Button.new()
 	curtain_button.text = "Cortina"
 	curtain_button.pressed.connect(_toggle_privacy)
-	controls.add_child(curtain_button)
+	debug_controls.add_child(curtain_button)
 	_auto_follow = CheckButton.new()
 	_auto_follow.text = "Cortina 2P"
 	_auto_follow.button_pressed = true
-	controls.add_child(_auto_follow)
+	debug_controls.add_child(_auto_follow)
 	_ai_enabled = CheckButton.new()
 	_ai_enabled.name = "AIEnabled"
 	_ai_enabled.text = "Rival IA"
 	_ai_enabled.button_pressed = DisplayServer.get_name() != "headless"
 	_ai_enabled.toggled.connect(_on_ai_toggled)
 	controls.add_child(_ai_enabled)
+	var primary_spacer := Control.new()
+	primary_spacer.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	controls.add_child(primary_spacer)
+	_phase_indicator = Label.new()
+	_phase_indicator.name = "PhaseIndicator"
+	_phase_indicator.add_theme_color_override("font_color", Color("ffe291"))
+	_phase_indicator.add_theme_font_size_override("font_size", 12)
+	controls.add_child(_phase_indicator)
 	_advance_button = Button.new()
 	_advance_button.name = "AdvancePhaseButton"
 	_advance_button.pressed.connect(_advance_phase_pressed)
@@ -288,16 +319,22 @@ func _build_interface() -> void:
 	_end_turn_button.text = "TERMINAR TURNO"
 	_end_turn_button.pressed.connect(_end_turn_pressed)
 	controls.add_child(_end_turn_button)
-	var spacer := Control.new()
-	spacer.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	controls.add_child(spacer)
+	var tools_button := Button.new()
+	tools_button.name = "TestToolsButton"
+	tools_button.text = "Herramientas ▸"
+	tools_button.flat = true
+	tools_button.pressed.connect(func() -> void:
+		debug_controls.visible = not debug_controls.visible
+		tools_button.text = "Herramientas ▾" if debug_controls.visible else "Herramientas ▸"
+	)
+	controls.add_child(tools_button)
 	_seed_input = SpinBox.new()
 	_seed_input.min_value = 0
 	_seed_input.max_value = 2147483646
 	_seed_input.step = 1
 	_seed_input.value = DEFAULT_SEED
 	_seed_input.custom_minimum_size.x = 105
-	controls.add_child(_seed_input)
+	debug_controls.add_child(_seed_input)
 	var restart_button := Button.new()
 	restart_button.name = "RestartButton"
 	restart_button.text = "Nueva partida"
@@ -308,20 +345,9 @@ func _build_interface() -> void:
 	_summary_label.name = "Summary"
 	_summary_label.autowrap_mode = TextServer.AUTOWRAP_OFF
 	_summary_label.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
-	_summary_label.add_theme_color_override("font_color", Color("dce7ee"))
+	_summary_label.add_theme_color_override("font_color", Color("aabbb9"))
+	_summary_label.add_theme_font_size_override("font_size", 13)
 	root_box.add_child(_summary_label)
-	var phase_track := HBoxContainer.new()
-	phase_track.alignment = BoxContainer.ALIGNMENT_CENTER
-	phase_track.add_theme_constant_override("separation", 3)
-	for phase_id in ["START", "DRAW", "MAIN_1", "COMBAT", "MAIN_2", "END"]:
-		var phase_label := Label.new()
-		phase_label.text = _phase_name(phase_id).to_upper()
-		phase_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-		phase_label.custom_minimum_size = Vector2(82, 22)
-		phase_label.add_theme_font_size_override("font_size", 11)
-		phase_track.add_child(phase_label)
-		_phase_labels[phase_id] = phase_label
-
 	_result_panel = PanelContainer.new()
 	_result_panel.name = "ResultPanel"
 	_result_panel.visible = false
@@ -337,12 +363,12 @@ func _build_interface() -> void:
 	_main_content = HSplitContainer.new()
 	_main_content.name = "MainContent"
 	_main_content.size_flags_vertical = Control.SIZE_EXPAND_FILL
-	_main_content.split_offset = 1260
+	_main_content.split_offset = 1600 - CONTEXT_RAIL_WIDTH - 32
 	root_box.add_child(_main_content)
 
 	_board_surface = PanelContainer.new()
 	_board_surface.name = "BoardSurface"
-	_board_surface.custom_minimum_size = Vector2(960, 620)
+	_board_surface.custom_minimum_size = Vector2(960, 2 * (PLAYER_HUD_HEIGHT + HAND_ROW_HEIGHT + 2 * FIELD_ROW_HEIGHT) + PHASE_HUD_HEIGHT)
 	_board_surface.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	_board_surface.add_theme_stylebox_override("panel", _style_box(Color("071014"), Color("8b7951"), 2, 10))
 	_main_content.add_child(_board_surface)
@@ -350,18 +376,6 @@ func _build_interface() -> void:
 	board_art.name = "DuelTableBackdrop"
 	board_art.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	_board_surface.add_child(board_art)
-	var phase_overlay := CenterContainer.new()
-	phase_overlay.name = "PhaseOverlay"
-	phase_overlay.z_index = 8
-	phase_overlay.anchor_left = 0.0
-	phase_overlay.anchor_top = 0.5
-	phase_overlay.anchor_right = 1.0
-	phase_overlay.anchor_bottom = 0.5
-	phase_overlay.offset_top = -14
-	phase_overlay.offset_bottom = 14
-	phase_overlay.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	_board_surface.add_child(phase_overlay)
-	phase_overlay.add_child(phase_track)
 	var board_margin := MarginContainer.new()
 	board_margin.add_theme_constant_override("margin_left", 22)
 	board_margin.add_theme_constant_override("margin_right", 22)
@@ -374,32 +388,35 @@ func _build_interface() -> void:
 	_board_box.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	_board_box.add_theme_constant_override("separation", 0)
 	board_margin.add_child(_board_box)
+	_field_layer = FieldTemplateLayer.new()
+	_field_layer.name = "FieldTemplateLayer"
+	_field_layer.z_index = 3
+	_board_surface.add_child(_field_layer)
+	_field_layer.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	_field_layer.resized.connect(_layout_template_field)
 
 	var action_panel := PanelContainer.new()
-	action_panel.custom_minimum_size.x = 292
+	action_panel.custom_minimum_size.x = CONTEXT_RAIL_WIDTH
 	action_panel.add_theme_stylebox_override("panel", _style_box(Color("111b22"), Color("3b4b55"), 1, 7))
 	_main_content.add_child(action_panel)
 	var action_outer := VBoxContainer.new()
 	action_panel.add_child(action_outer)
 	_action_heading = Label.new()
 	_action_heading.text = "ACCIONES LEGALES"
-	_action_heading.add_theme_font_size_override("font_size", 17)
+	_action_heading.add_theme_font_size_override("font_size", 14)
+	_action_heading.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	_action_heading.clip_text = true
 	var action_header := HBoxContainer.new()
 	action_outer.add_child(action_header)
 	action_header.add_child(_action_heading)
-	var action_header_spacer := Control.new()
-	action_header_spacer.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	action_header.add_child(action_header_spacer)
 	var save_button := Button.new()
 	save_button.name = "SaveButton"
 	save_button.text = "Guardar"
 	save_button.pressed.connect(save_match)
-	action_header.add_child(save_button)
 	var load_button := Button.new()
 	load_button.name = "LoadButton"
 	load_button.text = "Cargar"
 	load_button.pressed.connect(load_match)
-	action_header.add_child(load_button)
 	_selection_label = Label.new()
 	_selection_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	_selection_label.add_theme_color_override("font_color", Color("f3d58a"))
@@ -443,6 +460,11 @@ func _build_interface() -> void:
 	_event_log.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	_event_log.visible = false
 	event_box.add_child(_event_log)
+	var utility_row := HBoxContainer.new()
+	utility_row.alignment = BoxContainer.ALIGNMENT_END
+	action_outer.add_child(utility_row)
+	utility_row.add_child(save_button)
+	utility_row.add_child(load_button)
 
 	_end_turn_dialog = ConfirmationDialog.new()
 	_end_turn_dialog.title = "Terminar el turno"
@@ -518,6 +540,7 @@ func _refresh() -> void:
 	_privacy_panel.visible = _privacy_hidden
 	_privacy_label.text = "Mesa oculta\nEntrega el control a %s" % PLAYER_NAMES[_viewer_id]
 	_clear_children(_board_box)
+	_clear_children(_field_layer)
 	_clear_children(_action_list)
 	_clear_children(_choice_overlay_list)
 	_choice_overlay.visible = false
@@ -532,17 +555,27 @@ func _refresh() -> void:
 	var active: int = game["active_player"]
 	var response: Dictionary = game["response_window"]
 	var actor: int = response.get("priority_player_id", active) if response.get("active", false) else active
-	var energy: Dictionary = game["energy"][str(active)]
-	_summary_label.text = "Turno %d · Ronda %d · %s · Activo: %s · Prioridad: %s · Energía %d/%d · %s" % [
-		game["turn_number"], game["round_number"], _phase_name(game["phase"]), PLAYER_NAMES[active],
-		PLAYER_NAMES[actor], energy["available"], energy["maximum"], _status_message,
-	]
+	var turn_context := "Tu turno" if active == _viewer_id else "Turno rival"
+	if response.get("active", false):
+		turn_context = "Puedes responder" if actor == _viewer_id else "El rival puede responder"
+	_summary_label.text = "%s · %s" % [turn_context, _phase_name(game["phase"])]
+	if not _selected_card_id.is_empty():
+		_summary_label.text += " · Carta seleccionada"
+	if _status_message.begins_with("No ") or _status_message.begins_with("Acción rechazada") or _status_message.begins_with("Esa "):
+		_summary_label.text += " · " + _status_message
+	_summary_label.tooltip_text = _status_message
 	_update_advance_button(game)
 	_update_phase_track(game["phase"])
 	if _privacy_hidden:
 		return
 	_board_box.add_child(_build_player_half(game, 1 - _viewer_id, true))
 	_board_box.add_child(_build_player_half(game, _viewer_id, false))
+	for field_spec in [[1 - _viewer_id, "support", true], [1 - _viewer_id, "creatures", true], [_viewer_id, "creatures", false], [_viewer_id, "support", false]]:
+		var field_row := _build_field_row(game["card_table"], field_spec[0], field_spec[1], field_spec[2])
+		_field_layer.add_child(field_row)
+		field_row.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	_layout_template_field()
+	call_deferred("_layout_template_field")
 	var actions: Array = _engine.get_legal_actions(_viewer_id)
 	var visible_index: Dictionary = _visible_card_index(game["card_table"])
 	var visible_cards: Dictionary = _visible_cards_by_id(game["card_table"])
@@ -562,7 +595,7 @@ func _refresh() -> void:
 			valid_choices.append(choice_action)
 	_choice_actions = valid_choices
 	if not _choice_actions.is_empty():
-		_action_heading.text = "ELECCIÓN EN EL TABLERO"
+		_action_heading.text = "ELECCIÓN"
 		_selection_label.text = "Confirma la postura u opción en la ventana central."
 		_choice_overlay.visible = true
 		_choice_overlay_title.text = "ELIGE EL RESULTADO DE LA FUSIÓN" if _choice_actions[0]["type"] == "fuse_creatures" else "¿CÓMO QUIERES JUGARLA?"
@@ -589,7 +622,7 @@ func _refresh() -> void:
 		elif actions[index]["type"] == "concede":
 			general.append(entry)
 	var ordered_actions: Array = related + general
-	_action_heading.text = "INFORMACIÓN Y DECISIONES · %d" % ordered_actions.size()
+	_action_heading.text = "CARTA" if _selected_card_id.is_empty() else "SELECCIÓN · %d" % ordered_actions.size()
 	_selection_label.text = _selection_instruction(actions, visible_index)
 	if actions.is_empty():
 		var none := Label.new()
@@ -616,7 +649,7 @@ func _build_player_half(game: Dictionary, player_id: int, opponent: bool) -> Con
 	var panel := MarginContainer.new()
 	panel.name = "OpponentHalf" if opponent else "PlayerHalf"
 	panel.size_flags_vertical = Control.SIZE_EXPAND_FILL
-	panel.size_flags_stretch_ratio = 0.84 if opponent else 1.16
+	panel.size_flags_stretch_ratio = 1.0
 	var table: Dictionary = game["card_table"]
 	panel.add_theme_constant_override("margin_left", 55)
 	panel.add_theme_constant_override("margin_right", 55)
@@ -632,7 +665,7 @@ func _build_player_half(game: Dictionary, player_id: int, opponent: bool) -> Con
 		energy["available"], energy["maximum"],
 	]
 	heading.alignment = HORIZONTAL_ALIGNMENT_CENTER
-	heading.custom_minimum_size.y = 27
+	heading.custom_minimum_size.y = PLAYER_HUD_HEIGHT
 	heading.add_theme_stylebox_override("normal", _style_box(Color("111a20d9"), Color("867346"), 1, 14))
 	heading.add_theme_stylebox_override("hover", _style_box(Color("24302fd9"), Color("e6ca75"), 2, 14))
 	heading.add_theme_font_size_override("font_size", 16)
@@ -646,16 +679,31 @@ func _build_player_half(game: Dictionary, player_id: int, opponent: bool) -> Con
 	else:
 		heading.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	if opponent:
-		outer.add_child(heading)
-		outer.add_child(_build_hand_row(table, player_id))
-		outer.add_child(_build_field_row(table, player_id, "support", true))
-		outer.add_child(_build_field_row(table, player_id, "creatures", true))
+		outer.add_child(_hud_row(heading, 760.0))
+		outer.add_child(_depth_row(_build_hand_row(table, player_id), OPPONENT_HAND_DEPTH_SCALE))
+		outer.add_child(_field_spacer())
+		outer.add_child(_field_spacer())
 	else:
-		outer.add_child(_build_field_row(table, player_id, "creatures", false))
-		outer.add_child(_build_field_row(table, player_id, "support", false))
+		outer.add_child(_field_spacer())
+		outer.add_child(_field_spacer())
 		outer.add_child(_build_hand_row(table, player_id))
-		outer.add_child(heading)
+		outer.add_child(_hud_row(heading, 930.0))
 	return panel
+
+
+func _field_spacer() -> Control:
+	var spacer := Control.new()
+	spacer.custom_minimum_size.y = FIELD_ROW_HEIGHT
+	spacer.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	return spacer
+
+
+func _hud_row(heading: Button, width: float) -> Control:
+	var center := CenterContainer.new()
+	center.custom_minimum_size.y = PLAYER_HUD_HEIGHT
+	heading.custom_minimum_size = Vector2(width, PLAYER_HUD_HEIGHT)
+	center.add_child(heading)
+	return center
 
 
 func _territory_colors(table: Dictionary, player_id: int, opponent: bool) -> Array:
@@ -702,13 +750,11 @@ func _build_pile_row(table: Dictionary, player_id: int) -> Control:
 func _build_field_row(table: Dictionary, player_id: int, kind: String, opponent: bool) -> Control:
 	var row := Control.new()
 	row.name = ("Opponent" if opponent else "Player") + ("SupportRow" if kind == "support" else "CreatureRow")
-	row.custom_minimum_size.y = 98
+	row.custom_minimum_size.y = FIELD_ROW_HEIGHT
 	row.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	var zone: Dictionary = table["zones"]["%s:%d" % [kind, player_id]]
 	var capacity: int = zone["definition"]["capacity"]
-	var envelope_size := Vector2(102, 96)
-	var gap := 15.0
-	var total_width := capacity * envelope_size.x + (capacity - 1) * gap
+	var envelope_size := FIELD_ENVELOPE_SIZE
 	var cards_by_slot := {}
 	for slot in zone["slots"]:
 		if slot["card"] != null:
@@ -723,21 +769,21 @@ func _build_field_row(table: Dictionary, player_id: int, kind: String, opponent:
 				cards_by_slot[hidden_slot] = {"hidden": true, "engine_slot": slot["index"]}
 	for slot_index in range(capacity):
 		var card = cards_by_slot.get(slot_index, null)
-		var left := -total_width * 0.5 + slot_index * (envelope_size.x + gap)
+		var left := 0.0 # La posición final sale exclusivamente de FieldTemplateLayer.
 		if card == null:
 			var empty := Button.new()
 			empty.name = "CreatureSlot" if kind == "creatures" else "SupportSlot"
 			empty.set_meta("board_role", "creature_slot" if kind == "creatures" else "support_slot")
 			empty.set_anchors_preset(Control.PRESET_CENTER_TOP)
-			var slot_size := Vector2(70, 94)
+			var slot_size := FIELD_ATTACK_SIZE
 			empty.offset_left = left + (envelope_size.x - slot_size.x) * 0.5
 			empty.offset_right = empty.offset_left + slot_size.x
-			empty.offset_top = 2
-			empty.offset_bottom = 2 + slot_size.y
+			empty.offset_top = (FIELD_ENVELOPE_SIZE.y - slot_size.y) * 0.5
+			empty.offset_bottom = empty.offset_top + slot_size.y
 			var direct_attack := player_id != _viewer_id and kind == "creatures" and _selected_direct_attack_available()
 			var direct_destination := (player_id == _viewer_id and _selected_card_can_enter(kind)) or direct_attack
-			var destination_text := "ATAQUE DIRECTO" if direct_attack else ("JUGAR AQUÍ" if direct_destination else "VACÍA")
-			empty.text = ("A" if kind == "support" else "C") + "%d\n%s" % [slot_index + 1, destination_text]
+			var destination_text := "ATAQUE DIRECTO" if direct_attack else ("JUGAR AQUÍ" if direct_destination else "")
+			empty.text = ("A" if kind == "support" else "C") + "%d%s" % [slot_index + 1, "\n" + destination_text if not destination_text.is_empty() else ""]
 			empty.tooltip_text = "Selecciona una carta y después esta casilla."
 			empty.add_theme_font_size_override("font_size", 10)
 			empty.add_theme_color_override("font_color", Color("f2d98b") if direct_destination else Color("718781"))
@@ -745,6 +791,10 @@ func _build_field_row(table: Dictionary, player_id: int, kind: String, opponent:
 			empty.add_theme_stylebox_override("hover", _style_box(Color("294139"), Color("e2c977"), 2, 5))
 			empty.pressed.connect(_on_empty_slot_pressed.bind(player_id, kind, slot_index))
 			row.add_child(empty)
+			empty.self_modulate = Color.TRANSPARENT
+			var guide = _projected_piece(empty.text.get_slice("\n", 0), destination_text, Color("263b31"), Color("e2c977") if direct_destination else Color("779087"), false, false, false, direct_destination)
+			empty.add_child(guide)
+			guide.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 		else:
 			var holder := Control.new()
 			holder.name = "CreatureSlot" if kind == "creatures" else "SupportSlot"
@@ -771,6 +821,18 @@ func _build_field_row(table: Dictionary, player_id: int, kind: String, opponent:
 			tile.offset_top = -tile_size.y * 0.5
 			tile.offset_bottom = tile_size.y * 0.5
 			holder.add_child(tile)
+			if tile is CardTile:
+				var visual_title: String = tile.tooltip_text.get_slice("\n", 0)
+				var visual_detail: String = tile.tooltip_text.get_slice("\n", 1)
+				var card_color: Color = tile.call("_card_color")
+				var visual = _projected_piece(visual_title, visual_detail, card_color, Color("ffe58a") if tile.get("_selected") or tile.get("_targeted") else Color("c3a85d"), true, not tile.face_up, tile.card_posture == "guard", tile.get("_selected") or tile.get("_targeted"))
+				holder.add_child(visual)
+				visual.set_anchors_preset(Control.PRESET_CENTER)
+				visual.offset_left = -tile_size.x * 0.5
+				visual.offset_right = tile_size.x * 0.5
+				visual.offset_top = -tile_size.y * 0.5
+				visual.offset_bottom = tile_size.y * 0.5
+				tile.modulate = Color.TRANSPARENT
 			if kind == "creatures" and card is Dictionary and not card.get("hidden", false):
 				var equipment_names := _equipment_names_for(table, player_id, card["instance"]["id"])
 				if not equipment_names.is_empty():
@@ -788,19 +850,62 @@ func _build_field_row(table: Dictionary, player_id: int, kind: String, opponent:
 					equipment.offset_bottom = 0
 					holder.add_child(equipment)
 			row.add_child(holder)
-	_add_field_side_zones(row, table, player_id, kind, opponent, capacity, envelope_size, gap)
+	_add_field_side_zones(row, table, player_id, kind, opponent)
 	return row
 
 
+func _layout_template_field() -> void:
+	if _field_layer == null or _field_layer.get_child_count() != 4:
+		return
+	for band_index in range(4):
+		var row: Control = _field_layer.get_child(band_index)
+		for index in range(7):
+			var piece: Control = row.get_child(index)
+			var visual: Control = null
+			for child in piece.get_children():
+				if child is ProjectedFieldPiece:
+					visual = child
+					break
+			if visual == null:
+				continue
+			var quad: PackedVector2Array
+			if index < 5:
+				quad = _field_layer.slot_corners(band_index, index, visual.guard)
+			else:
+				quad = _field_layer.side_corners(band_index, index == 6)
+			var center := (quad[0] + quad[1] + quad[2] + quad[3]) * 0.25
+			piece.set_anchors_preset(Control.PRESET_TOP_LEFT)
+			piece.position = center - piece.size * 0.5
+			var local_quad := PackedVector2Array()
+			for corner in quad:
+				local_quad.append(corner - piece.position - visual.position)
+			visual.template_corners = local_quad
+			visual.queue_redraw()
+
+
+func _depth_row(row: Control, depth_scale: float) -> Control:
+	var wrapper := Control.new()
+	wrapper.custom_minimum_size.y = row.custom_minimum_size.y
+	wrapper.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	wrapper.add_child(row)
+	row.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	_apply_depth_scale(row, depth_scale)
+	return wrapper
+
+
+func _apply_depth_scale(control: Control, depth_scale: float) -> void:
+	control.scale = Vector2(depth_scale, depth_scale)
+	control.resized.connect(func() -> void:
+		control.pivot_offset = control.size * 0.5
+	)
+
+
 func _add_field_side_zones(
-	row: Control, table: Dictionary, player_id: int, kind: String, opponent: bool,
-	capacity: int, envelope_size: Vector2, gap: float
+	row: Control, table: Dictionary, player_id: int, kind: String, opponent: bool
 ) -> void:
-	var total_width := capacity * envelope_size.x + (capacity - 1) * gap
-	var side_size := Vector2(68, 92)
-	var side_gap := 24.0
-	var left_x := -total_width * 0.5 - side_gap - side_size.x
-	var right_x := total_width * 0.5 + side_gap
+	var side_size := SIDE_ZONE_SIZE
+	var left_x := 0.0
+	var right_x := 0.0
 	if kind == "support":
 		var materials: int = table["zones"]["fusion_materials:%d" % player_id]["count"]
 		_add_side_pile(row, "FUSIÓN", materials, left_x, side_size, opponent)
@@ -827,6 +932,10 @@ func _add_side_pile(row: Control, title: String, count: int, x: float, side_size
 	pile.add_theme_color_override("font_disabled_color", Color("cbd5d2"))
 	pile.add_theme_stylebox_override("disabled", _style_box(Color("121a20c8"), Color("718087"), 2, 5, true))
 	row.add_child(pile)
+	pile.self_modulate = Color.TRANSPARENT
+	var visual = _projected_piece(title, str(count), Color("19242b"), Color("718087"), true, false, false, false, true)
+	pile.add_child(visual)
+	visual.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 
 
 func _add_terrain_side(row: Control, table: Dictionary, player_id: int, opponent: bool, x: float, side_size: Vector2) -> void:
@@ -851,6 +960,20 @@ func _add_terrain_side(row: Control, table: Dictionary, player_id: int, opponent
 	terrain.add_theme_stylebox_override("hover", _style_box(Color("3c4b32"), Color("f2d98b"), 3, 5))
 	terrain.pressed.connect(_on_terrain_pressed.bind(player_id))
 	row.add_child(terrain)
+	terrain.self_modulate = Color.TRANSPARENT
+	var visual = _projected_piece("TERR.", terrain_name, Color("2d3c2a"), Color("e2c977") if destination else Color("66806c"), zone["count"] > 0, false, false, destination, true)
+	terrain.add_child(visual)
+	visual.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+
+
+func _projected_piece(
+	caption: String, detail: String, face_color: Color, edge_color: Color,
+	occupied: bool, face_down: bool = false, guard: bool = false,
+	highlighted: bool = false, auxiliary: bool = false
+) -> Control:
+	var visual = ProjectedFieldPiece.new()
+	visual.configure(caption, detail, face_color, edge_color, occupied, face_down, guard, highlighted, auxiliary)
+	return visual
 
 
 func _equipment_names_for(table: Dictionary, player_id: int, carrier_id: String) -> Array:
@@ -895,11 +1018,11 @@ func _build_hand_row(table: Dictionary, player_id: int) -> Control:
 	var zone: Dictionary = table["zones"]["hand:%d" % player_id]
 	var scroll := Control.new()
 	scroll.name = "HandFan"
-	scroll.custom_minimum_size.y = 122
+	scroll.custom_minimum_size.y = HAND_ROW_HEIGHT
 	scroll.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	var cards: Array = zone["cards"] if zone["identities_visible"] else range(zone["count"])
 	var count := cards.size()
-	var step := 90.0
+	var step := _hand_step(count)
 	var total := step * maxi(0, count - 1)
 	for index in range(count):
 		var tile: Button
@@ -911,7 +1034,6 @@ func _build_hand_row(table: Dictionary, player_id: int) -> Control:
 		var tile_size: Vector2 = tile.custom_minimum_size
 		tile.set_anchors_preset(Control.PRESET_CENTER_TOP)
 		var x := -total * 0.5 + index * step - tile_size.x * 0.5
-		var distance := float(index) - float(count - 1) * 0.5
 		tile.offset_left = x
 		tile.offset_right = x + tile_size.x
 		tile.offset_top = 2
@@ -920,6 +1042,16 @@ func _build_hand_row(table: Dictionary, player_id: int) -> Control:
 		tile.z_index = index
 		scroll.add_child(tile)
 	return scroll
+
+
+func _hand_step(count: int) -> float:
+	if count <= 5:
+		return HAND_STEPS[0]
+	if count <= 7:
+		return HAND_STEPS[1]
+	if count <= 9:
+		return HAND_STEPS[2]
+	return HAND_STEPS[3]
 
 
 func _tile_from_card(card: Dictionary, player_id: int = -1, kind: String = "", visual_slot: int = -1) -> Button:
@@ -1176,7 +1308,7 @@ func _select_card(instance_id: String) -> void:
 
 func _selection_instruction(actions: Array, visible_index: Dictionary) -> String:
 	if _selected_card_id.is_empty():
-		return "1. Selecciona una carta de tu mano o campo.\n2. La mesa iluminará únicamente sus destinos legales."
+		return "Elige una carta para ver sus destinos."
 	var name: String = visible_index.get(_selected_card_id, "Carta")
 	var action_types: Array = []
 	for action in actions:
@@ -1540,11 +1672,7 @@ func _update_advance_button(game: Dictionary) -> void:
 
 
 func _update_phase_track(current_phase: String) -> void:
-	for phase_id in _phase_labels:
-		var label: Label = _phase_labels[phase_id]
-		var active: bool = phase_id == current_phase
-		label.add_theme_color_override("font_color", Color("ffe291") if active else Color("66767d"))
-		label.add_theme_stylebox_override("normal", _style_box(Color("4a4026") if active else Color("101a20"), Color("d7b85f") if active else Color("293940"), 1, 3))
+	_phase_indicator.text = "FASE · %s" % _phase_name(current_phase).to_upper()
 
 
 func _advance_phase_pressed() -> void:

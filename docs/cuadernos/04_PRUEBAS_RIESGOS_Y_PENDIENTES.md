@@ -1,5 +1,44 @@
 # Cuaderno 4 — Pruebas, riesgos y pendientes
 
+## Verificación de plantilla medida 1280×720 — 2026-09-12
+
+- Godot 4.7: mesa manual **207/207**, flujo de ataque **11/11**, IA básica **9/9**, habilidades de criaturas **38/38** y ocho Fusiones verticales **82/82**; cinco suites con código 0. La prueba nueva compara literalmente los 16 vértices y 20 centros de la referencia, escala uniforme, C3 centrada, separación progresiva, costura central fuera de casillas y esquinas de las piezas derivadas de su banda. La primera ejecución falló por aserciones antiguas que asumían un ancho fijo y una misma inclinación lateral para todas las piezas; se sustituyeron por comprobaciones de la malla medida y la puerta final pasó.
+- Captura gráfica real a **1600×900**: `artifacts/manual_table_preview.png` (general), `artifacts/manual_table_attack_projected.png` (criatura realmente invocada en Ataque) y `artifacts/manual_table_guard_projected.png` (criatura realmente colocada en Guardia). El capturador valida la postura en el estado y el visual proyectado antes de guardar. Se revisaron: jugador abajo/rival arriba, C3 centrada, apertura monótona de extremos, cuatro bandas integradas, carta apoyada y zonas auxiliares siguiendo los mismos bordes. La fase sigue compacta arriba, sin barra central.
+- Límite: la referencia especifica geometría del campo, no de manos/HUD ni arte definitivo; estos permanecen como estaban. La traslación común centra el eje C3 de la plantilla dentro del tablero disponible. Fuera de 1600×900 la geometría conserva relación mediante escala uniforme, pero aún falta una prueba humana de legibilidad/ajuste en otras resoluciones. No se ejecutaron las suites generales del motor porque solo cambió presentación.
+- Acceso directo del escritorio regenerado y verificado: Godot 4.7, proyecto de F y escena explícita `res://demo/juego_cartas_table.tscn`.
+
+## Verificación de proyección de piezas — 2026-09-12
+
+- Godot 4.7: mesa manual **153/153**, flujo de ataque **11/11**, IA básica **9/9**, habilidades de criaturas **38/38** y ocho Fusiones verticales **82/82**; cinco suites terminadas con código 0. La mesa gráfica cargó sin errores de parser/runtime.
+- Capturas reales de 1600×900: `artifacts/manual_table_preview.png`, `artifacts/manual_table_interaction_preview.png`, `artifacts/manual_table_choice_preview.png`, `artifacts/manual_table_attack_projected.png` y `artifacts/manual_table_guard_projected.png`. El generador verifica criatura física en el campo con postura correcta y visual proyectado antes de guardar Ataque/Guardia. Revisión explícita: carta en Ataque sobre cuadrilátero, carta oculta en Guardia sobre cuadrilátero horizontal, veinte casillas vacías y ocho zonas laterales proyectadas, ninguna banda de seis fases en el centro. Rótulos centrados tras corregir un desplazamiento visto en la primera captura.
+- Conservación: hitboxes nominales y señales de la mesa intactas; mano propia frontal y rival legible. Riesgo visual restante: la ficha de detalle aún es greybox y el texto pequeño sobre cartas tumbadas requiere evaluación humana en partida completa; también sigue pendiente el layout responsive fuera de 1600×900. No se atribuyen a esta fase los PASS históricos de suites generales del motor.
+- Acceso directo del escritorio regenerado y comprobado: `C:/Godot/4.7/Godot_v4.7-stable_win64.exe`, raíz `F:/Taller de Juegos Zapity/juego_cartas_propio/engine` y escena explícita `res://demo/juego_cartas_table.tscn`.
+
+## Verificación de perspectiva interna — 2026-09-12
+
+- Godot 4.7: mesa manual **120/120** (incluye ancho de las cuatro filas y alineación de sus zonas laterales), flujo de ataque **11/11**, IA básica **9/9**, criaturas verticales **38/38** y ocho Fusiones verticales **82/82**; cinco procesos terminaron con código 0. La captura gráfica cargó la escena sin errores de parser/runtime.
+- Capturas reales a 1600×900: `artifacts/manual_table_preview.png`, `artifacts/manual_table_interaction_preview.png` y `artifacts/manual_table_choice_preview.png`. Inspección visual de inicial y selección: campo propio más abierto, rival comprimido, zonas laterales en el mismo plano compositivo, sin recortes observados, cartas y rail legibles. La oblicuidad sigue siendo una ilusión 2D moderada; falta validar percepción y comodidad en una partida humana completa y resolver pantallas distintas de 1600×900.
+- No hubo regresiones que corregir tras distribuir las filas. `git diff --check` sin errores de espacios (solo avisos de conversión LF/CRLF). No se reejecutaron las suites generales del motor porque no cambió código de reglas ni infraestructura.
+- Acceso directo de escritorio comprobado: Godot 4.7, raíz de F y escena explícita `res://demo/juego_cartas_table.tscn`; no precisó regeneración. Los documentos greybox/benchmark nombrados por el encargo siguen sin existir en esta copia local.
+
+## Verificación de perspectiva oblicua — 2026-09-12
+
+- Puerta final ejecutada ahora en Godot 4.7 sobre esta iteración: mesa manual **96/96**, flujo de ataque **11/11**, IA básica **9/9**, habilidades verticales de criaturas **38/38** y ocho Fusiones verticales **82/82**. Las cinco terminaron con código 0; la escena principal cargó sin errores de parser/runtime.
+- Capturas gráficas reales a 1600×900: `artifacts/manual_table_preview.png` y `artifacts/manual_table_interaction_preview.png` (también se conserva `manual_table_choice_preview.png`). Revisión visual: las cinco posiciones caben, el HUD rival queda dentro del borde lejano, las cartas rivales son moderadamente menores y siguen reconocibles, el campo propio domina el primer plano, el rail y el estado superior no cortan texto ni salen de pantalla.
+- Fallo observado y corregido durante la captura: Godot restablecía a 1 la escala asignada a un hijo directo de `Container`. Se insertó un `Control` neutro y se aplicó la escala al contenido interior. La prueba manual comprueba ahora el factor visual real, no solo el tamaño nominal de las cartas.
+- Riesgo visual restante: la profundidad se simula en 2D y los marcos/ilustraciones siguen siendo marcadores greybox; la primera sesión humana debe valorar si la sensación espacial ya es suficiente. El layout aún requiere una fase responsive para pantallas distintas de 1600×900.
+- `GREYBOX_INTERFAZ_FINAL_V0_1.md` y `CUADERNO_BENCHMARK_INTERFAZ_TCG_V0_1.md` no existen localmente; no se descargaron ramas ni se inventó su contenido.
+- El acceso directo del escritorio se regeneró y verificó: Godot 4.7 desde `C:/Godot/4.7`, proyecto de F y escena explícita `res://demo/juego_cartas_table.tscn`.
+
+## Verificación de métricas greybox — 2026-09-12
+
+- Puerta final ejecutada de nuevo en Godot 4.7 sobre la interfaz terminada: mesa manual **89/89**, flujo de ataque **11/11**, IA básica **9/9**, vertical de habilidades de criaturas **38/38** y vertical de ocho Fusiones **82/82**; las cinco terminaron con código de salida 0.
+- La escena `res://demo/juego_cartas_table.tscn` cargó sin error de parser/runtime antes y después del cambio en Godot 4.7.
+- Captura gráfica real de 1600×900: `artifacts/manual_table_preview.png`, `artifacts/manual_table_interaction_preview.png` y `artifacts/manual_table_choice_preview.png`. Se revisaron las cinco casillas, la envolvente de Guardia, las dos manos a igual escala, las zonas auxiliares, la banda de fases y el rail. En la primera captura el título del rail se recortaba; se corrigió desplazando Guardar/Cargar al pie y se repitió el render.
+- Riesgo abierto: la distribución está medida para 1600×900. Falta comprobar y resolver expresamente pantallas más pequeñas o grandes mediante escala común o responsive. No se atribuyen a esta revisión los PASS históricos del motor.
+- Los dos documentos greybox nombrados por el encargo no existen en el árbol local; no se descargó la rama de ChatGPT. La especificación aplicada aquí procede únicamente del texto explícito del diseñador.
+- Acceso directo `C:/Users/danie/OneDrive/Desktop/Juego de Cartas Propio - Pruebas.lnk` regenerado y comprobado: ejecutable `C:/Godot/4.7/Godot_v4.7-stable_win64.exe`, raíz del proyecto en F y escena explícita `res://demo/juego_cartas_table.tscn`.
+
 Última ejecución completa: **2026-09-11 — PASS**
 
 ## Ejecución larga completada — PASS

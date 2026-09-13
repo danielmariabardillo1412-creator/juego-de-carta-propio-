@@ -9,33 +9,34 @@ func _ready() -> void:
 
 func _draw() -> void:
 	var bounds := Rect2(Vector2.ZERO, size)
-	draw_rect(bounds, Color("071014"))
-	# Inclinación suave de sobremesa: profundidad sin efecto de "pista hacia el horizonte".
-	var top_left := Vector2(size.x * 0.085, size.y * 0.035)
-	var top_right := Vector2(size.x * 0.915, size.y * 0.035)
-	var bottom_right := Vector2(size.x * 0.98, size.y * 0.985)
-	var bottom_left := Vector2(size.x * 0.02, size.y * 0.985)
+	draw_rect(bounds, Color("070d12"))
+	# Tapete oblicuo 2D: borde cercano ancho, borde lejano estrecho, sin deformar las cartas.
+	var top_left := Vector2(size.x * 0.19, size.y * 0.035)
+	var top_right := Vector2(size.x * 0.81, size.y * 0.035)
+	var bottom_right := Vector2(size.x * 0.985, size.y * 0.985)
+	var bottom_left := Vector2(size.x * 0.015, size.y * 0.985)
 	var table_shape := PackedVector2Array([top_left, top_right, bottom_right, bottom_left])
-	draw_colored_polygon(table_shape, Color("13231f"))
-	draw_polyline(PackedVector2Array([top_left, top_right, bottom_right, bottom_left, top_left]), Color("c8a957"), 3.0, true)
-	for fraction in [0.12, 0.26, 0.40, 0.55, 0.70, 0.84]:
-		var y := lerpf(top_left.y, bottom_left.y, fraction)
-		var half_width := lerpf((top_right.x - top_left.x) * 0.5, (bottom_right.x - bottom_left.x) * 0.5, fraction)
-		draw_line(Vector2(size.x * 0.5 - half_width, y), Vector2(size.x * 0.5 + half_width, y), Color("a9935350"), 1.5)
-	for bottom_fraction in [0.08, 0.22, 0.36, 0.50, 0.64, 0.78, 0.92]:
-		var tx := lerpf(top_left.x, top_right.x, bottom_fraction)
-		var bx := lerpf(bottom_left.x, bottom_right.x, bottom_fraction)
-		draw_line(Vector2(tx, top_left.y), Vector2(bx, bottom_left.y), Color("78908628"), 1.0)
-	var upper := PackedVector2Array([
-		Vector2(size.x * 0.17, size.y * 0.08), Vector2(size.x * 0.83, size.y * 0.08),
-		Vector2(size.x * 0.91, size.y * 0.47), Vector2(size.x * 0.09, size.y * 0.47),
+	draw_colored_polygon(table_shape, Color("182925"))
+	var far_band := PackedVector2Array([
+		top_left, top_right,
+		top_right.lerp(bottom_right, 0.49), top_left.lerp(bottom_left, 0.49),
 	])
-	var lower := PackedVector2Array([
-		Vector2(size.x * 0.09, size.y * 0.53), Vector2(size.x * 0.91, size.y * 0.53),
-		Vector2(size.x * 0.98, size.y * 0.96), Vector2(size.x * 0.02, size.y * 0.96),
+	draw_colored_polygon(far_band, Color("101d23b8"))
+	var near_band := PackedVector2Array([
+		top_left.lerp(bottom_left, 0.52), top_right.lerp(bottom_right, 0.52),
+		bottom_right, bottom_left,
 	])
-	draw_colored_polygon(upper, Color("391f2848"))
-	draw_colored_polygon(lower, Color("173d364d"))
-	var center := size * 0.5
-	draw_line(Vector2(size.x * 0.075, center.y), Vector2(size.x * 0.925, center.y), Color("e1c66a"), 3.0)
-	draw_line(Vector2(size.x * 0.10, center.y + 5), Vector2(size.x * 0.90, center.y + 5), Color("071014aa"), 1.0)
+	draw_colored_polygon(near_band, Color("21403885"))
+	# Las cartas y casillas ya dan estructura: solo tres costuras suaves en el tapete.
+	for fraction in [0.28, 0.50, 0.76]:
+		var left := top_left.lerp(bottom_left, fraction)
+		var right := top_right.lerp(bottom_right, fraction)
+		draw_line(left, right, Color("b4a36b20") if fraction != 0.50 else Color("d6bd6d60"), 1.0 if fraction != 0.50 else 2.0)
+	var far_edge := Color("af995a8c")
+	var near_edge := Color("e0bd6c")
+	draw_line(top_left, top_right, far_edge, 1.5)
+	draw_line(top_left, bottom_left, Color("b49a5ec7"), 2.0)
+	draw_line(top_right, bottom_right, Color("b49a5ec7"), 2.0)
+	draw_line(bottom_left, bottom_right, near_edge, 4.0)
+	# Un canto visible en primer plano refuerza que el jugador está sentado ante la mesa.
+	draw_line(bottom_left + Vector2(0, -9), bottom_right + Vector2(0, -9), Color("f2d18b38"), 2.0)

@@ -4,6 +4,9 @@ extends SceneTree
 const OUTPUT_PATH := "res://artifacts/manual_table_preview.png"
 const INTERACTION_PATH := "res://artifacts/manual_table_interaction_preview.png"
 const CHOICE_PATH := "res://artifacts/manual_table_choice_preview.png"
+const ATTACK_PATH := "res://artifacts/manual_table_attack_projected.png"
+const GUARD_PATH := "res://artifacts/manual_table_guard_projected.png"
+const ProjectedFieldPiece = preload("res://demo/projected_field_piece.gd")
 
 
 func _init() -> void:
@@ -46,8 +49,58 @@ func _capture() -> void:
 		printerr("No se pudo guardar la captura de elección: %s" % error_string(error))
 		quit(1)
 		return
-	print("JCP-TABLE-CAPTURE PASS: 3 capturas (1600x900)")
+	table.queue_free()
+	await process_frame
+	if not await _capture_placed_creature("summon_creature", "attack", ATTACK_PATH):
+		quit(1)
+		return
+	if not await _capture_placed_creature("set_creature", "guard", GUARD_PATH):
+		quit(1)
+		return
+	print("JCP-TABLE-CAPTURE PASS: 5 capturas (1600x900), Ataque y Guardia reales")
 	quit(0)
+
+
+func _capture_placed_creature(action_type: String, posture: String, path: String) -> bool:
+	var scene: PackedScene = load("res://demo/juego_cartas_table.tscn")
+	var table := scene.instantiate()
+	root.add_child(table)
+	await process_frame
+	var chosen: Dictionary = {}
+	for action in table.debug_snapshot()["legal_actions"]:
+		if action["type"] == action_type:
+			chosen = action
+			break
+	if chosen.is_empty() or not table.call("_perform_action", chosen):
+		printerr("No se pudo colocar una criatura real en %s" % posture)
+		table.queue_free()
+		return false
+	await process_frame
+	await RenderingServer.frame_post_draw
+	var zone: Dictionary = table.debug_snapshot()["view"]["game"]["card_table"]["zones"]["creatures:0"]
+	if zone["count"] != 1 or zone["slots"].all(func(slot: Dictionary) -> bool: return slot["card"] == null or slot["card"]["instance"]["metadata"].get("position", "") != posture):
+		printerr("La criatura capturada no está en %s" % posture)
+		table.queue_free()
+		return false
+	var projected_cards: Array = []
+	_find_projected_cards(table, projected_cards)
+	if not projected_cards.any(func(piece) -> bool: return piece.guard == (posture == "guard") and piece.face_down == (posture == "guard")):
+		printerr("La criatura %s no utiliza la proyección de campo esperada" % posture)
+		table.queue_free()
+		return false
+	var error := _save_viewport(path)
+	table.queue_free()
+	if error != OK:
+		printerr("No se pudo guardar la captura de %s: %s" % [posture, error_string(error)])
+		return false
+	return true
+
+
+func _find_projected_cards(node: Node, result: Array) -> void:
+	if node is ProjectedFieldPiece and node.occupied and not node.auxiliary:
+		result.append(node)
+	for child in node.get_children():
+		_find_projected_cards(child, result)
 
 
 func _save_viewport(path: String) -> Error:

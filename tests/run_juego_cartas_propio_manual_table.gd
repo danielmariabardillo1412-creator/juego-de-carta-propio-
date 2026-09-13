@@ -1,6 +1,9 @@
 extends SceneTree
 ## Integración mínima de la mesa local con UCE, vistas privadas, acciones legales y cortina de relevo.
 
+const CardTile = preload("res://demo/card_tile.gd")
+const ProjectedFieldPiece = preload("res://demo/projected_field_piece.gd")
+
 var _checks := 0
 var _failures: Array = []
 
@@ -18,14 +21,26 @@ func _run() -> void:
 	var table = packed.instantiate()
 	root.add_child(table)
 	await process_frame
+	await process_frame
 	var snapshot: Dictionary = table.debug_snapshot()
 	_expect(snapshot["ready"], "la mesa construye el motor")
 	_expect_equal(snapshot["lifecycle"], "RUNNING", "la mesa inicia una partida")
 	_expect_equal(snapshot["module_version"], "0.24.0-stress-hardening", "la mesa usa el módulo vigente")
 	_expect_equal(snapshot["viewer_id"], 0, "la vista inicial pertenece al jugador uno")
 	_expect_equal(snapshot["phase"], "MAIN_1", "Inicio y Robo se resuelven automáticamente antes de entregar control")
+	var test_tools: Array = []
+	var tools_buttons: Array = []
+	_find_named_nodes(table, "TestTools", test_tools)
+	_find_named_nodes(table, "TestToolsButton", tools_buttons)
+	_expect_equal(test_tools.size(), 1, "los controles de prueba siguen presentes")
+	if test_tools.size() == 1 and tools_buttons.size() == 1:
+		_expect(not test_tools[0].visible, "los controles de prueba comienzan plegados")
+		tools_buttons[0].pressed.emit()
+		_expect(test_tools[0].visible, "Herramientas permite abrir los controles de prueba")
+		tools_buttons[0].pressed.emit()
+		_expect(not test_tools[0].visible, "Herramientas permite plegar de nuevo los controles")
 	_expect_equal(snapshot["board_player_count"], 2, "se presentan ambos lados del tablero")
-	_expect_equal(snapshot["visual_board_layout"], "perspective-opponent-divider-player", "la mesa usa perspectiva, separación central y lados enfrentados")
+	_expect_equal(snapshot["visual_board_layout"], "measured-template-1280x720", "la mesa usa una plantilla medida común")
 	_expect_equal(snapshot["creature_slot_count"], 10, "las diez casillas de criatura permanecen dibujadas")
 	_expect_equal(snapshot["support_slot_count"], 10, "las diez casillas de apoyo permanecen dibujadas")
 	_expect_equal(snapshot["terrain_lane_count"], 2, "cada jugador dispone de una franja territorial visible")
@@ -35,11 +50,71 @@ func _run() -> void:
 	_find_named_nodes(table, "HandFan", hand_fans)
 	_expect_equal(hand_fans.size(), 2, "ambas manos tienen una fila visual")
 	if hand_fans.size() == 2 and hand_fans[0].get_child_count() > 0 and hand_fans[1].get_child_count() > 0:
-		_expect_equal(hand_fans[0].get_child(0).custom_minimum_size, hand_fans[1].get_child(0).custom_minimum_size, "las cartas rivales y propias usan exactamente el mismo tamaño")
+		_expect_equal(hand_fans[0].get_child(0).custom_minimum_size, hand_fans[1].get_child(0).custom_minimum_size, "las cartas rivales y propias conservan la misma métrica nominal")
+		_expect_equal(hand_fans[0].get_child(0).custom_minimum_size, Vector2(86, 120), "ambas manos usan carta 86×120")
+		_expect_equal(hand_fans[0].scale, Vector2(0.90, 0.90), "la mano rival se reduce moderadamente por profundidad")
+		_expect_equal(hand_fans[1].scale, Vector2.ONE, "la mano propia conserva escala de primer plano")
+	var layers: Array = []
+	_find_named_nodes(table, "FieldTemplateLayer", layers)
+	_expect_equal(layers.size(), 1, "una malla única cubre las cuatro bandas")
+	if layers.size() == 1:
+		var layer: Control = layers[0]
+		var geometry: Dictionary = layer.get_script().get_script_constant_map()
+		_expect_equal(geometry["REFERENCE_SIZE"], Vector2(1280, 720), "la referencia geométrica es 1280×720")
+		_expect_equal(geometry["BANDS"], [
+			[Vector2(612, 197), Vector2(992, 197), Vector2(1007, 245), Vector2(598, 245)],
+			[Vector2(595, 250), Vector2(1008, 250), Vector2(1025, 308), Vector2(580, 308)],
+			[Vector2(565, 355), Vector2(1038, 355), Vector2(1062, 433), Vector2(542, 433)],
+			[Vector2(540, 440), Vector2(1063, 440), Vector2(1092, 537), Vector2(512, 537)],
+		], "las cuatro bandas coinciden exactamente con la referencia")
+		_expect_equal(geometry["CENTERS"], [
+			[Vector2(643, 221), Vector2(722, 221), Vector2(802, 220), Vector2(881, 221), Vector2(962, 221)],
+			[Vector2(628, 278), Vector2(715, 279), Vector2(803, 278), Vector2(888, 279), Vector2(975, 279)],
+			[Vector2(601, 394), Vector2(701, 394), Vector2(802, 394), Vector2(903, 394), Vector2(1003, 394)],
+			[Vector2(579, 489), Vector2(690, 489), Vector2(802, 489), Vector2(914, 489), Vector2(1025, 489)],
+		], "los veinte centros coinciden exactamente con la referencia")
+		_expect(is_equal_approx(layer.call("template_scale"), minf(layer.size.x / 1280.0, layer.size.y / 720.0)), "la plantilla se escala uniformemente")
+		_check_field_row_geometry(table, layer, "OpponentSupportRow", "support_slot", 0)
+		_check_field_row_geometry(table, layer, "OpponentCreatureRow", "creature_slot", 1)
+		_check_field_row_geometry(table, layer, "PlayerCreatureRow", "creature_slot", 2)
+		_check_field_row_geometry(table, layer, "PlayerSupportRow", "support_slot", 3)
+		var spans: Array = []
+		for band_index in range(4):
+			var left: Vector2 = layer.call("slot_center", band_index, 0)
+			var middle: Vector2 = layer.call("slot_center", band_index, 2)
+			var right: Vector2 = layer.call("slot_center", band_index, 4)
+			spans.append(right.x - left.x)
+			_expect(absf(middle.x - layer.size.x * 0.5) <= layer.call("template_scale") * 1.0, "C3 permanece centrada en la banda %d" % band_index)
+		_expect(spans[0] < spans[1] and spans[1] < spans[2] and spans[2] < spans[3], "los extremos se abren progresivamente hacia el jugador")
+		var own_band: PackedVector2Array = layer.call("band_corners", 2)
+		_expect(own_band[0].y > layer.size.y * 0.51, "la costura del fondo queda entre bandos y no cruza las casillas propias")
+	_expect_equal(table.get_script().get_script_constant_map()["FIELD_ENVELOPE_SIZE"], Vector2(101, 101), "la envolvente de campo admite Ataque y Guardia")
+	_expect_equal(table.get_script().get_script_constant_map()["FIELD_GAP"], 11.0, "cinco envolventes mantienen separación de 11 px")
+	for sample in [["field", "attack", Vector2(72, 101)], ["field", "guard", Vector2(101, 72)], ["opponent_field", "guard", Vector2(101, 72)], ["preview", "attack", Vector2(180, 251)]]:
+		var sample_tile = CardTile.new()
+		sample_tile.setup("SAMPLE", "Muestra", "", false, "creature", "neutral", sample[1], true, sample[0])
+		_expect_equal(sample_tile.custom_minimum_size, sample[2], "carta %s/%s respeta la métrica TCG" % [sample[0], sample[1]])
+		sample_tile.free()
+	for hand_case in [[5, 94.0], [7, 76.0], [9, 60.0], [10, 48.0]]:
+		_expect_equal(table.call("_hand_step", hand_case[0]), hand_case[1], "paso de mano para %d cartas" % hand_case[0])
 	var empty_card_slot: Button = _find_first_role_button(table, "creature_slot")
 	_expect(empty_card_slot != null and empty_card_slot.size.y > empty_card_slot.size.x, "las casillas vacías conservan proporción de carta")
 	_expect(snapshot["rendered_action_count"] < snapshot["legal_action_count"], "la mesa absorbe acciones directas y el lateral no las duplica")
-	_expect_equal(snapshot["phase_track_count"], 6, "el tablero muestra las seis fases del turno")
+	_expect_equal(snapshot["phase_track_count"], 1, "la cabecera muestra una sola fase actual")
+	var phase_indicators: Array = []
+	var phase_overlays: Array = []
+	_find_named_nodes(table, "PhaseIndicator", phase_indicators)
+	_find_named_nodes(table, "PhaseOverlay", phase_overlays)
+	_expect_equal(phase_indicators.size(), 1, "el HUD superior contiene el indicador de fase")
+	_expect_equal(phase_overlays.size(), 0, "la mesa no conserva una banda de fases central")
+	if phase_indicators.size() == 1:
+		_expect(phase_indicators[0].text.contains("PRINCIPAL 1"), "la fase actual aparece en la cabecera")
+	var projected_pieces: Array = []
+	_find_projected_pieces(table, projected_pieces)
+	_expect_equal(projected_pieces.size(), 28, "veinte casillas y ocho zonas laterales tienen superficie proyectada")
+	for piece in projected_pieces:
+		var quad: PackedVector2Array = piece.projected_corners()
+		_expect(piece.template_corners.size() == 4 and quad[1].x - quad[0].x < quad[2].x - quad[3].x and quad[0].y < quad[3].y, "cada pieza de campo usa el trapecio de su banda")
 	_expect(not snapshot["event_expanded"], "el historial comienza plegado")
 	var table_view: Dictionary = snapshot["view"]["game"]["card_table"]
 	_expect_equal(table_view["zones"]["hand:0"]["cards"].size(), 5, "el propietario ve sus cinco cartas")
@@ -121,6 +196,9 @@ func _run() -> void:
 				choice_button.emit_signal("pressed")
 		snapshot = table.debug_snapshot()
 		_expect_equal(snapshot["view"]["game"]["card_table"]["zones"]["creatures:0"]["count"], 1, "la criatura aparece en el tablero")
+		var projected_card: Array = []
+		_find_projected_pieces(table, projected_card)
+		_expect(projected_card.any(func(piece: Control) -> bool: return piece.occupied and not piece.auxiliary and not piece.face_down), "la criatura en Ataque usa una superficie proyectada")
 		_expect_equal(table.call("_visual_slot_for", "creatures", 0, selected_id), 4, "la criatura ocupa la casilla visual elegida")
 		_expect_equal(snapshot["selected_card_id"], "", "una acción aplicada limpia la selección")
 		var has_second_summon := false
@@ -239,6 +317,51 @@ func _preferred_action_index(actions: Array, phase: String, active_player: int) 
 			if actions[index]["type"] == action_type:
 				return index
 	return 0 if not actions.is_empty() else -1
+
+
+func _check_field_row_geometry(table: Control, layer: Control, row_name: String, slot_role: String, band_index: int) -> void:
+	var rows: Array = []
+	_find_named_nodes(table, row_name, rows)
+	_expect_equal(rows.size(), 1, "%s existe" % row_name)
+	if rows.size() != 1:
+		return
+	var slots: Array = []
+	var sides: Array = []
+	for child in rows[0].get_children():
+		if child.get_meta("board_role", "") == slot_role:
+			slots.append(child)
+		elif child.get_meta("board_role", "") in ["pile_zone", "terrain_lane"]:
+			sides.append(child)
+	_expect_equal(slots.size(), 5, "%s conserva cinco posiciones" % row_name)
+	_expect_equal(sides.size(), 2, "%s conserva dos zonas laterales" % row_name)
+	if slots.size() == 5:
+		for slot_index in range(5):
+			var expected: PackedVector2Array = layer.call("slot_corners", band_index, slot_index, false)
+			var visual = _first_projected_piece(slots[slot_index])
+			_expect(visual != null and visual.template_corners.size() == 4, "%s C%d tiene visual derivado de la plantilla" % [row_name, slot_index + 1])
+			if visual != null and visual.template_corners.size() == 4:
+				_expect(visual.projected_corners()[0].distance_to(expected[0] - slots[slot_index].position - visual.position) < 0.5, "%s C%d coincide con la banda medida" % [row_name, slot_index + 1])
+	if sides.size() == 2:
+		for side_index in range(2):
+			var visual = _first_projected_piece(sides[side_index])
+			var expected: PackedVector2Array = layer.call("side_corners", band_index, side_index == 1)
+			_expect(visual != null and visual.template_corners.size() == 4, "%s lateral %d deriva de la banda" % [row_name, side_index])
+			if visual != null and visual.template_corners.size() == 4:
+				_expect(visual.projected_corners()[0].distance_to(expected[0] - sides[side_index].position - visual.position) < 0.5, "%s lateral %d coincide con la banda" % [row_name, side_index])
+
+
+func _first_projected_piece(node: Node):
+	for child in node.get_children():
+		if child is ProjectedFieldPiece:
+			return child
+	return null
+
+
+func _find_projected_pieces(node: Node, result: Array) -> void:
+	if node is ProjectedFieldPiece:
+		result.append(node)
+	for child in node.get_children():
+		_find_projected_pieces(child, result)
 
 
 func _find_card_tile(node: Node, instance_id: String) -> Button:
