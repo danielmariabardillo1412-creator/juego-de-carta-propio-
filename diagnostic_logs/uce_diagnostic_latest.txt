@@ -6,7 +6,7 @@ Status: PASS
 {
 	"command_line": [
 		"--script",
-		"res://tests/diagnostics/run_engine_diagnostics.gd"
+		"tests/diagnostics/run_engine_diagnostics.gd"
 	],
 	"distribution": "Windows",
 	"godot": {

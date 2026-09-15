@@ -16,6 +16,7 @@ func _run() -> void:
 		_finish()
 		return
 	var table = scene.instantiate()
+	table.startup_seed = 210921
 	root.add_child(table)
 	await process_frame
 	_expect(not table.debug_snapshot()["ai_enabled"], "headless no activa la IA sin pedirlo")

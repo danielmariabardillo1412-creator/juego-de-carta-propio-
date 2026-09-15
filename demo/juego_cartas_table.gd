@@ -29,8 +29,10 @@ const CONTEXT_RAIL_WIDTH := 274.0
 const PHASE_HUD_HEIGHT := 26.0
 const HAND_STEPS := [94.0, 76.0, 60.0, 48.0]
 const OPPONENT_HAND_DEPTH_SCALE := 0.90
+const ACTIVATION_REVEAL_SECONDS := 4.0
 
 const DEFAULT_SEED := 210921
+const MAX_SEED := 2147483646
 const DEFAULT_SAVE_PATH := "user://juego_cartas_propio/partida_manual.json"
 const PLAYER_NAMES := ["Jugador 1", "Jugador 2"]
 const DIRECT_BOARD_ACTIONS := [
@@ -54,18 +56,36 @@ const TERRAIN_PREVIEWS := {
 }
 
 var _engine: Object
+@export var startup_seed := -1
+var _match_rng := RandomNumberGenerator.new()
+var _active_seed := -1
 var _viewer_id := 0
 var _request_number := 0
 var _privacy_hidden := false
 var _status_message := ""
 var _selected_card_id := ""
+var _attack_targeting := false
 var _choice_actions: Array = []
+var _choice_stage := ""
+var _forced_pass_pending := false
 var _visible_card_locations: Dictionary = {}
 var _visual_slot_assignments: Dictionary = {}
 var _pending_visual_placement: Dictionary = {}
 var _ai_running := false
 var _creature_interaction = TableInteractionState.new()
 var _last_committed_action: Dictionary = {}
+var _cached_legal_version := -1
+var _cached_legal_viewer := -1
+var _cached_legal_actions: Array = []
+var _activation_queue: Array = []
+var _announced_main_spells: Dictionary = {}
+var _activation_catalog: Dictionary = {}
+var _activation_overlay: Control
+var _activation_title: Label
+var _activation_card_box: CenterContainer
+var _activation_effect: Label
+var _activation_progress: Label
+var _activation_timer: Timer
 
 var _summary_label: Label
 var _viewer_label: Label
@@ -96,14 +116,24 @@ var _choice_overlay_title: Label
 var _choice_overlay_list: VBoxContainer
 var _creature_mode_popup: PanelContainer
 var _creature_mode_buttons: HBoxContainer
+var _creature_action_popup: PanelContainer
+var _creature_action_buttons: VBoxContainer
 var _end_turn_dialog: ConfirmationDialog
 var _terrain_dialog: ConfirmationDialog
 var _pending_terrain_action: Dictionary = {}
 
 
 func _ready() -> void:
+	_match_rng.randomize()
 	_build_interface()
-	start_match(DEFAULT_SEED)
+	start_match(startup_seed if startup_seed >= 0 else _fresh_seed())
+
+
+func _fresh_seed() -> int:
+	var seed := _match_rng.randi_range(0, MAX_SEED)
+	while seed == _active_seed:
+		seed = _match_rng.randi_range(0, MAX_SEED)
+	return seed
 
 
 func start_match(seed: int = DEFAULT_SEED, config_overrides: Dictionary = {}) -> bool:
@@ -114,12 +144,19 @@ func start_match(seed: int = DEFAULT_SEED, config_overrides: Dictionary = {}) ->
 	_viewer_id = 0
 	_privacy_hidden = false
 	_selected_card_id = ""
+	_attack_targeting = false
 	_choice_actions = []
+	_choice_stage = ""
+	_forced_pass_pending = false
 	_visual_slot_assignments = {}
 	_pending_visual_placement = {}
 	_ai_running = false
 	_creature_interaction.reset()
 	_last_committed_action = {}
+	_cached_legal_version = -1
+	_cached_legal_viewer = -1
+	_cached_legal_actions = []
+	_clear_activation_reveal()
 	if not _engine.is_ready():
 		_status_message = "No se pudo construir el motor: %s" % str(_engine.construction_error())
 		_refresh()
@@ -129,6 +166,9 @@ func start_match(seed: int = DEFAULT_SEED, config_overrides: Dictionary = {}) ->
 		_status_message = "No se pudo iniciar: %s — %s" % [result.code, result.message]
 		_refresh()
 		return false
+	_active_seed = seed
+	if _seed_input != null:
+		_seed_input.value = seed
 	_status_message = "Partida iniciada con semilla %d." % seed
 	_auto_resolve_opening(0)
 	_refresh()
@@ -145,7 +185,9 @@ func set_viewer(player_id: int, require_reveal: bool = true) -> void:
 	_viewer_id = player_id
 	_privacy_hidden = require_reveal
 	_selected_card_id = ""
+	_attack_targeting = false
 	_choice_actions = []
+	_choice_stage = ""
 	_creature_interaction.reset()
 	_status_message = "Vista preparada para %s." % PLAYER_NAMES[player_id]
 	_refresh()
@@ -154,7 +196,7 @@ func set_viewer(player_id: int, require_reveal: bool = true) -> void:
 func perform_legal_action(index: int) -> bool:
 	if _engine == null or _privacy_hidden:
 		return false
-	var actions: Array = _engine.get_legal_actions(_viewer_id)
+	var actions: Array = _legal_actions()
 	if index < 0 or index >= actions.size():
 		return false
 	return _perform_action(actions[index])
@@ -205,8 +247,14 @@ func load_match(path: String = DEFAULT_SAVE_PATH) -> bool:
 	_request_number = _engine.state_version()
 	_selected_card_id = ""
 	_choice_actions = []
+	_choice_stage = ""
+	_forced_pass_pending = false
 	_creature_interaction.reset()
 	_privacy_hidden = true
+	_cached_legal_version = -1
+	_cached_legal_viewer = -1
+	_cached_legal_actions = []
+	_clear_activation_reveal()
 	_status_message = "Partida cargada y verificada; revela la mesa para continuar."
 	_refresh()
 	return true
@@ -217,7 +265,7 @@ func debug_snapshot() -> Dictionary:
 		return {"ready": false}
 	var envelope: Dictionary = _engine.get_player_state(_viewer_id)
 	var game: Dictionary = envelope.get("game", {})
-	var legal_actions: Array = _engine.get_legal_actions(_viewer_id)
+	var legal_actions: Array = _legal_actions()
 	var related_count := 0
 	for action in legal_actions:
 		if _action_mentions_card(action, _selected_card_id):
@@ -226,6 +274,7 @@ func debug_snapshot() -> Dictionary:
 		"ready": _engine.is_ready(),
 		"lifecycle": _engine.lifecycle_name(),
 		"module_version": _engine.module_version(),
+		"seed": _active_seed,
 		"viewer_id": _viewer_id,
 		"privacy_hidden": _privacy_hidden,
 		"state_version": _engine.state_version(),
@@ -234,6 +283,8 @@ func debug_snapshot() -> Dictionary:
 		"legal_action_count": legal_actions.size(),
 		"legal_actions": legal_actions,
 		"selected_card_id": _selected_card_id,
+		"attack_targeting": _attack_targeting,
+		"creature_action_popup_visible": _creature_action_popup.visible if _creature_action_popup != null else false,
 		"status_message": _status_message,
 		"related_action_count": related_count,
 		"choice_action_count": _choice_actions.size(),
@@ -326,7 +377,7 @@ func _build_interface() -> void:
 	controls.add_child(_phase_indicator)
 	_advance_button = Button.new()
 	_advance_button.name = "AdvancePhaseButton"
-	_advance_button.pressed.connect(_advance_phase_pressed)
+	_advance_button.pressed.connect(_on_phase_button_pressed)
 	controls.add_child(_advance_button)
 	_end_turn_button = Button.new()
 	_end_turn_button.name = "EndTurnButton"
@@ -344,11 +395,17 @@ func _build_interface() -> void:
 	controls.add_child(tools_button)
 	_seed_input = SpinBox.new()
 	_seed_input.min_value = 0
-	_seed_input.max_value = 2147483646
+	_seed_input.max_value = MAX_SEED
 	_seed_input.step = 1
 	_seed_input.value = DEFAULT_SEED
 	_seed_input.custom_minimum_size.x = 105
 	debug_controls.add_child(_seed_input)
+	var replay_button := Button.new()
+	replay_button.name = "ReplaySeedButton"
+	replay_button.text = "Jugar semilla"
+	replay_button.tooltip_text = "Repite esta partida o escribe otra semilla para una prueba reproducible."
+	replay_button.pressed.connect(func() -> void: start_match(int(_seed_input.value)))
+	debug_controls.add_child(replay_button)
 	var restart_button := Button.new()
 	restart_button.name = "RestartButton"
 	restart_button.text = "Nueva partida"
@@ -482,7 +539,7 @@ func _build_interface() -> void:
 
 	_end_turn_dialog = ConfirmationDialog.new()
 	_end_turn_dialog.title = "Terminar el turno"
-	_end_turn_dialog.dialog_text = "¿Terminar ahora? Se omitirán las fases que todavía no hayas jugado."
+	_end_turn_dialog.dialog_text = "¿Terminar ahora? Se descartará la jugada sin confirmar y se omitirán las fases restantes."
 	_end_turn_dialog.ok_button_text = "Terminar turno"
 	_end_turn_dialog.cancel_button_text = "Seguir jugando"
 	_end_turn_dialog.confirmed.connect(_confirm_end_turn)
@@ -553,6 +610,166 @@ func _build_interface() -> void:
 	_creature_mode_buttons = HBoxContainer.new()
 	_creature_mode_buttons.add_theme_constant_override("separation", 4)
 	_creature_mode_popup.add_child(_creature_mode_buttons)
+	_creature_action_popup = PanelContainer.new()
+	_creature_action_popup.name = "CreatureActionPopup"
+	_creature_action_popup.visible = false
+	_creature_action_popup.z_index = 22
+	_creature_action_popup.custom_minimum_size = Vector2(162, 0)
+	_creature_action_popup.add_theme_stylebox_override("panel", _style_box(Color("111b22f5"), Color("d3bc75"), 1, 5))
+	add_child(_creature_action_popup)
+	var action_margin := MarginContainer.new()
+	action_margin.add_theme_constant_override("margin_left", 5)
+	action_margin.add_theme_constant_override("margin_right", 5)
+	action_margin.add_theme_constant_override("margin_top", 5)
+	action_margin.add_theme_constant_override("margin_bottom", 5)
+	_creature_action_popup.add_child(action_margin)
+	_creature_action_buttons = VBoxContainer.new()
+	_creature_action_buttons.add_theme_constant_override("separation", 3)
+	action_margin.add_child(_creature_action_buttons)
+	_build_activation_reveal()
+
+
+func _build_activation_reveal() -> void:
+	_activation_overlay = Control.new()
+	_activation_overlay.name = "ActivationOverlay"
+	_activation_overlay.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	_activation_overlay.mouse_filter = Control.MOUSE_FILTER_STOP
+	_activation_overlay.visible = false
+	_activation_overlay.z_index = 30
+	add_child(_activation_overlay)
+	var shade := ColorRect.new()
+	shade.color = Color("000000b8")
+	shade.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	shade.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_activation_overlay.add_child(shade)
+	var centered := CenterContainer.new()
+	centered.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	centered.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_activation_overlay.add_child(centered)
+	var panel := PanelContainer.new()
+	panel.custom_minimum_size = Vector2(620, 320)
+	panel.add_theme_stylebox_override("panel", _style_box(Color("111b22f5"), Color("e2c977"), 3, 10))
+	centered.add_child(panel)
+	var margin := MarginContainer.new()
+	for side in ["left", "right", "top", "bottom"]:
+		margin.add_theme_constant_override("margin_" + side, 14)
+	panel.add_child(margin)
+	var column := VBoxContainer.new()
+	column.add_theme_constant_override("separation", 10)
+	margin.add_child(column)
+	_activation_title = Label.new()
+	_activation_title.name = "ActivationTitle"
+	_activation_title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	_activation_title.add_theme_font_size_override("font_size", 20)
+	_activation_title.add_theme_color_override("font_color", Color("f3d58a"))
+	column.add_child(_activation_title)
+	var content := HBoxContainer.new()
+	content.add_theme_constant_override("separation", 18)
+	column.add_child(content)
+	_activation_card_box = CenterContainer.new()
+	_activation_card_box.name = "ActivationCard"
+	_activation_card_box.custom_minimum_size.x = 180
+	content.add_child(_activation_card_box)
+	var details := VBoxContainer.new()
+	details.custom_minimum_size.x = 360
+	details.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	content.add_child(details)
+	_activation_effect = Label.new()
+	_activation_effect.name = "ActivationEffect"
+	_activation_effect.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	_activation_effect.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	_activation_effect.add_theme_font_size_override("font_size", 16)
+	details.add_child(_activation_effect)
+	_activation_progress = Label.new()
+	_activation_progress.name = "ActivationProgress"
+	_activation_progress.add_theme_color_override("font_color", Color("c7d1d6"))
+	details.add_child(_activation_progress)
+	var next_button := Button.new()
+	next_button.name = "ActivationNext"
+	next_button.text = "Siguiente ahora"
+	next_button.pressed.connect(_advance_activation_reveal)
+	details.add_child(next_button)
+	_activation_timer = Timer.new()
+	_activation_timer.one_shot = true
+	_activation_timer.timeout.connect(_advance_activation_reveal)
+	add_child(_activation_timer)
+	for spec in GameModule.new().call("_card_specs"):
+		_activation_catalog[String(spec["id"])] = spec["attributes"]
+
+
+func _clear_activation_reveal() -> void:
+	_activation_queue.clear()
+	_announced_main_spells.clear()
+	if _activation_timer != null:
+		_activation_timer.stop()
+	if _activation_overlay != null:
+		_activation_overlay.visible = false
+
+
+func _activation_entries_from_events(events: Array) -> Array:
+	var entries: Array = []
+	for event in events:
+		var kind: String = event.get("type", "")
+		var payload: Dictionary = event.get("payload", {})
+		var definition_id: String = String(payload.get("source_definition_id", "")) if kind == "persistent_effect_triggered" else String(payload.get("definition_id", ""))
+		if not _activation_catalog.has(definition_id):
+			continue
+		var attributes: Dictionary = _activation_catalog[definition_id]
+		if not String(attributes.get("card_type", "")) in ["spell", "trap"]:
+			continue
+		var key := "%s:%s" % [str(payload.get("player_id", -1)), definition_id]
+		if kind == "main_spell_activated":
+			_announced_main_spells[key] = int(_announced_main_spells.get(key, 0)) + 1
+		elif kind == "main_spell_resolved":
+			if int(_announced_main_spells.get(key, 0)) > 0:
+				_announced_main_spells[key] = int(_announced_main_spells[key]) - 1
+				continue
+		elif kind not in ["reaction_activated", "persistent_played", "persistent_effect_triggered"]:
+			continue
+		entries.append({"definition_id": definition_id, "player_id": int(payload.get("player_id", -1)), "kind": kind, "sequence": int(event.get("sequence", 0))})
+	return entries
+
+
+func _queue_public_activations(start_index: int) -> void:
+	var events: Array = _engine.get_events(0, _viewer_id)
+	var entries := _activation_entries_from_events(events.slice(start_index))
+	if DisplayServer.get_name() == "headless" or entries.is_empty():
+		return
+	_activation_queue.append_array(entries)
+	if not _activation_overlay.visible and not _privacy_hidden:
+		call_deferred("_show_next_activation")
+
+
+func _show_next_activation() -> void:
+	if _privacy_hidden or _activation_overlay.visible or _activation_queue.is_empty():
+		return
+	var entry: Dictionary = _activation_queue.pop_front()
+	var attributes: Dictionary = _activation_catalog[entry["definition_id"]]
+	var owner: int = entry["player_id"]
+	var who := "Tu carta" if owner == _viewer_id else ("Carta rival" if owner in [0, 1] else "Carta activada")
+	_activation_title.text = "%s · %s" % [who, "TRAMPA" if attributes["card_type"] == "trap" else "MAGIA"]
+	_clear_children(_activation_card_box)
+	var tile := CardTile.new()
+	tile.setup("", String(attributes["display_name"]), "", false, String(attributes["card_type"]), String(attributes.get("element", "")), "", true, "preview", {"effect_text": String(attributes.get("effect_text", ""))})
+	tile.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_activation_card_box.add_child(tile)
+	_activation_effect.text = String(attributes.get("effect_text", ""))
+	_activation_progress.text = "Activación pública #%d · %d más en espera · continúa en %.0f s" % [entry["sequence"], _activation_queue.size(), ACTIVATION_REVEAL_SECONDS]
+	_activation_overlay.visible = true
+	_activation_timer.start(ACTIVATION_REVEAL_SECONDS)
+
+
+func _advance_activation_reveal() -> void:
+	_activation_timer.stop()
+	_activation_overlay.visible = false
+	if not _activation_queue.is_empty():
+		_show_next_activation()
+	elif _forced_pass_pending:
+		call_deferred("_pass_forced_response")
+
+
+func _activation_pause_active() -> bool:
+	return _activation_overlay.visible or not _activation_queue.is_empty()
 
 
 func _refresh() -> void:
@@ -570,6 +787,8 @@ func _refresh() -> void:
 	_choice_overlay.visible = false
 	_clear_children(_creature_mode_buttons)
 	_creature_mode_popup.visible = false
+	_clear_children(_creature_action_buttons)
+	_creature_action_popup.visible = false
 	if _engine == null or not _engine.is_ready() or _engine.lifecycle_name() == "CREATED":
 		_summary_label.text = _status_message
 		return
@@ -585,9 +804,7 @@ func _refresh() -> void:
 	if response.get("active", false):
 		turn_context = "Puedes responder" if actor == _viewer_id else "El rival puede responder"
 	_summary_label.text = "%s · %s" % [turn_context, _phase_name(game["phase"])]
-	if not _selected_card_id.is_empty():
-		_summary_label.text += " · Carta seleccionada"
-	if _status_message.begins_with("No ") or _status_message.begins_with("Acción rechazada") or _status_message.begins_with("Esa "):
+	if not _status_message.is_empty():
 		_summary_label.text += " · " + _status_message
 	_summary_label.tooltip_text = _status_message
 	_update_advance_button(game)
@@ -602,11 +819,13 @@ func _refresh() -> void:
 		field_row.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	_layout_template_field()
 	call_deferred("_layout_template_field")
-	var actions: Array = _engine.get_legal_actions(_viewer_id)
+	var actions: Array = _legal_actions()
+	_schedule_forced_pass(actions, game)
 	var visible_index: Dictionary = _visible_card_index(game["card_table"])
 	var visible_cards: Dictionary = _visible_cards_by_id(game["card_table"])
 	if not _selected_card_id.is_empty() and not visible_index.has(_selected_card_id):
 		_selected_card_id = ""
+		_attack_targeting = false
 		_creature_interaction.reset()
 	_card_detail.visible = not _selected_card_id.is_empty()
 	_card_detail.text = _card_detail_text(visible_cards.get(_selected_card_id, {})) if _card_detail.visible else ""
@@ -621,22 +840,19 @@ func _refresh() -> void:
 		if choice_action in actions:
 			valid_choices.append(choice_action)
 	_choice_actions = valid_choices
+	if _choice_actions.is_empty():
+		_choice_stage = ""
 	if _creature_interaction.phase == TableInteractionState.Phase.MODE_SELECTION:
 		_render_creature_mode_popup(actions)
+	if _choice_actions.is_empty():
+		_render_creature_action_popup(actions, visible_cards)
 	if not _choice_actions.is_empty():
 		_action_heading.text = "ELECCIÓN"
-		_selection_label.text = "Confirma la postura u opción en la ventana central."
+		_selection_label.text = "Elige postura y, si el efecto lo requiere, su objetivo."
 		_choice_overlay.visible = true
-		_choice_overlay_title.text = "ELIGE EL RESULTADO DE LA FUSIÓN" if _choice_actions[0]["type"] == "fuse_creatures" else "¿CÓMO QUIERES JUGARLA?"
-		for choice_action in _choice_actions:
-			var choice_button := Button.new()
-			choice_button.text = _describe_action(choice_action, visible_index)
-			choice_button.alignment = HORIZONTAL_ALIGNMENT_LEFT
-			choice_button.custom_minimum_size.y = 48
-			choice_button.pressed.connect(_perform_choice.bind(choice_action))
-			_choice_overlay_list.add_child(choice_button)
+		_render_choice_buttons(visible_index)
 		var cancel_button := Button.new()
-		cancel_button.text = "Cancelar y volver al tablero"
+		cancel_button.text = "NO · CANCELAR FUSIÓN" if _choice_actions[0]["type"] == "fuse_creatures" else "Cancelar y volver al tablero"
 		cancel_button.pressed.connect(_cancel_choices)
 		_choice_overlay_list.add_child(cancel_button)
 		_render_events()
@@ -646,13 +862,13 @@ func _refresh() -> void:
 	for index in range(actions.size()):
 		var entry := {"index": index, "action": actions[index]}
 		if _action_mentions_card(actions[index], _selected_card_id):
-			if actions[index]["type"] not in DIRECT_BOARD_ACTIONS:
+			if actions[index]["type"] not in DIRECT_BOARD_ACTIONS and not (actions[index]["type"] == "change_position" and _own_creature_selected()):
 				related.append(entry)
 		elif actions[index]["type"] == "concede":
 			general.append(entry)
 	var ordered_actions: Array = related + general
 	_action_heading.text = "CARTA" if _selected_card_id.is_empty() else "SELECCIÓN · %d" % ordered_actions.size()
-	_selection_label.text = _selection_instruction(actions, visible_index)
+	_selection_label.text = _selection_instruction(actions, visible_index, visible_cards)
 	if actions.is_empty():
 		var none := Label.new()
 		none.text = "El rival está decidiendo…" if _ai_is_actor(game) else "Este jugador no tiene la prioridad."
@@ -1106,7 +1322,8 @@ func _tile_from_card(card: Dictionary, player_id: int = -1, kind: String = "", v
 	var display_mode := "hand" if kind == "hand" else ("terrain" if kind == "terrain" else ("opponent_field" if player_id >= 0 and player_id != _viewer_id else "field"))
 	return _make_card_tile(
 		card["instance"]["id"], title, " · ".join(detail), true, player_id, kind, visual_slot,
-		card_type, attributes.get("element", ""), metadata.get("position", ""), metadata.get("face_up", true), display_mode
+		card_type, attributes.get("element", ""), metadata.get("position", ""), metadata.get("face_up", true), display_mode,
+		_card_face_data(card)
 	)
 
 
@@ -1119,23 +1336,45 @@ func _preview_tile_from_card(card: Dictionary) -> Button:
 	if card.has("effective_stats"):
 		detail = "ATQ %d  ·  DEF %d" % [card["effective_stats"]["attack"], card["effective_stats"]["defense"]]
 	var tile = CardTile.new()
-	tile.setup(card["instance"]["id"], title, detail, true, card_kind, attributes.get("element", ""), metadata.get("position", ""), metadata.get("face_up", true), "preview")
+	tile.setup(card["instance"]["id"], title, detail, true, card_kind, attributes.get("element", ""), metadata.get("position", ""), metadata.get("face_up", true), "preview", _card_face_data(card))
 	tile.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	return tile
+
+
+func _card_face_data(card: Dictionary) -> Dictionary:
+	var attributes: Dictionary = card["definition"]["attributes"]
+	var identity: Dictionary = card.get("fusion_identity", attributes)
+	var data := {
+		"element_label": _element_name(String(identity.get("element", attributes.get("element", "")))),
+		"effect_text": String(identity.get("effect_text", attributes.get("effect_text", ""))),
+	}
+	if attributes.get("card_type", "") == "creature" or card.has("fusion_identity"):
+		data["cost"] = int(identity.get("cost", attributes.get("cost", 0)))
+		var stats: Dictionary = card.get("effective_stats", identity)
+		data["attack"] = int(stats.get("attack", 0))
+		data["defense"] = int(stats.get("defense", 0))
+	return data
 
 
 func _make_card_tile(
 	instance_id: String, title: String, detail: String, interactive: bool,
 	player_id: int = -1, kind: String = "", visual_slot: int = -1,
 	card_type: String = "", element: String = "", position: String = "",
-	face_up: bool = true, display_mode: String = "field"
+	face_up: bool = true, display_mode: String = "field", face_data: Dictionary = {}
 ) -> Button:
 	var tile = CardTile.new()
-	tile.setup(instance_id, title, detail, interactive, card_type, element, position, face_up, display_mode)
+	tile.setup(instance_id, title, detail, interactive, card_type, element, position, face_up, display_mode, face_data)
 	if kind == "hand" and player_id == _viewer_id and card_type == "creature":
 		tile.set_creature_drag_enabled(not _legal_creature_actions(instance_id).is_empty())
 		tile.creature_drag_started.connect(_on_creature_drag_started)
 		tile.creature_drag_failed.connect(_on_creature_drag_failed)
+	if kind == "creatures" and player_id == _viewer_id:
+		var partners := _fusion_partners(instance_id)
+		tile.set_fusion_drag_enabled(not partners.is_empty())
+		tile.set_fusion_drop_sources(partners)
+		tile.fusion_drag_started.connect(_on_fusion_drag_started)
+		tile.fusion_drag_failed.connect(_on_fusion_drag_failed)
+		tile.fusion_dropped.connect(_on_fusion_dropped)
 	tile.set_selected(not instance_id.is_empty() and instance_id == _selected_card_id)
 	tile.set_targeted(not instance_id.is_empty() and _is_direct_target(instance_id, player_id, kind))
 	if player_id >= 0 and not kind.is_empty():
@@ -1149,8 +1388,10 @@ func _make_card_tile(
 func _is_direct_target(instance_id: String, player_id: int, kind: String) -> bool:
 	if _selected_card_id.is_empty() or instance_id == _selected_card_id or _engine == null:
 		return false
+	if _attack_targeting and kind == "creatures" and player_id != _viewer_id and _can_offer_attack_from_main():
+		return true
 	var location: Dictionary = _visible_card_locations.get(instance_id, {})
-	for action in _engine.get_legal_actions(_viewer_id):
+	for action in _legal_actions():
 		var payload: Dictionary = action["payload"]
 		if action["type"] == "fuse_creatures" and _selected_card_id in payload.get("material_instance_ids", []) and instance_id in payload.get("material_instance_ids", []):
 			return true
@@ -1160,9 +1401,24 @@ func _is_direct_target(instance_id: String, player_id: int, kind: String) -> boo
 			return true
 		if action["type"] == "play_main_spell" and not location.is_empty() and payload.get("target_player_id", -1) == player_id and payload.get("target_slot", -2) == location.get("slot", -3):
 			return true
-		if action["type"] == "attack" and kind == "creatures" and player_id != _viewer_id and not location.is_empty() and payload.get("target_slot", -2) == location.get("slot", -3):
+		if _attack_targeting and action["type"] == "attack" and kind == "creatures" and player_id != _viewer_id and not location.is_empty() and payload.get("target_slot", -2) == location.get("slot", -3):
 			return true
 	return false
+
+
+func _fusion_partners(instance_id: String) -> Array:
+	var partners: Array = []
+	if _engine == null or _privacy_hidden or instance_id.is_empty():
+		return partners
+	for action in _legal_actions():
+		if action["type"] != "fuse_creatures":
+			continue
+		var materials: Array = action["payload"].get("material_instance_ids", [])
+		if instance_id in materials:
+			for other_id in materials:
+				if other_id != instance_id and other_id not in partners:
+					partners.append(other_id)
+	return partners
 
 
 func _zone_description(table: Dictionary, player_id: int, kind: String) -> String:
@@ -1230,8 +1486,9 @@ func _card_detail_text(card: Dictionary) -> String:
 	else:
 		identity_lines.append("%s · coste %d" % [_card_type_name(attributes.get("card_type", "")), int(attributes.get("cost", 0))])
 	var stat_line := ""
-	if card.has("effective_stats"):
-		stat_line = "ATQ %d · DEF %d" % [card["effective_stats"]["attack"], card["effective_stats"]["defense"]]
+	if attributes.get("card_type", "") == "creature" or card.has("fusion_identity"):
+		var face_values := _card_face_data(card)
+		stat_line = "ATQ %d · DEF %d" % [face_values["attack"], face_values["defense"]]
 	var traits: Array = []
 	var element: String = attributes.get("element", "")
 	if not element.is_empty():
@@ -1327,12 +1584,23 @@ func _group_action_entries(entries: Array) -> Array:
 	return groups
 
 
+func _legal_actions() -> Array:
+	if _engine == null or not _engine.is_ready():
+		return []
+	var version: int = _engine.state_version()
+	if _cached_legal_version != version or _cached_legal_viewer != _viewer_id:
+		_cached_legal_actions = _engine.get_legal_actions(_viewer_id)
+		_cached_legal_version = version
+		_cached_legal_viewer = _viewer_id
+	return _cached_legal_actions
+
+
 func _legal_creature_actions(instance_id: String) -> Array:
 	var result: Array = []
 	if _engine == null or _privacy_hidden:
 		return result
 	var modes := {}
-	for action in _engine.get_legal_actions(_viewer_id):
+	for action in _legal_actions():
 		if action["type"] in ["summon_creature", "set_creature"] and action["payload"].get("instance_id", "") == instance_id:
 			# Una habilidad de entrada puede ofrecer varios comandos de Ataque con
 			# objetivos distintos. Su elección pertenece a otra pasada de UX.
@@ -1347,7 +1615,7 @@ func _legal_creature_source_ids() -> Array:
 	var result: Array = []
 	if _engine == null or _privacy_hidden:
 		return result
-	for action in _engine.get_legal_actions(_viewer_id):
+	for action in _legal_actions():
 		if action["type"] in ["summon_creature", "set_creature"]:
 			var instance_id: String = action["payload"].get("instance_id", "")
 			if not instance_id.is_empty() and instance_id not in result and not _legal_creature_actions(instance_id).is_empty():
@@ -1372,7 +1640,9 @@ func _legal_empty_creature_slots() -> Array:
 
 func _select_card(instance_id: String, refresh_view: bool = true) -> void:
 	_selected_card_id = instance_id
+	_attack_targeting = false
 	_choice_actions = []
+	_choice_stage = ""
 	_pending_visual_placement = {}
 	var location: Dictionary = _visible_card_locations.get(instance_id, {})
 	var game: Dictionary = _engine.get_player_state(_viewer_id)["game"] if _engine != null else {}
@@ -1383,10 +1653,12 @@ func _select_card(instance_id: String, refresh_view: bool = true) -> void:
 	else:
 		_creature_interaction.reset()
 	if location.get("kind", "") == "creatures" and location.get("player_id", -1) == _viewer_id:
-		if game.get("phase", "") == "COMBAT":
-			_status_message = "Atacante seleccionado: pulsa una criatura rival iluminada o la vida rival para ataque directo."
+		if game.get("turn_number", 0) == 1 and game.get("active_player", -1) == _viewer_id:
+			_status_message = "Primer turno: todavía no puedes atacar. Las acciones de la criatura aparecen junto a ella; también puedes Fusionar con otra compatible."
+		elif game.get("phase", "") == "COMBAT":
+			_status_message = "Elige Atacar junto a la criatura y luego un objetivo iluminado."
 		else:
-			_status_message = "Criatura seleccionada. Para atacar, pulsa IR A COMBATE; para Fusionar, elige un material iluminado."
+			_status_message = "Elige Atacar o Cambiar postura junto a la criatura. Para Fusionar, pulsa o arrastra hacia otra propia compatible."
 	else:
 		_status_message = "Carta seleccionada: pulsa una casilla amarilla o una carta objetivo válida."
 	if refresh_view:
@@ -1395,9 +1667,86 @@ func _select_card(instance_id: String, refresh_view: bool = true) -> void:
 		_update_live_drag_highlights()
 
 
+func _own_creature_selected() -> bool:
+	var location: Dictionary = _visible_card_locations.get(_selected_card_id, {})
+	return location.get("kind", "") == "creatures" and location.get("player_id", -1) == _viewer_id
+
+
+func _render_creature_action_popup(actions: Array, visible_cards: Dictionary) -> void:
+	if not _own_creature_selected() or _attack_targeting or _privacy_hidden:
+		return
+	var card: Dictionary = visible_cards.get(_selected_card_id, {})
+	if card.is_empty():
+		return
+	var attack_available := _can_offer_attack_from_main()
+	var posture_action: Dictionary = {}
+	for action in actions:
+		if action["type"] == "attack" and action["payload"].get("attacker_id", "") == _selected_card_id:
+			attack_available = true
+		if action["type"] == "change_position" and action["payload"].get("instance_id", "") == _selected_card_id:
+			posture_action = action
+	var attack_button := Button.new()
+	attack_button.name = "CreatureAttackAction"
+	attack_button.text = "Atacar"
+	attack_button.disabled = not attack_available
+	attack_button.tooltip_text = "Elige después una criatura rival o la Vida rival." if attack_available else "No puede atacar ahora: comprueba fase, Guardia, primer turno o ataque ya usado."
+	attack_button.pressed.connect(_begin_creature_attack)
+	_creature_action_buttons.add_child(attack_button)
+	var current_position: String = card["instance"]["metadata"].get("position", "attack")
+	var posture_button := Button.new()
+	posture_button.name = "CreaturePostureAction"
+	posture_button.text = "Pasar a Ataque" if current_position == "guard" else "Pasar a Guardia"
+	posture_button.disabled = posture_action.is_empty()
+	posture_button.tooltip_text = "Cambio de postura permitido por UCE." if not posture_action.is_empty() else "No disponible ahora: solo en fase principal propia, desde un turno posterior, una vez por turno y no después de atacar."
+	if not posture_action.is_empty():
+		posture_button.pressed.connect(_perform_action.bind(posture_action))
+	_creature_action_buttons.add_child(posture_button)
+	_creature_action_popup.visible = true
+	call_deferred("_place_creature_action_popup")
+
+
+func _place_creature_action_popup() -> void:
+	if not _creature_action_popup.visible or not _own_creature_selected() or _field_layer == null:
+		return
+	var tile: CardTile = null
+	for row in _field_layer.get_children():
+		for holder in row.get_children():
+			for child in holder.get_children():
+				if child is CardTile and child.instance_id == _selected_card_id:
+					tile = child
+					break
+	if tile == null:
+		_creature_action_popup.visible = false
+		return
+	var card_rect := tile.get_global_rect()
+	var popup_size := _creature_action_popup.get_combined_minimum_size()
+	_creature_action_popup.size = popup_size
+	var root_origin := get_global_rect().position
+	var desired := Vector2(card_rect.get_center().x - popup_size.x * 0.5, card_rect.end.y + 8.0) - root_origin
+	var board_rect := _board_surface.get_global_rect()
+	var board_left: float = board_rect.position.x - root_origin.x
+	var board_right: float = board_rect.end.x - root_origin.x
+	desired.x = clampf(desired.x, board_left + 8.0, board_right - popup_size.x - 8.0)
+	if desired.y + popup_size.y > size.y - 8.0:
+		desired.y = card_rect.position.y - root_origin.y - popup_size.y - 8.0
+	_creature_action_popup.position = desired
+
+
+func _begin_creature_attack() -> void:
+	if not _own_creature_selected():
+		return
+	var available := _can_offer_attack_from_main()
+	for action in _legal_actions():
+		if action["type"] == "attack" and action["payload"].get("attacker_id", "") == _selected_card_id:
+			available = true
+	if not available:
+		return
+	_attack_targeting = true
+	_status_message = "Elige una criatura rival iluminada o la Vida rival si el ataque directo es legal."
+	_refresh()
+
+
 func _update_live_drag_highlights() -> void:
-	if _end_turn_button != null:
-		_end_turn_button.disabled = _creature_interaction.phase != TableInteractionState.Phase.IDLE
 	for slot_index in range(5):
 		var slot := _field_slot("creatures", slot_index)
 		if slot is CreatureDropSlot:
@@ -1406,24 +1755,48 @@ func _update_live_drag_highlights() -> void:
 					child.highlighted = slot_index in _creature_interaction.legal_destinations
 					child.detail = "JUGAR AQUÍ" if child.highlighted else ""
 					child.queue_redraw()
+	if _field_layer == null or _selected_card_id.is_empty():
+		return
+	var partners := _fusion_partners(_selected_card_id)
+	for row in _field_layer.get_children():
+		for holder in row.get_children():
+			var target_id := ""
+			var visual: ProjectedFieldPiece = null
+			for child in holder.get_children():
+				if child is CardTile:
+					target_id = child.instance_id
+				elif child is ProjectedFieldPiece:
+					visual = child
+			if visual != null and target_id in partners:
+				visual.highlighted = true
+				visual.queue_redraw()
 
 
-func _selection_instruction(actions: Array, visible_index: Dictionary) -> String:
+func _selection_instruction(actions: Array, visible_index: Dictionary, visible_cards: Dictionary = {}) -> String:
 	if _selected_card_id.is_empty():
-		return "Elige una carta para ver sus destinos."
+		return _status_message if not _status_message.is_empty() else "Elige una carta para ver sus destinos."
 	var name: String = visible_index.get(_selected_card_id, "Carta")
+	var selected_card: Dictionary = visible_cards.get(_selected_card_id, {})
+	var definition_id: String = selected_card.get("definition", {}).get("id", "")
 	var action_types: Array = []
 	for action in actions:
 		if _action_mentions_card(action, _selected_card_id) and action["type"] not in action_types:
 			action_types.append(action["type"])
 	if "equip_item" in action_types:
-		return "%s\nEQUIPO: elige una criatura propia iluminada. Se vincula a ella y no ocupa una casilla de Apoyo." % name
+		return "%s\nEQUIPO: pulsa una criatura propia iluminada. Se vincula y se activa al instante; NO lo coloques en Apoyo." % name
 	if "play_main_spell" in action_types:
 		return "%s\nMAGIA INSTANTÁNEA: elige el objetivo iluminado. Se resuelve y después va al Cementerio." % name
 	if "play_persistent" in action_types:
-		return "%s\nMAGIA PERSISTENTE: elige una casilla de Apoyo. Quedará boca arriba mientras siga activa." % name
+		match definition_id:
+			"G04":
+				return "%s\nElige Apoyo. Después da +1 DEF automáticamente a TODAS tus criaturas en Guardia; no se entrega ni se activa sobre una sola." % name
+			"G05":
+				return "%s\nElige Apoyo. Queda activa: +1 ATQ cuando una criatura propia pase de Guardia a Ataque (primera vez de cada turno)." % name
+			"E04":
+				return "%s\nARTEFACTO: va a Apoyo. No da DEF: permite trasladar un equipo YA vinculado entre dos criaturas compatibles." % name
+		return "%s\nMAGIA PERSISTENTE: elige Apoyo. Queda boca arriba y se activa según el texto de la carta." % name
 	if "set_support" in action_types:
-		return "%s\nTRAMPA O RESPUESTA: elige una casilla de Apoyo. Quedará preparada boca abajo." % name
+		return "%s\nTRAMPA O RESPUESTA: elige una casilla de Apoyo. Queda boca abajo; colocarla no activa su efecto. Se usa después, cuando sea legal responder." % name
 	if "play_terrain" in action_types:
 		return "%s\nTERRENO: pulsa tu zona central de Territorio." % name
 	if "summon_creature" in action_types or "set_creature" in action_types:
@@ -1431,25 +1804,117 @@ func _selection_instruction(actions: Array, visible_index: Dictionary) -> String
 	if "attack" in action_types:
 		return "%s\nATACANTE: pulsa una criatura rival iluminada o la Vida rival si el ataque directo está permitido." % name
 	var location: Dictionary = _visible_card_locations.get(_selected_card_id, {})
+	if location.get("kind", "") == "support" and location.get("player_id", -1) == _viewer_id:
+		match definition_id:
+			"G04":
+				return "%s\nACTIVA AUTOMÁTICAMENTE: +1 DEF a todas tus criaturas en Guardia. No se asigna ni necesita otro clic; sin criaturas en Guardia no verás aumento." % name
+			"G05":
+				return "%s\nACTIVA AUTOMÁTICAMENTE al pasar una criatura propia de Guardia a Ataque, una vez por turno. No requiere otro clic." % name
+			"E04":
+				return "%s\nSolo traslada un equipo ya vinculado a otra criatura compatible. Si no hay equipo vinculado, todavía no tiene uso." % name
 	if location.get("kind", "") == "creatures" and location.get("player_id", -1) == _viewer_id:
-		return "%s\nCRIATURA: usa IR A COMBATE para atacar; los cambios de postura y habilidades aparecen aquí cuando son legales." % name
+		var game: Dictionary = _engine.get_public_state()["game"]
+		if game.get("turn_number", 0) == 1 and game.get("active_player", -1) == _viewer_id:
+			return "%s\nPRIMER TURNO: no puedes atacar. Las acciones aparecen junto a esta carta; FUSIÓN: pulsa otra criatura propia iluminada o arrastra esta sobre ella." % name
+		if "fuse_creatures" in action_types:
+			return "%s\nElige Atacar o Cambiar postura junto a la carta. FUSIÓN: pulsa otra criatura propia iluminada o arrastra esta sobre ella; confirma el resultado." % name
+		var phase: String = game["phase"]
+		if phase == "COMBAT":
+			return "%s\nElige Atacar junto a la carta si está habilitado. Si no, comprueba Guardia, ataque ya usado o restricciones." % name
+		return "%s\nAcciones junto a la carta: Atacar o Cambiar postura cuando sean legales. FUSIÓN: pulsa o arrastra hacia una criatura propia compatible." % name
 	return "%s\nEsta carta no tiene ahora un destino directo legal. Consulta su ficha o cambia de fase." % name
 
 
 func _open_action_choices(actions: Array) -> void:
 	_choice_actions = actions.duplicate(true)
+	_choice_stage = ""
 	_refresh()
 
 
 func _cancel_choices() -> void:
 	_choice_actions = []
+	_choice_stage = ""
 	_pending_visual_placement = {}
 	_refresh()
 
 
 func _perform_choice(action: Dictionary) -> void:
 	_choice_actions = []
+	_choice_stage = ""
 	_perform_action(action)
+
+
+func _choice_position(action: Dictionary) -> String:
+	if action["type"] == "summon_creature":
+		return "attack"
+	if action["type"] == "set_creature":
+		return "guard"
+	return str(action["payload"].get("position", "attack"))
+
+
+func _choice_target_text(action: Dictionary, visible_index: Dictionary) -> String:
+	var payload: Dictionary = action["payload"]
+	var target_id: String = payload.get("target_instance_id", "")
+	if not target_id.is_empty():
+		var target_name: String = visible_index.get(target_id, "Criatura visible")
+		var target_location: Dictionary = _visible_card_locations.get(target_id, {})
+		if target_location.get("kind", "") == "creatures":
+			return "%s · C%d" % [target_name, _visual_slot_for("creatures", int(target_location["player_id"]), target_id) + 1]
+		return target_name
+	if payload.has("target_slot"):
+		return "Criatura rival · C%d" % (int(payload["target_slot"]) + 1)
+	return "Sin objetivo adicional"
+
+
+func _render_choice_buttons(visible_index: Dictionary) -> void:
+	var first: Dictionary = _choice_actions[0]
+	var is_fusion: bool = first["type"] == "fuse_creatures"
+	var is_creature: bool = first["type"] in ["summon_creature", "set_creature"]
+	if not is_fusion and not is_creature:
+		_choice_overlay_title.text = "ELIGE UNA OPCIÓN"
+		for action in _choice_actions:
+			var legacy_button := Button.new()
+			legacy_button.text = _describe_action(action, visible_index)
+			legacy_button.alignment = HORIZONTAL_ALIGNMENT_LEFT
+			legacy_button.custom_minimum_size.y = 48
+			legacy_button.pressed.connect(_perform_choice.bind(action))
+			_choice_overlay_list.add_child(legacy_button)
+		return
+	var result_name: String = str(first["label"]).get_slice(": ", 1)
+	_choice_overlay_title.text = "¿FUSIONAR %s? · 0 ENERGÍA" % result_name if is_fusion else "¿CÓMO QUIERES JUGARLA?"
+	if _choice_stage == "targets":
+		_choice_overlay_title.text = "ELIGE OBJETIVO · %s" % result_name if is_fusion else "ELIGE OBJETIVO DEL EFECTO"
+		for action in _choice_actions:
+			var target_button := Button.new()
+			target_button.text = _choice_target_text(action, visible_index)
+			target_button.custom_minimum_size.y = 40
+			target_button.pressed.connect(_perform_choice.bind(action))
+			_choice_overlay_list.add_child(target_button)
+		return
+	var positions: Array = []
+	for action in _choice_actions:
+		var position := _choice_position(action)
+		if position not in positions:
+			positions.append(position)
+	for position in positions:
+		var mode_button := Button.new()
+		mode_button.text = "ATAQUE · Visible" if position == "attack" else "GUARDIA · Oculta" if is_creature else "GUARDIA · Visible"
+		mode_button.custom_minimum_size.y = 42
+		mode_button.pressed.connect(_select_choice_position.bind(position))
+		_choice_overlay_list.add_child(mode_button)
+
+
+func _select_choice_position(position: String) -> void:
+	var matching: Array = []
+	for action in _choice_actions:
+		if _choice_position(action) == position:
+			matching.append(action)
+	if matching.size() == 1:
+		_perform_choice(matching[0])
+	elif matching.size() > 1:
+		_choice_actions = matching
+		_choice_stage = "targets"
+		_refresh()
 
 
 func _render_creature_mode_popup(legal_actions: Array) -> void:
@@ -1497,7 +1962,11 @@ func _position_creature_mode_popup() -> void:
 
 func _describe_action(action: Dictionary, cards: Dictionary) -> String:
 	var text: String = action["label"]
-	if action["type"] == "summon_creature":
+	if action["type"] == "fuse_creatures":
+		var result_name: String = text.get_slice(": ", 1)
+		var posture: String = "ATAQUE" if action["payload"].get("position", "") == "attack" else "GUARDIA"
+		text = "FUSIONAR · %s · %s · 0 Energía" % [result_name, posture]
+	elif action["type"] == "summon_creature":
 		text = "ATAQUE · Visible\n" + text
 	elif action["type"] == "set_creature":
 		text = "GUARDIA · Oculta\n" + text
@@ -1572,12 +2041,53 @@ func _phase_name(phase: String) -> String:
 func _perform_action(action: Dictionary, from_ai: bool = false) -> bool:
 	_request_number += 1
 	var request_id := "table-%06d" % _request_number
+	var defender_id: int = 1 - int(action["actor_id"])
+	var life_before: int = int(_engine.get_public_state()["game"]["life"][str(defender_id)]) if action["type"] == "attack" else 0
+	var events_before: int = _engine.get_events(0, _viewer_id).size()
 	var result = _engine.perform_action(GameAction.new(action["type"], action["actor_id"], action["payload"], request_id))
 	if not result.success:
 		_status_message = "Acción rechazada: %s — %s" % [result.code, result.message]
 		_refresh()
 		return false
+	_queue_public_activations(events_before)
 	_status_message = "Aplicada: %s" % action["label"]
+	var played_definition_id := ""
+	if not from_ai and action["payload"].has("instance_id"):
+		var player_table: Dictionary = _engine.get_player_state(_viewer_id)["game"]["card_table"]
+		played_definition_id = _visible_cards_by_id(player_table).get(action["payload"]["instance_id"], {}).get("definition", {}).get("id", "")
+	match action["type"]:
+		"set_support":
+			_status_message = "Carta preparada boca abajo. Su efecto no se activa al colocarla: espera a una respuesta legal."
+		"play_persistent":
+			match played_definition_id:
+				"G04":
+					_status_message = "Bastión activo: +1 DEF automático a TODAS tus criaturas en Guardia; no hay que asignarlo."
+				"G05":
+					_status_message = "Magia activa: bonifica el primer cambio propio de Guardia a Ataque de cada turno."
+				"E04":
+					_status_message = "Artefacto activo: necesita un equipo ya vinculado para poder trasladarlo; no da +1 DEF."
+				_:
+					_status_message = "Carta persistente boca arriba; consulta su condición de activación."
+		"equip_item":
+			_status_message = "Equipo vinculado a la criatura elegida: su bonificación ya está activa."
+		"attack":
+			var attack_game: Dictionary = _engine.get_public_state()["game"]
+			if attack_game["response_window"].get("active", false):
+				_status_message = "Ataque declarado; espera a que se resuelvan las respuestas."
+			elif action["payload"].get("target_slot", -2) == -1:
+				var damage: int = maxi(0, life_before - int(attack_game["life"][str(defender_id)]))
+				_status_message = "Ataque directo: %d de daño a la Vida rival." % damage
+			else:
+				_status_message = "Combate resuelto; revisa Vida, criaturas y Cementerio."
+		"play_main_spell":
+			_status_message = "Magia dirigida jugada sobre el objetivo elegido; comprueba el resultado en la carta y el registro."
+		"fuse_creatures":
+			_status_message = "Fusión realizada; consulta la criatura resultante en el campo."
+	var combat_status := _combat_status_from_events(events_before)
+	if not combat_status.is_empty():
+		_status_message = combat_status
+	elif _events_contain_type(events_before, "attack_canceled"):
+		_status_message = "Ataque cancelado por una respuesta. Esa criatura gastó su ataque; puedes atacar con otra o terminar turno."
 	_last_committed_action = {"type": action["type"], "actor_id": action["actor_id"], "payload": action["payload"].duplicate(true)}
 	if not from_ai and not _pending_visual_placement.is_empty():
 		var placement_key := "%s:%d" % [_pending_visual_placement["kind"], _pending_visual_placement["player_id"]]
@@ -1586,7 +2096,9 @@ func _perform_action(action: Dictionary, from_ai: bool = false) -> bool:
 		_visual_slot_assignments[placement_key][_pending_visual_placement["instance_id"]] = _pending_visual_placement["slot"]
 	_selected_card_id = ""
 	_choice_actions = []
+	_choice_stage = ""
 	_pending_visual_placement = {}
+	_attack_targeting = false
 	_creature_interaction.reset()
 	if _engine.lifecycle_name() == "RUNNING":
 		var public_game: Dictionary = _engine.get_public_state()["game"]
@@ -1606,17 +2118,46 @@ func _perform_action(action: Dictionary, from_ai: bool = false) -> bool:
 	return true
 
 
+func _combat_status_from_events(start_index: int) -> String:
+	var events: Array = _engine.get_events(0, _viewer_id)
+	for index in range(events.size() - 1, start_index - 1, -1):
+		var event: Dictionary = events[index]
+		if event["type"] != "creature_combat_resolved":
+			continue
+		var info: Dictionary = event["payload"]
+		var attacker_falls: bool = info["attacker_destroyed"]
+		var defender_falls: bool = info["target_destroyed"]
+		if not attacker_falls and not defender_falls:
+			return "Ninguna criatura cae: ATQ %d no supera DEF %d; la represalia ATQ %d no supera DEF %d. Vida sin cambios." % [info["attacker_attack"], info["target_defense"], info["target_attack"], info["attacker_defense"]]
+		var fallen := "ambas criaturas" if attacker_falls and defender_falls else "la atacante" if attacker_falls else "la defensora"
+		return "Combate: cae %s. Daño a Vida del atacante: %d; del defensor: %d." % [fallen, info["damage_to_attacker"], info["damage_to_defender"]]
+	return ""
+
+
+func _events_contain_type(start_index: int, event_type: String) -> bool:
+	var events: Array = _engine.get_events(0, _viewer_id)
+	for index in range(start_index, events.size()):
+		if events[index]["type"] == event_type:
+			return true
+	return false
+
+
 func _on_action_pressed(index: int) -> void:
 	perform_legal_action(index)
 
 
 func _toggle_privacy() -> void:
 	_privacy_hidden = not _privacy_hidden
+	if _privacy_hidden:
+		_activation_timer.stop()
+		_activation_overlay.visible = false
+	else:
+		_show_next_activation()
 	_refresh()
 
 
 func _restart_pressed() -> void:
-	start_match(int(_seed_input.value))
+	start_match(_fresh_seed())
 
 
 func _on_empty_slot_pressed(player_id: int, kind: String, visual_slot: int) -> void:
@@ -1624,21 +2165,21 @@ func _on_empty_slot_pressed(player_id: int, kind: String, visual_slot: int) -> v
 		_choose_creature_slot(visual_slot)
 		return
 	if player_id != _viewer_id and kind == "creatures" and not _selected_card_id.is_empty():
-		for action in _engine.get_legal_actions(_viewer_id):
-			if action["type"] == "attack" and action["payload"].get("attacker_id", "") == _selected_card_id and action["payload"].get("target_slot", -2) == -1:
-				_perform_action(action)
-				return
+		_attempt_selected_attack(-1)
+		return
 	if player_id != _viewer_id or _selected_card_id.is_empty() or _privacy_hidden:
 		_status_message = "Selecciona primero una carta de tu mano." if _selected_card_id.is_empty() else "Esa casilla no pertenece a tu lado."
 		_refresh()
 		return
 	var allowed_types: Array = ["summon_creature", "set_creature"] if kind == "creatures" else ["set_support", "play_persistent"]
 	var candidates: Array = []
-	for action in _engine.get_legal_actions(_viewer_id):
+	for action in _legal_actions():
 		if action["type"] in allowed_types and action["payload"].get("instance_id", "") == _selected_card_id:
 			candidates.append(action)
 	if candidates.is_empty():
-		_status_message = "Esa carta no puede jugarse en esta casilla durante la fase actual."
+		var selected_card: Dictionary = _visible_cards_by_id(_engine.get_player_state(_viewer_id)["game"]["card_table"]).get(_selected_card_id, {})
+		var card_type: String = selected_card.get("definition", {}).get("attributes", {}).get("card_type", "")
+		_status_message = "Este equipo no va en Apoyo: pulsa una criatura propia compatible para vincularlo." if kind == "support" and card_type == "item" and selected_card.get("definition", {}).get("id", "") != "E04" else "Esa carta no puede jugarse en esta casilla durante la fase actual."
 		_refresh()
 		return
 	_pending_visual_placement = {"kind": kind, "player_id": player_id, "slot": visual_slot, "instance_id": _selected_card_id}
@@ -1693,12 +2234,36 @@ func _on_creature_drag_failed(instance_id: String) -> void:
 		_cancel_creature_interaction()
 
 
+func _on_fusion_drag_started(instance_id: String) -> void:
+	if _fusion_partners(instance_id).is_empty():
+		return
+	_select_card(instance_id, false)
+	_status_message = "Suelta sobre una criatura propia iluminada para ver el resultado de la Fusión."
+
+
+func _on_fusion_drag_failed(instance_id: String) -> void:
+	if _selected_card_id == instance_id:
+		_selected_card_id = ""
+		_attack_targeting = false
+		_status_message = "Fusión cancelada; no se han gastado cartas ni Energía."
+		_refresh()
+
+
+func _on_fusion_dropped(source_id: String, target_id: String) -> void:
+	if target_id not in _fusion_partners(source_id):
+		return
+	_selected_card_id = source_id
+	_on_board_card_selected(target_id, _viewer_id, "creatures", _visual_slot_for("creatures", _viewer_id, target_id))
+
+
 func _cancel_creature_interaction() -> void:
 	if _creature_interaction.phase == TableInteractionState.Phase.IDLE:
 		return
 	_creature_interaction.reset()
 	_selected_card_id = ""
+	_attack_targeting = false
 	_choice_actions = []
+	_choice_stage = ""
 	_pending_visual_placement = {}
 	_status_message = ""
 	_refresh()
@@ -1706,6 +2271,21 @@ func _cancel_creature_interaction() -> void:
 
 func _input(event: InputEvent) -> void:
 	if _creature_interaction.phase == TableInteractionState.Phase.IDLE:
+		if _creature_action_popup.visible or _attack_targeting:
+			if event is InputEventKey and event.pressed and not event.echo and event.keycode == KEY_ESCAPE:
+				_cancel_creature_context()
+				get_viewport().set_input_as_handled()
+			elif event is InputEventMouseButton and event.pressed and event.button_index == MOUSE_BUTTON_LEFT and _board_surface.get_global_rect().has_point(event.global_position):
+				var hovered_context := get_viewport().gui_get_hovered_control()
+				var over_control := false
+				while hovered_context != null:
+					if hovered_context is Button:
+						over_control = true
+						break
+					hovered_context = hovered_context.get_parent() as Control
+				if not over_control:
+					_cancel_creature_context()
+					get_viewport().set_input_as_handled()
 		return
 	if event is InputEventKey and event.pressed and not event.echo and event.keycode == KEY_ESCAPE:
 		_cancel_creature_interaction()
@@ -1723,13 +2303,31 @@ func _input(event: InputEvent) -> void:
 			get_viewport().set_input_as_handled()
 
 
+func _cancel_creature_context() -> void:
+	_selected_card_id = ""
+	_attack_targeting = false
+	_status_message = "Selección cancelada."
+	_refresh()
+
+
 func _on_board_card_selected(instance_id: String, player_id: int, kind: String, _visual_slot: int) -> void:
 	if _selected_card_id.is_empty() or _selected_card_id == instance_id:
 		_select_card(instance_id)
 		return
 	var location: Dictionary = _visible_card_locations.get(instance_id, {})
+	var selected_location: Dictionary = _visible_card_locations.get(_selected_card_id, {})
+	if kind == "creatures" and player_id != _viewer_id and selected_location.get("kind", "") == "creatures" and selected_location.get("player_id", -1) == _viewer_id:
+		_attempt_selected_attack(location.get("slot", -2))
+		return
+	if kind == "creatures" and player_id == _viewer_id and selected_location.get("player_id", -1) == _viewer_id and selected_location.get("kind", "") in ["hand", "support"]:
+		var selected_card: Dictionary = _visible_cards_by_id(_engine.get_player_state(_viewer_id)["game"]["card_table"]).get(_selected_card_id, {})
+		var definition_id: String = selected_card.get("definition", {}).get("id", "")
+		if definition_id in ["G04", "G05", "E04"]:
+			_status_message = "Esta carta no se entrega a una criatura: va en Apoyo y funciona automáticamente según su condición. E04 solo traslada equipos ya vinculados."
+			_refresh()
+			return
 	var candidates: Array = []
-	for action in _engine.get_legal_actions(_viewer_id):
+	for action in _legal_actions():
 		var payload: Dictionary = action["payload"]
 		if action["type"] == "fuse_creatures" and _selected_card_id in payload.get("material_instance_ids", []) and instance_id in payload.get("material_instance_ids", []):
 			candidates.append(action)
@@ -1743,28 +2341,19 @@ func _on_board_card_selected(instance_id: String, player_id: int, kind: String, 
 			candidates.append(action)
 		elif action["type"] == "attack" and kind == "creatures" and player_id != _viewer_id and not location.is_empty() and payload.get("target_slot", -2) == location.get("slot", -3):
 			candidates.append(action)
-	if candidates.size() == 1:
+	if candidates.size() == 1 and candidates[0]["type"] != "fuse_creatures":
 		_perform_action(candidates[0])
-	elif candidates.size() > 1:
-		_status_message = "Elige la acción exacta para esa carta objetivo."
+	elif not candidates.is_empty():
+		_status_message = "Comprueba resultado, postura y objetivo antes de confirmar. Fusión normal: 0 Energía." if candidates[0]["type"] == "fuse_creatures" else "Elige la acción exacta para esa carta objetivo."
 		_open_action_choices(candidates)
 	else:
-		var selected_location: Dictionary = _visible_card_locations.get(_selected_card_id, {})
-		if selected_location.get("kind", "") == "creatures" and selected_location.get("player_id", -1) == _viewer_id and kind == "creatures" and player_id != _viewer_id:
-			var phase: String = _engine.get_public_state()["game"]["phase"]
-			_status_message = "Todavía estás en %s. Mantengo tu atacante seleccionado: pulsa IR A COMBATE y después el objetivo." % _phase_name(phase) if phase != "COMBAT" else "Esa criatura no es un objetivo legal para este atacante."
-			_refresh()
-			return
 		_select_card(instance_id)
 
 
 func _on_direct_player_pressed() -> void:
 	if _selected_card_id.is_empty() or _engine == null:
 		return
-	for action in _engine.get_legal_actions(_viewer_id):
-		if action["type"] == "attack" and action["payload"].get("attacker_id", "") == _selected_card_id and action["payload"].get("target_slot", -2) == -1:
-			_perform_action(action)
-			return
+	_attempt_selected_attack(-1)
 
 
 func _on_terrain_pressed(player_id: int) -> void:
@@ -1772,7 +2361,7 @@ func _on_terrain_pressed(player_id: int) -> void:
 		_status_message = "Selecciona un Terreno de tu mano y después tu franja de Territorio."
 		_refresh()
 		return
-	for action in _engine.get_legal_actions(_viewer_id):
+	for action in _legal_actions():
 		if action["type"] == "play_terrain" and action["payload"].get("instance_id", "") == _selected_card_id:
 			var table: Dictionary = _engine.get_player_state(_viewer_id)["game"]["card_table"]
 			var terrain_zone: Dictionary = table["zones"]["terrain:%d" % player_id]
@@ -1810,7 +2399,7 @@ func _confirm_terrain() -> void:
 func _has_selected_action_type(action_type: String) -> bool:
 	if _selected_card_id.is_empty() or _engine == null:
 		return false
-	for action in _engine.get_legal_actions(_viewer_id):
+	for action in _legal_actions():
 		if action["type"] == action_type and action["payload"].get("instance_id", "") == _selected_card_id:
 			return true
 	return false
@@ -1825,18 +2414,71 @@ func _selected_card_can_enter(kind: String) -> bool:
 
 
 func _selected_direct_attack_available() -> bool:
-	if _selected_card_id.is_empty() or _engine == null:
+	if _selected_card_id.is_empty() or _engine == null or not _attack_targeting:
 		return false
-	for action in _engine.get_legal_actions(_viewer_id):
+	if _can_offer_attack_from_main():
+		var game: Dictionary = _engine.get_public_state()["game"]
+		if game["card_table"]["zones"]["creatures:%d" % (1 - _viewer_id)]["count"] == 0:
+			return true
+	for action in _legal_actions():
 		if action["type"] == "attack" and action["payload"].get("attacker_id", "") == _selected_card_id and action["payload"].get("target_slot", -2) == -1:
 			return true
 	return false
 
 
-func _hidden_slot_attack_available(player_id: int, engine_slot: int) -> bool:
-	if player_id == _viewer_id or _selected_card_id.is_empty() or _engine == null:
+func _can_offer_attack_from_main() -> bool:
+	if _engine == null or _selected_card_id.is_empty() or _privacy_hidden:
 		return false
-	for action in _engine.get_legal_actions(_viewer_id):
+	var location: Dictionary = _visible_card_locations.get(_selected_card_id, {})
+	if location.get("kind", "") != "creatures" or location.get("player_id", -1) != _viewer_id:
+		return false
+	var game: Dictionary = _engine.get_player_state(_viewer_id)["game"]
+	if game["phase"] != "MAIN_1" or game["active_player"] != _viewer_id or game["response_window"].get("active", false) or game["turn_number"] == 1:
+		return false
+	var card: Dictionary = _visible_cards_by_id(game["card_table"]).get(_selected_card_id, {})
+	if card.is_empty():
+		return false
+	var metadata: Dictionary = card["instance"]["metadata"]
+	if not metadata.get("face_up", false) or metadata.get("position", "") != "attack":
+		return false
+	if card.has("fusion_identity") and metadata.get("summoned_turn", -1) == game["turn_number"]:
+		return false
+	return true
+
+
+func _attempt_selected_attack(target_slot: int) -> void:
+	if _engine == null or _selected_card_id.is_empty():
+		return
+	var attacker_id := _selected_card_id
+	var game: Dictionary = _engine.get_public_state()["game"]
+	if game["phase"] == "MAIN_1":
+		if not _can_offer_attack_from_main():
+			_status_message = "Esta criatura no puede atacar ahora: comprueba el primer turno, Guardia o Fusión recién formada."
+			_refresh()
+			return
+		var phase_action: Dictionary = {}
+		for action in _legal_actions():
+			if action["type"] == "advance_phase":
+				phase_action = action
+				break
+		if phase_action.is_empty() or not _perform_action(phase_action):
+			return
+		_selected_card_id = attacker_id
+		_refresh()
+	for action in _legal_actions():
+		if action["type"] == "attack" and action["payload"].get("attacker_id", "") == attacker_id and action["payload"].get("target_slot", -2) == target_slot:
+			_perform_action(action)
+			return
+	_status_message = "No hay ataque legal contra ese objetivo. Elige una criatura rival iluminada; ataque directo solo con campo rival vacío."
+	_refresh()
+
+
+func _hidden_slot_attack_available(player_id: int, engine_slot: int) -> bool:
+	if player_id == _viewer_id or _selected_card_id.is_empty() or _engine == null or not _attack_targeting:
+		return false
+	if _can_offer_attack_from_main():
+		return true
+	for action in _legal_actions():
 		if action["type"] == "attack" and action["payload"].get("attacker_id", "") == _selected_card_id and action["payload"].get("target_slot", -2) == engine_slot:
 			return true
 	return false
@@ -1845,12 +2487,7 @@ func _hidden_slot_attack_available(player_id: int, engine_slot: int) -> bool:
 func _on_hidden_board_card_selected(_ui_id: String, player_id: int, kind: String, engine_slot: int) -> void:
 	if player_id == _viewer_id or kind != "creatures":
 		return
-	for action in _engine.get_legal_actions(_viewer_id):
-		if action["type"] == "attack" and action["payload"].get("attacker_id", "") == _selected_card_id and action["payload"].get("target_slot", -2) == engine_slot:
-			_perform_action(action)
-			return
-	_status_message = "La carta está en guardia, pero todavía no existe un ataque legal contra esa casilla."
-	_refresh()
+	_attempt_selected_attack(engine_slot)
 
 
 func _sync_visual_slots(table: Dictionary) -> void:
@@ -1883,42 +2520,79 @@ func _visual_slot_for(kind: String, player_id: int, instance_id: String) -> int:
 func _update_advance_button(game: Dictionary) -> void:
 	var actor: int = _current_actor(game)
 	var owns_turn: bool = game["active_player"] == _viewer_id
-	var blocked: bool = actor != _viewer_id or not owns_turn or _privacy_hidden or _engine.lifecycle_name() != "RUNNING" or game["response_window"].get("active", false)
+	var response_active: bool = game["response_window"].get("active", false)
+	var blocked: bool = actor != _viewer_id or not owns_turn or _privacy_hidden or _engine.lifecycle_name() != "RUNNING" or response_active
+	_advance_button.visible = game["phase"] in ["MAIN_1", "COMBAT"]
 	_advance_button.disabled = blocked
-	_end_turn_button.disabled = blocked or _creature_interaction.phase != TableInteractionState.Phase.IDLE
+	_end_turn_button.text = "TERMINAR TURNO"
+	_end_turn_button.disabled = not owns_turn or _privacy_hidden or _engine.lifecycle_name() != "RUNNING"
+	if response_active:
+		_end_turn_button.text = "PASAR RESPUESTA" if actor == _viewer_id else "ESPERANDO RESPUESTA"
+		var can_pass := false
+		if actor == _viewer_id:
+			for action in _legal_actions():
+				if action["type"] == "pass_reaction":
+					can_pass = true
+					break
+		_end_turn_button.disabled = _privacy_hidden or _engine.lifecycle_name() != "RUNNING" or not can_pass
 	if actor != _viewer_id:
 		_advance_button.text = "Turno del rival…"
 		return
-	_advance_button.text = {
-		"START": "Comenzar robo", "DRAW": "Ir a Principal 1", "MAIN_1": "Ir a Combate",
-		"COMBAT": "Ir a Principal 2", "MAIN_2": "Ir a Final", "END": "Terminar turno",
-	}.get(game["phase"], "Fase siguiente")
+	_advance_button.text = "Pasar sin atacar" if game["phase"] == "MAIN_1" else "Pasar ataques"
 
 
 func _update_phase_track(current_phase: String) -> void:
 	_phase_indicator.text = "FASE · %s" % _phase_name(current_phase).to_upper()
 
 
+func _on_phase_button_pressed() -> void:
+	var phase: String = _engine.get_public_state()["game"]["phase"]
+	_advance_phase_pressed()
+	if phase == "MAIN_1" and _engine.lifecycle_name() == "RUNNING":
+		var game: Dictionary = _engine.get_public_state()["game"]
+		if game["phase"] == "COMBAT" and game["active_player"] == _viewer_id and not game["response_window"].get("active", false):
+			_advance_phase_pressed()
+
+
 func _advance_phase_pressed() -> void:
-	for action in _engine.get_legal_actions(_viewer_id):
+	for action in _legal_actions():
 		if action["type"] == "advance_phase":
 			_perform_action(action)
 			return
 
 
 func _end_turn_pressed() -> void:
-	if _creature_interaction.phase != TableInteractionState.Phase.IDLE:
+	if _engine == null or _engine.lifecycle_name() != "RUNNING" or _privacy_hidden:
+		return
+	var game: Dictionary = _engine.get_public_state()["game"]
+	if game["response_window"].get("active", false):
+		if _current_actor(game) == _viewer_id:
+			for action in _legal_actions():
+				if action["type"] == "pass_reaction":
+					_perform_action(action)
+					return
+		return
+	if game["active_player"] != _viewer_id:
 		return
 	if _end_turn_dialog != null:
 		_end_turn_dialog.popup_centered()
 
 
 func _confirm_end_turn() -> void:
-	if _engine == null or _engine.lifecycle_name() != "RUNNING" or _creature_interaction.phase != TableInteractionState.Phase.IDLE:
+	if _engine == null or _engine.lifecycle_name() != "RUNNING":
 		return
-	var starting_player: int = _engine.get_public_state()["game"]["active_player"]
+	var game_before: Dictionary = _engine.get_public_state()["game"]
+	if game_before["response_window"].get("active", false):
+		return
+	var starting_player: int = game_before["active_player"]
 	if starting_player != _viewer_id:
 		return
+	if _creature_interaction.phase != TableInteractionState.Phase.IDLE:
+		_cancel_creature_interaction()
+	_selected_card_id = ""
+	_choice_actions = []
+	_choice_stage = ""
+	_attack_targeting = false
 	var safety := 8
 	while safety > 0 and _engine.lifecycle_name() == "RUNNING":
 		safety -= 1
@@ -1964,6 +2638,41 @@ func _ai_is_actor(game: Dictionary) -> bool:
 	return _ai_enabled != null and _ai_enabled.button_pressed and _current_actor(game) == 1
 
 
+func _schedule_forced_pass(actions: Array, game: Dictionary) -> void:
+	if _forced_pass_pending or _ai_enabled == null or not _ai_enabled.button_pressed or _viewer_id != 0 or _privacy_hidden:
+		return
+	if not game["response_window"].get("active", false) or _current_actor(game) != 0:
+		return
+	var can_pass := false
+	for action in actions:
+		if action["type"] == "pass_reaction":
+			can_pass = true
+		elif action["type"] != "concede":
+			return
+	if can_pass:
+		_forced_pass_pending = true
+		call_deferred("_pass_forced_response")
+
+
+func _pass_forced_response() -> void:
+	if _activation_pause_active():
+		return
+	_forced_pass_pending = false
+	if _engine == null or _engine.lifecycle_name() != "RUNNING" or _ai_enabled == null or not _ai_enabled.button_pressed or _privacy_hidden:
+		return
+	var game: Dictionary = _engine.get_public_state()["game"]
+	if not game["response_window"].get("active", false) or _current_actor(game) != 0:
+		return
+	var pass_action: Dictionary = {}
+	for action in _legal_actions():
+		if action["type"] == "pass_reaction":
+			pass_action = action
+		elif action["type"] != "concede":
+			return
+	if not pass_action.is_empty():
+		_perform_action(pass_action)
+
+
 func _on_ai_toggled(enabled: bool) -> void:
 	if enabled:
 		_viewer_id = 0
@@ -1989,6 +2698,8 @@ func _run_ai_until_human() -> void:
 	_ai_running = true
 	var safety := 80
 	while safety > 0 and _engine.lifecycle_name() == "RUNNING":
+		while _activation_pause_active():
+			await get_tree().process_frame
 		safety -= 1
 		var game: Dictionary = _engine.get_public_state()["game"]
 		if _current_actor(game) != 1:

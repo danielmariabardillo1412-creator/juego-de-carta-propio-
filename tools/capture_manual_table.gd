@@ -21,6 +21,7 @@ func _capture() -> void:
 		quit(1)
 		return
 	var table := scene.instantiate()
+	table.startup_seed = 210921
 	root.add_child(table)
 	await process_frame
 	await process_frame
@@ -64,6 +65,7 @@ func _capture() -> void:
 func _capture_placed_creature(action_type: String, posture: String, path: String) -> bool:
 	var scene: PackedScene = load("res://demo/juego_cartas_table.tscn")
 	var table := scene.instantiate()
+	table.startup_seed = 210921
 	root.add_child(table)
 	await process_frame
 	var chosen: Dictionary = {}

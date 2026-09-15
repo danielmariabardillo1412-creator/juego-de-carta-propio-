@@ -39,6 +39,13 @@ var _life_profile_counts: Dictionary = {}
 var _tied_matches := 0
 var _failure: Dictionary = {}
 var _started_at_msec := 0
+var _balance_mode := false
+var _balance_cards: Dictionary = {}
+var _balance_wins_by_seat := {"0": 0, "1": 0}
+var _balance_first_player_wins := 0
+var _balance_decided_matches := 0
+var _balance_turns_total := 0
+var _balance_openings_without_creature := 0
 
 
 func _init() -> void:
@@ -56,6 +63,9 @@ func _run() -> void:
 			_write_json(_failure_path(), result)
 			_finish(game_index)
 			return
+		if _balance_mode and (game_index + 1) % 2 == 0:
+			_write_json(_summary_path(), _summary(game_index + 1, "RUNNING"))
+			print("JCP-BALANCE progreso: %d/%d partidas" % [game_index + 1, _games_target])
 		if (game_index + 1) % 100 == 0:
 			print("JCP-STRESS progreso: %d/%d partidas" % [game_index + 1, _games_target])
 	_finish(_games_target)
@@ -65,7 +75,7 @@ func _run_match(seed: int, game_index: int) -> Dictionary:
 	# La mayoria de partidas usa vida abreviada para multiplicar recorridos de
 	# combate; una de cada diez conserva los 30 puntos reglamentarios completos.
 	var life_profiles := [1, 1, 1, 1, 1, 1, 1, 3, 8, 30]
-	var starting_life: int = life_profiles[game_index % life_profiles.size()]
+	var starting_life: int = 30 if _balance_mode else life_profiles[game_index % life_profiles.size()]
 	var config := {
 		"player_names": ["Bot A", "Bot B"],
 		"starting_player": seed % 2,
@@ -78,8 +88,21 @@ func _run_match(seed: int, game_index: int) -> Dictionary:
 	var started = engine.start(seed)
 	if not started.success:
 		return _failure_result("start", seed, 0, {}, _engine_error(started), engine)
+	var initial_state: Dictionary = engine.export_module_state() if _balance_mode else {}
+	var played_by_player := {"0": {}, "1": {}}
+	if _balance_mode:
+		for player_id in [0, 1]:
+			var hand: Array = initial_state["cards"]["zones"]["hand:%d" % player_id]["cards"]
+			var has_creature := false
+			for instance_id in hand:
+				var definition_id: String = initial_state["cards"]["instances"][instance_id]["definition_id"]
+				if definition_id.begins_with("M"):
+					has_creature = true
+			if not has_creature:
+				_balance_openings_without_creature += 1
 
-	var policy_id := seed % 4
+	# Emparejar cada politica con ambos jugadores iniciales en semillas consecutivas.
+	var policy_id := (int(seed / 2) % 4) if _balance_mode else seed % 4
 	var policy_name: String = ["uniform", "development", "aggressive", "reactive"][policy_id]
 	_increment(_policy_counts, policy_name)
 	var rng_result: Dictionary = DeterministicRng.create(seed + 1000003)
@@ -101,6 +124,13 @@ func _run_match(seed: int, game_index: int) -> Dictionary:
 			return _failure_result("action_selection", seed, step, {}, pick, engine)
 		rng_state = pick["rng_state"]
 		var selected: Dictionary = pick["action"]
+		if _balance_mode and selected["type"] in ["summon_creature", "set_creature", "set_support", "play_persistent", "equip_item", "play_main_spell", "play_terrain", "activate_reaction"]:
+			var instance_id: String = selected["payload"].get("instance_id", "")
+			if not instance_id.is_empty():
+				var pre_state: Dictionary = engine.export_module_state()
+				var instance: Dictionary = pre_state["cards"]["instances"].get(instance_id, {})
+				if not instance.is_empty():
+					played_by_player[str(actor_actions["actor_id"])][instance["definition_id"]] = true
 		var request_id := "stress-%d-%d" % [seed, step]
 		var before_version: int = engine.state_version()
 		var action = GameAction.new(selected["type"], actor_actions["actor_id"], selected["payload"], request_id)
@@ -136,6 +166,32 @@ func _run_match(seed: int, game_index: int) -> Dictionary:
 		_tied_matches += 1
 	elif winners.size() != 1:
 		return _failure_result("winner_count", seed, step, {}, {"actual": winners}, engine)
+	if _balance_mode:
+		_balance_turns_total += state["turn"]["turn_number"]
+		if winners.size() == 1:
+			_balance_decided_matches += 1
+			_increment(_balance_wins_by_seat, str(winners[0]))
+			if winners[0] == config["starting_player"]:
+				_balance_first_player_wins += 1
+		for player_id in [0, 1]:
+			var deck: Array = state["cards"]["zones"]["deck:%d" % player_id]["cards"]
+			var seen: Dictionary = {}
+			for instance_id in initial_state["cards"]["instances"]:
+				var instance: Dictionary = initial_state["cards"]["instances"][instance_id]
+				if instance["metadata"]["owner_id"] == player_id and not deck.has(instance_id):
+					seen[instance["definition_id"]] = true
+			for definition_id in seen:
+				var metric: Dictionary = _balance_card_metric(definition_id)
+				metric["seen"] += 1
+				if winners.has(player_id):
+					metric["won_when_seen"] += 1
+				_balance_cards[definition_id] = metric
+			for definition_id in played_by_player[str(player_id)]:
+				var metric: Dictionary = _balance_card_metric(definition_id)
+				metric["played"] += 1
+				if winners.has(player_id):
+					metric["won_when_played"] += 1
+				_balance_cards[definition_id] = metric
 
 	# El primer lote y una muestra regular reconstruyen el snapshot completo.
 	if game_index < 2 or game_index % REPLAY_SAMPLE_INTERVAL == 0:
@@ -273,6 +329,8 @@ func _parse_arguments() -> void:
 			var candidate := argument.trim_prefix("--report-tag=")
 			if candidate.is_valid_identifier():
 				_report_tag = candidate
+		elif argument == "--balance":
+			_balance_mode = true
 
 
 func _increment(counts: Dictionary, key: String) -> void:
@@ -280,9 +338,22 @@ func _increment(counts: Dictionary, key: String) -> void:
 
 
 func _finish(games_completed: int) -> void:
+	var summary := _summary(games_completed, "PASS" if _failure.is_empty() else "FAIL")
+	_write_json(_summary_path(), summary)
+	if _failure.is_empty():
+		print("JCP-STRESS PASS: %d games, %d actions, %d replays, %d ms" % [games_completed, _total_actions, _replays_checked, summary["elapsed_msec"]])
+		print(JSON.stringify(summary, "\t"))
+		quit(0)
+		return
+	printerr("JCP-STRESS FAIL: seed=%s step=%s stage=%s" % [_failure.get("seed"), _failure.get("step"), _failure.get("stage")])
+	printerr("Failure report: %s" % ProjectSettings.globalize_path(_failure_path()))
+	quit(1)
+
+
+func _summary(games_completed: int, status: String) -> Dictionary:
 	var elapsed_msec := Time.get_ticks_msec() - _started_at_msec
 	var summary := {
-		"status": "PASS" if _failure.is_empty() else "FAIL",
+		"status": status,
 		"games_requested": _games_target,
 		"games_completed": games_completed,
 		"start_seed": _start_seed,
@@ -297,18 +368,21 @@ func _finish(games_completed: int) -> void:
 		"action_counts": _action_counts,
 		"elapsed_msec": elapsed_msec,
 	}
+	if _balance_mode:
+		summary["balance_observation"] = {
+			"method": "full_life_30_mirrored_decks_paired_starting_seats_weighted_policies",
+			"warning": "Bot-vs-bot correlations are not causal card power or human play data.",
+			"decided_matches": _balance_decided_matches,
+			"wins_by_seat": _balance_wins_by_seat,
+			"first_player_wins": _balance_first_player_wins,
+			"turns_total": _balance_turns_total,
+			"openings_without_creature": _balance_openings_without_creature,
+			"cards": _balance_cards,
+		}
 	if not _failure.is_empty():
 		summary["failure_stage"] = _failure.get("stage", "unknown")
 		summary["failure_seed"] = _failure.get("seed", -1)
-	_write_json(_summary_path(), summary)
-	if _failure.is_empty():
-		print("JCP-STRESS PASS: %d games, %d actions, %d replays, %d ms" % [games_completed, _total_actions, _replays_checked, elapsed_msec])
-		print(JSON.stringify(summary, "\t"))
-		quit(0)
-		return
-	printerr("JCP-STRESS FAIL: seed=%s step=%s stage=%s" % [_failure.get("seed"), _failure.get("step"), _failure.get("stage")])
-	printerr("Failure report: %s" % ProjectSettings.globalize_path(_failure_path()))
-	quit(1)
+	return summary
 
 
 func _summary_path() -> String:
@@ -325,3 +399,7 @@ func _write_json(path: String, value: Dictionary) -> void:
 		printerr("No se pudo escribir %s" % path)
 		return
 	file.store_string(JSON.stringify(value, "\t") + "\n")
+
+
+func _balance_card_metric(definition_id: String) -> Dictionary:
+	return _balance_cards.get(definition_id, {"seen": 0, "played": 0, "won_when_seen": 0, "won_when_played": 0}).duplicate()

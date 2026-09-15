@@ -15,6 +15,7 @@ func _run() -> void:
 	root.size = Vector2i(1600, 900)
 	var scene: PackedScene = load("res://demo/juego_cartas_table.tscn")
 	var table = scene.instantiate()
+	table.startup_seed = 210921
 	root.add_child(table)
 	await process_frame
 	await process_frame

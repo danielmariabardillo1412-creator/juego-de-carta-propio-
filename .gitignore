@@ -1,6 +1,7 @@
 # Godot genera esta caché local al importar y ejecutar el proyecto.
 .godot/
 .import/
+*.png.import
 
 # Archivos temporales del editor y del sistema.
 *.tmp
@@ -9,6 +10,9 @@
 *~
 Thumbs.db
 Desktop.ini
+
+# Copias físicas de emergencia locales; Git y las ramas/tags conservan la historia compartida.
+artifacts/backup_*/
 
 # Salidas de consola regenerables; los informes JSON de diagnóstico sí se conservan.
 diagnostic_logs/*.stdout.log

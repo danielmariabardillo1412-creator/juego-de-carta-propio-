@@ -2,6 +2,8 @@
 
 Este directorio es una **caché local de consulta** del corpus de diseño de Google Drive. Los originales de Drive continúan siendo la fuente editable. La caché existe para poder buscar, citar y leer únicamente el bloque necesario de cada fase sin cargar todos los documentos en el contexto.
 
+La carpeta oficial es **`JUEGO_CARTAS_PROPIO`**, ID `1m54Q-WmufRhdVleWMq6mTwUbP3Nzxqcl`. No debe confundirse con **`Juego de cartas original — Diseño y reglas`**, que contiene documentación anterior y no sustituye este corpus S00–S05. La auditoría de reconciliación del 2026-09-15 está en `docs/diseno/AUDITORIA_RECONCILIACION_DRIVE_CONTENIDO_LOCAL_V0_1.md`.
+
 ## Regla de autoridad
 
 1. Una afirmación sobre el diseño debe indicar el documento que la respalda.
@@ -56,4 +58,3 @@ S01 sí define la separación entre anatomía y aptitudes y asigna provisionalme
 ## Sincronización
 
 `SOURCE_MANIFEST.json` conserva los IDs, URLs, revisiones y fechas observadas. La comprobación local garantiza integridad, pero no consulta Internet. Al comenzar una fase de diseño o cuando el usuario indique que cambió los papeles, se comparan los metadatos actuales de Drive con el manifiesto y solo se vuelve a descargar el documento modificado.
-

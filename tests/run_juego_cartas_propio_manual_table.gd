@@ -19,6 +19,7 @@ func _run() -> void:
 		_finish()
 		return
 	var table = packed.instantiate()
+	table.startup_seed = 210921
 	root.add_child(table)
 	await process_frame
 	await process_frame
@@ -95,6 +96,11 @@ func _run() -> void:
 		sample_tile.setup("SAMPLE", "Muestra", "", false, "creature", "neutral", sample[1], true, sample[0])
 		_expect_equal(sample_tile.custom_minimum_size, sample[2], "carta %s/%s respeta la métrica TCG" % [sample[0], sample[1]])
 		sample_tile.free()
+	var hidden_face = CardTile.new()
+	hidden_face.setup("SECRET", "Nombre oculto", "", false, "creature", "fire", "guard", false, "opponent_hand", {"cost": 7, "attack": 8, "defense": 6})
+	_expect(hidden_face.find_child("CardCost", true, false) == null and hidden_face.find_child("CardATQ", true, false) == null, "una carta boca abajo no dibuja coste ni estadísticas")
+	_expect_equal(hidden_face.tooltip_text, "Carta oculta", "la ayuda de una carta oculta tampoco revela identidad ni cifras")
+	hidden_face.free()
 	for hand_case in [[5, 94.0], [7, 76.0], [9, 60.0], [10, 48.0]]:
 		_expect_equal(table.call("_hand_step", hand_case[0]), hand_case[1], "paso de mano para %d cartas" % hand_case[0])
 	var empty_card_slot: Button = _find_first_role_button(table, "creature_slot")
@@ -120,6 +126,26 @@ func _run() -> void:
 	_expect_equal(table_view["zones"]["hand:0"]["cards"].size(), 5, "el propietario ve sus cinco cartas")
 	_expect_equal(table_view["zones"]["hand:1"]["cards"].size(), 0, "la mano rival no revela identidades")
 	_expect_equal(table_view["zones"]["hand:1"]["count"], 5, "la mano rival conserva su recuento público")
+	var checked_face := false
+	for card in table_view["zones"]["hand:0"]["cards"]:
+		var attributes: Dictionary = card["definition"]["attributes"]
+		if attributes.get("card_type", "") != "creature":
+			continue
+		var hand_face: Button = table.call("_tile_from_card", card, 0, "hand")
+		var preview_face: Button = table.call("_preview_tile_from_card", card)
+		for face in [hand_face, preview_face]:
+			_expect_equal(face.find_child("CardCost", true, false).text, "E %d" % int(attributes["cost"]), "el frontal muestra el coste impreso")
+			_expect_equal(face.find_child("CardATQ", true, false).text, "ATQ %d" % int(attributes["attack"]), "el frontal muestra el ataque impreso")
+			_expect_equal(face.find_child("CardDEF", true, false).text, "DEF %d" % int(attributes["defense"]), "el frontal muestra la defensa impresa")
+			_expect(face.find_child("ArtPlaceholder", true, false) != null, "el frontal reserva espacio para la ilustración futura")
+		if not String(attributes.get("effect_text", "")).is_empty():
+			_expect_equal(preview_face.find_child("CardEffect", true, false).text, attributes["effect_text"], "la ficha grande imprime el texto de efecto")
+		_expect(table.call("_card_detail_text", card).contains("ATQ %d · DEF %d" % [attributes["attack"], attributes["defense"]]), "la ficha lateral también muestra ATQ y DEF antes de invocar")
+		hand_face.free()
+		preview_face.free()
+		checked_face = true
+		break
+	_expect(checked_face, "la mano inicial permite comprobar una criatura real")
 	_expect(snapshot["event_text"].contains("Motor iniciado"), "el registro presenta eventos visibles")
 	var fake_attacks := [
 		{"index": 0, "action": {"type": "attack", "actor_id": 0, "payload": {"attacker_id": "A", "target_slot": 0}, "label": "Atacar criatura", "metadata": {}}},
@@ -137,7 +163,7 @@ func _run() -> void:
 	_expect(not table.call("_action_mentions_card", fake_attacks[0]["action"], "ENEMY"), "otra casilla no crea una relación falsa")
 	table.set("_selected_card_id", "TEST")
 	var visible_test := {"TEST": "Carta de prueba"}
-	_expect(table.call("_selection_instruction", [{"type": "equip_item", "actor_id": 0, "payload": {"instance_id": "TEST", "target_instance_id": "X"}}], visible_test).contains("no ocupa una casilla de Apoyo"), "el equipo dirigido no se presenta como apoyo libre")
+	_expect(table.call("_selection_instruction", [{"type": "equip_item", "actor_id": 0, "payload": {"instance_id": "TEST", "target_instance_id": "X"}}], visible_test).contains("NO lo coloques en Apoyo"), "el equipo dirigido no se presenta como apoyo libre")
 	_expect(table.call("_selection_instruction", [{"type": "play_main_spell", "actor_id": 0, "payload": {"instance_id": "TEST", "target_slot": 0}}], visible_test).contains("Cementerio"), "la Magia instantánea anuncia su destino final")
 	_expect(table.call("_selection_instruction", [{"type": "play_persistent", "actor_id": 0, "payload": {"instance_id": "TEST"}}], visible_test).contains("boca arriba"), "la Magia persistente explica su permanencia")
 	_expect(table.call("_selection_instruction", [{"type": "set_support", "actor_id": 0, "payload": {"instance_id": "TEST"}}], visible_test).contains("boca abajo"), "la respuesta preparada explica su ocultación")

@@ -20,6 +20,7 @@ func _run() -> void:
 		_finish(null)
 		return
 	var table = scene.instantiate()
+	table.startup_seed = 210921
 	root.add_child(table)
 	await process_frame
 	await process_frame
@@ -47,10 +48,11 @@ func _run() -> void:
 	_expect_equal(selected["view"]["game"]["card_table"]["zones"]["hand:0"]["count"], original_hand, "la criatura permanece en mano")
 	if original_energy >= 0:
 		_expect_equal(selected["view"]["game"]["players"][0]["energy"], original_energy, "seleccionar no gasta Energía")
-	_expect(table.get("_end_turn_button").disabled, "Terminar turno se deshabilita con acción incompleta")
+	_expect(not table.get("_end_turn_button").disabled, "Terminar turno sigue disponible con acción incompleta")
 	table.call("_end_turn_pressed")
-	table.call("_confirm_end_turn")
-	_expect_equal(table.debug_snapshot()["state_version"], original_version, "no se puede terminar turno saltándose el bloqueo")
+	_expect(table.get("_end_turn_dialog").visible, "Terminar turno abre confirmación aun con selección pendiente")
+	table.get("_end_turn_dialog").hide()
+	_expect_equal(table.debug_snapshot()["state_version"], original_version, "abrir confirmación no muta UCE")
 	var escape := InputEventKey.new()
 	escape.keycode = KEY_ESCAPE
 	escape.pressed = true
@@ -94,7 +96,7 @@ func _run() -> void:
 	_expect(not pending["choice_overlay_visible"], "la ventana central permanece oculta")
 	_expect_equal(pending["state_version"], original_version, "elegir destino todavía no muta")
 	_expect_equal(pending["request_number"], original_requests, "elegir destino todavía no envía acción")
-	_expect(table.get("_end_turn_button").disabled, "Terminar turno sigue bloqueado al elegir modo")
+	_expect(not table.get("_end_turn_button").disabled, "Terminar turno sigue disponible al elegir modo")
 	var attack := _candidate(pending, table, "summon_creature")
 	var guard := _candidate(pending, table, "set_creature")
 	_expect(not attack.is_empty() and not guard.is_empty(), "UCE ofrece dos modos legales exactos")
@@ -148,6 +150,15 @@ func _run() -> void:
 	_expect_equal(drag_done["last_committed_action"], click_command, "clic y drag generan el mismo comando final")
 	_expect_equal(drag_done["request_number"], original_requests + 1, "drag legal confirma una sola vez")
 	_expect_equal(drag_done["creature_interaction"]["phase"], "IDLE", "drag legal vuelve a IDLE")
+	table.start_match(210921)
+	await process_frame
+	source_id = _first_creature_id(table.debug_snapshot()["legal_actions"])
+	table.call("_select_card", source_id)
+	_expect_equal(table.debug_snapshot()["creature_interaction"]["phase"], "TARGET_SELECTION", "hay una invocación a medias antes de terminar")
+	table.call("_confirm_end_turn")
+	var ended: Dictionary = table.debug_snapshot()
+	_expect_equal(ended["creature_interaction"]["phase"], "IDLE", "terminar cancela la invocación a medias")
+	_expect_equal(ended["view"]["game"]["active_player"], 1, "terminar entrega el turno al rival")
 	_finish(table)
 
 

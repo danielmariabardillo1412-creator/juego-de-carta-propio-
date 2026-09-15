@@ -4,6 +4,9 @@ extends Button
 signal card_selected(instance_id: String)
 signal creature_drag_started(instance_id: String)
 signal creature_drag_failed(instance_id: String)
+signal fusion_drag_started(instance_id: String)
+signal fusion_drag_failed(instance_id: String)
+signal fusion_dropped(source_id: String, target_id: String)
 
 const FIELD_ATTACK_SIZE := Vector2(72, 101)
 const FIELD_GUARD_SIZE := Vector2(101, 72)
@@ -17,10 +20,13 @@ var element := ""
 var card_posture := ""
 var face_up := true
 var display_mode := "field"
+var face_data: Dictionary = {}
 var _selected := false
 var _targeted := false
 var _playable := false
 var _creature_drag_enabled := false
+var _fusion_drag_enabled := false
+var _fusion_drop_sources: Array = []
 
 
 func setup(
@@ -32,7 +38,8 @@ func setup(
 	p_element: String = "",
 	p_position: String = "",
 	p_face_up: bool = true,
-	p_display_mode: String = "field"
+	p_display_mode: String = "field",
+	p_face_data: Dictionary = {}
 ) -> void:
 	instance_id = p_instance_id
 	card_type = p_card_type
@@ -40,8 +47,17 @@ func setup(
 	card_posture = p_position
 	face_up = p_face_up
 	display_mode = p_display_mode
+	face_data = p_face_data.duplicate(true)
 	text = ""
-	tooltip_text = "%s%s" % [title, "\n" + detail if not detail.is_empty() else ""]
+	var info := detail
+	if card_type in ["creature", "fusion"] and face_data.has("attack"):
+		info = "%s · %s · ATQ %d · DEF %d" % [
+			"Coste %d" % int(face_data.get("cost", 0)) if card_type == "creature" else "Coste ref. %d" % int(face_data.get("cost", 0)),
+			String(face_data.get("element_label", "")), int(face_data["attack"]), int(face_data["defense"])
+		]
+	if not String(face_data.get("effect_text", "")).is_empty():
+		info += "\n" + String(face_data["effect_text"])
+	tooltip_text = "%s%s" % [title, "\n" + info if not info.is_empty() else ""] if face_up else "Carta oculta"
 	clip_contents = true
 	custom_minimum_size = _card_size()
 	size_flags_horizontal = Control.SIZE_SHRINK_CENTER
@@ -72,10 +88,21 @@ func set_creature_drag_enabled(value: bool) -> void:
 	_apply_card_style(not disabled, _selected)
 
 
+func set_fusion_drag_enabled(value: bool) -> void:
+	_fusion_drag_enabled = value
+
+
+func set_fusion_drop_sources(source_ids: Array) -> void:
+	_fusion_drop_sources = source_ids.duplicate()
+
+
 func _get_drag_data(_at_position: Vector2) -> Variant:
-	if not _creature_drag_enabled or disabled or instance_id.is_empty():
+	if (not _creature_drag_enabled and not _fusion_drag_enabled) or disabled or instance_id.is_empty():
 		return null
-	creature_drag_started.emit(instance_id)
+	if _fusion_drag_enabled:
+		fusion_drag_started.emit(instance_id)
+	else:
+		creature_drag_started.emit(instance_id)
 	var preview := PanelContainer.new()
 	preview.custom_minimum_size = HAND_SIZE
 	preview.mouse_filter = Control.MOUSE_FILTER_IGNORE
@@ -87,12 +114,23 @@ func _get_drag_data(_at_position: Vector2) -> Variant:
 	label.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	preview.add_child(label)
 	set_drag_preview(preview)
-	return {"kind": "creature_from_hand", "instance_id": instance_id}
+	return {"kind": "fusion_material" if _fusion_drag_enabled else "creature_from_hand", "instance_id": instance_id}
+
+
+func _can_drop_data(_at_position: Vector2, data: Variant) -> bool:
+	return not disabled and data is Dictionary and data.get("kind", "") == "fusion_material" and data.get("instance_id", "") in _fusion_drop_sources
+
+
+func _drop_data(at_position: Vector2, data: Variant) -> void:
+	if _can_drop_data(at_position, data):
+		fusion_dropped.emit(data["instance_id"], instance_id)
 
 
 func _notification(what: int) -> void:
 	if what == NOTIFICATION_DRAG_END and _creature_drag_enabled and not get_viewport().gui_is_drag_successful():
 		creature_drag_failed.emit(instance_id)
+	if what == NOTIFICATION_DRAG_END and _fusion_drag_enabled and not get_viewport().gui_is_drag_successful():
+		fusion_drag_failed.emit(instance_id)
 
 
 func _build_face(title: String, detail: String) -> void:
@@ -118,6 +156,9 @@ func _build_face(title: String, detail: String) -> void:
 		back_mark.add_theme_color_override("font_color", Color("d8b96c"))
 		back_mark.mouse_filter = Control.MOUSE_FILTER_IGNORE
 		content.add_child(back_mark)
+		return
+	if display_mode in ["hand", "preview"]:
+		_build_info_face(content, title)
 		return
 	var header := Label.new()
 	header.text = title
@@ -148,6 +189,89 @@ func _build_face(title: String, detail: String) -> void:
 	footer.add_theme_color_override("font_color", Color("f6e8bd"))
 	footer.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	content.add_child(footer)
+
+
+func _build_info_face(content: VBoxContainer, title: String) -> void:
+	var large := display_mode == "preview"
+	var header := Label.new()
+	header.name = "CardName"
+	header.text = title
+	header.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	header.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
+	header.add_theme_font_size_override("font_size", 15 if large else 10)
+	header.add_theme_color_override("font_color", Color("fff4d5"))
+	header.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	content.add_child(header)
+	var identity := HBoxContainer.new()
+	identity.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	content.add_child(identity)
+	var element_label := Label.new()
+	element_label.name = "CardElement"
+	element_label.text = String(face_data.get("element_label", _type_label(card_type)))
+	element_label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	element_label.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
+	element_label.add_theme_font_size_override("font_size", 11 if large else 8)
+	element_label.add_theme_color_override("font_color", Color("f6e8bd"))
+	element_label.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	identity.add_child(element_label)
+	if card_type in ["creature", "fusion"] and face_data.has("cost"):
+		var cost := Label.new()
+		cost.name = "CardCost"
+		cost.text = "E %d" % int(face_data["cost"]) if card_type == "creature" else "REF %d" % int(face_data["cost"])
+		cost.add_theme_font_size_override("font_size", 11 if large else 8)
+		cost.add_theme_color_override("font_color", Color("fff4d5"))
+		cost.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		identity.add_child(cost)
+	var art := PanelContainer.new()
+	art.name = "ArtPlaceholder"
+	art.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	art.add_theme_stylebox_override("panel", _art_style())
+	art.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	content.add_child(art)
+	var sigil := Label.new()
+	sigil.text = _sigil(title)
+	sigil.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	sigil.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+	sigil.add_theme_font_size_override("font_size", 42 if large else 20)
+	sigil.add_theme_color_override("font_color", Color("ffffff99"))
+	sigil.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	art.add_child(sigil)
+	if large and not String(face_data.get("effect_text", "")).is_empty():
+		var effect := Label.new()
+		effect.name = "CardEffect"
+		effect.text = String(face_data["effect_text"])
+		effect.custom_minimum_size = Vector2(0, 44)
+		effect.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+		effect.max_lines_visible = 3
+		effect.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
+		effect.add_theme_font_size_override("font_size", 10)
+		effect.add_theme_color_override("font_color", Color("f6e8bd"))
+		effect.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		content.add_child(effect)
+	var type_label := Label.new()
+	type_label.name = "CardType"
+	type_label.text = _type_label(card_type)
+	type_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	type_label.add_theme_font_size_override("font_size", 11 if large else 8)
+	type_label.add_theme_color_override("font_color", Color("f6e8bd"))
+	type_label.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	content.add_child(type_label)
+	if card_type in ["creature", "fusion"] and face_data.has("attack"):
+		var stats := HBoxContainer.new()
+		stats.name = "CardStats"
+		stats.add_theme_constant_override("separation", 1)
+		stats.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		content.add_child(stats)
+		for stat in ["ATQ", "DEF"]:
+			var badge := Label.new()
+			badge.name = "Card%s" % stat
+			badge.text = "%s %d" % [stat, int(face_data["attack" if stat == "ATQ" else "defense"])]
+			badge.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+			badge.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+			badge.add_theme_font_size_override("font_size", 13 if large else 8)
+			badge.add_theme_color_override("font_color", Color("fff4d5"))
+			badge.mouse_filter = Control.MOUSE_FILTER_IGNORE
+			stats.add_child(badge)
 
 
 func _card_size() -> Vector2:

@@ -1,9 +1,72 @@
 # Cuaderno 3 — Bitácora de trabajo
 
+## 2026-09-15 — Primera línea base de equilibrio sin retocar cartas
+
+- Se contrastaron S01, S02 y S04 con sus fechas de Drive; la caché local pasó 6/6. S01 exige revisar la composición solo tras problemas prácticos de partidas, S02 se declara presupuesto provisional y S04 fija la preparación de Fusiones. El único guardado humano disponible era una partida `RUNNING` del 2026-09-11 con cero acciones; no se atribuyó a ella evidencia de equilibrio.
+- `tools/run_jcp_stress_matches.gd` recibió el modo optativo `--balance`: vida normal de 30, políticas repartidas entre ambos jugadores iniciales, métricas por carta vista/jugada y guardado de avances cada dos partidas. El modo normal de estrés no cambia. Se descartó una primera ejecución exploratoria con política correlacionada con la paridad de semilla; la tanda emparejada final usó semillas 1000–1015.
+- `tools/report_jcp_saved_match.gd` resume un guardado local, incluidos desenlace, acciones, cartas jugadas y Fusiones, sin publicar mano, baraja ni log completo. Se comprobó que lee el guardado antiguo y que lo marca correctamente como no terminado; no se ha fingido una prueba humana completa.
+- La tanda final completó 16 duelos de 30 vidas, 5.623 acciones, 427 ataques, 24 Fusiones y 106 respuestas activadas sin fallo. El informe bruto y la interpretación están en `diagnostic_logs/jcp_stress_balance_paired_20260915.json` y `docs/diseno/LINEA_BASE_EQUILIBRIO_MAZO_2026_09_15.md`. La muestra de bots no permite afirmar potencia causal por carta; M01–M18, G01–G07, T01–T06, E01–E06 y R01–R03 permanecen intactas. Ninguna regla, IA de mesa, UCE o geometría cambió. Esta fase de medición sigue abierta hasta recibir partidas humanas terminadas.
+
+## 2026-09-14 — Activaciones legibles antes de continuar
+
+- La partida humana mostró que una respuesta mágica o trampa podía cambiar un ataque sin dejar tiempo para identificarla. Se contrastó S01: preparar boca abajo no es activar; la activación sí publica identidad y permite respuestas sucesivas. E03 no era un fallo de regla: exige Manipulador y no puede jugarse en Combate.
+- Se preservó `demo/juego_cartas_table.gd` antes del cambio en `artifacts/backup_pre_activation_reveal_20260914/`. La mesa toma únicamente eventos filtrados de UCE y presenta Magias/Trampas activadas una a una con `CardTile` ampliada, texto funcional, pausa de cuatro segundos y «Siguiente ahora». El catálogo estático aporta el texto de un ID ya publicado; no se consulta la mano rival oculta. Se evita volver a anunciar una Magia principal cuando se resuelve después de su activación.
+- La cola detiene el pase trivial y el siguiente paso de la IA hasta cerrar la ficha; no modifica el orden de resolución del motor. Una nueva prueba gráfica verifica privacidad, dos anuncios en orden, temporizador, ficha G06 real, captura 1600×900 y pase automático aplazado. Puertas y riesgo del arnés de ventanas en cuaderno 4. Reglas, geometría, E03 y motor no cambiaron.
+
+## 2026-09-14 — Diálogos sin variantes duplicadas y respuesta sin clic inútil
+
+- Las capturas humanas mostraron tres filas para invocar una sola criatura y cuatro para una sola Fusión: eran producto cartesiano de Ataque/Guardia y objetivos de entrada, no resultados distintos. S01 confirma doble comparación estricta y fase de Combate con ataques sucesivos; S04 confirma identidad de Fusión por receta. Se preservaron esas reglas.
+- Respaldo de `demo/juego_cartas_table.gd` previo en `artifacts/backup_pre_choice_response_20260914/`. La mesa agrupa las acciones legales por postura, pide objetivo en un segundo paso solo cuando procede y evita repetir nombre/coste/materiales por combinación. El botón «Cerrar combate» pasa a «Pasar ataques» para describir su función sin presentar un modo que haya que activar para cada carta.
+- Una respuesta del rival puede devolver prioridad al humano sin ninguna reacción propia disponible; antes exigía pulsar «Pasar respuesta» aun sin decisión. Solo en duelo con IA se pasa automáticamente ese caso mediante la acción UCE existente. Los combates muestran comparaciones, supervivencia y daño; un ataque anulado comunica que su uso se gastó. No se modificaron el motor, recetas, estructura de fases ni geometría. Pruebas y riesgo de foco gráfico en cuaderno 4.
+- El acceso directo del escritorio se regeneró y comprobó hacia Godot 4.7, la escena explícita y el proyecto vigente en F.
+
+## 2026-09-14 — Menú de combate y postura junto a la criatura
+
+- El diseñador aprobó mostrar Atacar y Cambiar postura en la criatura, no en el rail. S01 documenta límites de cambio voluntario que podían interpretarse en conflicto con «solo una carta lo impediría»; se pidió aclaración. El diseñador precisó que hablaba de elegir postura antes de invocar y de modificarla desde la criatura en el tablero, no de reescribir esos límites. Se conservaron S01 y el motor intactos.
+- Copia física previa de `demo/juego_cartas_table.gd` en `artifacts/backup_pre_creature_context_20260914/`. La mesa dibuja un menú cercano a la criatura seleccionada: Atacar activa resaltado de objetivos y Cambiar postura ejecuta la acción UCE disponible. Cuando una acción no es legal queda deshabilitada con explicación emergente. La invocación Ataque/Guardia, clic rápido de ataque visible, arrastre de Fusión, dimensiones, perspectiva y guardado permanecen como estaban. El botón de postura deja de estar en la lista lateral.
+- Se adaptó la prueba gráfica de ataque a elegir Atacar y se añadió prueba gráfica de postura: bloqueo de turno de entrada, cambio en turno posterior y un único envío UCE. Una captura 1600×900 muestra el menú junto a carta real. Resultados finales en cuaderno 4.
+
+## 2026-09-14 — Repartos nuevos al iniciar partida
+
+- La observación humana se contrastó con S01 y el código: ambos jugadores tenían el mismo mazo generalista de 40 cartas; UCE ya lo barajaba de forma independiente, pero la mesa abría y reiniciaba siempre con `210921`. No se modificó el constructor de mazos ni el motor.
+- Antes de cambiar la mesa se copió `demo/juego_cartas_table.gd` a `artifacts/backup_pre_random_starts_20260914/`. La apertura y «Nueva partida» eligen ahora semilla fresca; Herramientas conserva la semilla vigente y añade «Jugar semilla» para reproducirla. Las suites que dependen de un reparto concreto fijan la semilla al instanciar la mesa; un test nuevo cubre tres reinicios, cambio real de mano, tamaño de ambos mazos y repetición exacta.
+- El cambio es solo de inicio/UI; no altera S01, reglas, contenido, UCE, IA, privacidad ni geometría. Las puertas ejecutadas y riesgos se registran en el cuaderno 4.
+
+## 2026-09-14 — Frontal provisional con cifras visibles
+
+- La prueba humana mostró que en la mano solo figuraban nombre y tipo: el componente solo recibía ATQ/DEF cuando la carta ya estaba en campo. Se leyó S01/S02 y se reutilizaron los valores impresos de la definición visible, sin introducir cifras ni costes nuevos.
+- Antes del cambio visual se copiaron `demo/card_tile.gd` y `demo/juego_cartas_table.gd` en `artifacts/backup_pre_card_front_20260914/`. `card_tile.gd` presenta nombre, elemento, coste numérico, área de imagen vacía, tipo y ATQ/DEF en la mano y preview; la ficha grande muestra el texto de efecto. `juego_cartas_table.gd` entrega datos impresos en mano y efectivos cuando existen en campo, y añade ATQ/DEF al detalle textual anterior a la invocación. El coste de referencia de Fusión queda diferenciado.
+- Se añadió aserción con criatura real de la mano para coste/ATQ/DEF/efecto y se corrigió una expectativa de texto obsoleta en la prueba de flujo de ataque. Las capturas de 1600×900 muestran el frontal nuevo sin alterar la malla ni la mano rival oculta. Resultados y límites en cuaderno 4.
+
+## 2026-09-14 — Arrastre de materiales y coste visible de Fusión
+
+- El diseñador aprobó una Fusión que comience en la criatura del campo y se suelte sobre otra compatible, manteniendo dos clics como alternativa. Se comprobó S04 y el contrato vigente: la Fusión normal cuesta 0 Energía, aunque la entidad resultante tenga un coste de referencia para equilibrio. No se diseñaron ni añadieron variantes más caras.
+- `card_tile.gd` emite arrastre/entrega de material de campo y solo admite parejas derivadas de acciones legales; `juego_cartas_table.gd` ilumina la pareja y presenta nombre del resultado, postura, objetivo si procede y pago 0 antes de ejecutar el comando UCE. Cancelar o soltar fuera no muta. Se preserva la geometría. Punto previo de seguridad físico: `artifacts/backup_pre_fusion_drag_20260914/`; respaldo geométrico original en la etiqueta `mesa_perspectiva_ok_v1` intacto.
+- La prueba gráfica de Fusión recorre arrastre real, iluminación, rechazo de material inválido, cancelación, alternativa por dos clics y confirmación; guarda captura 1600×900. Los resultados de la puerta proporcional se registran en el cuaderno 4.
+
+## 2026-09-13 — Corrección del bloqueo al terminar turno
+
+- La captura de la prueba humana mostraba «Puedes responder» con «TERMINAR TURNO» inhabilitado; además, el selector de criatura bloqueaba el mismo mando. Se retiró esa dependencia de la selección. Confirmar el fin de turno descarta cualquier intención incompleta y avanza solo con las acciones legales de fase. Durante una respuesta con prioridad propia el mando ofrece «Pasar respuesta», y con prioridad rival indica espera, sin saltarse la resolución del motor.
+- `run_juego_cartas_propio_creature_ux.gd` ahora prueba la cancelación de una selección a medias al terminar; la nueva `run_jcp_table_end_turn_response.gd` prepara una trampa real, declara un ataque y comprueba que el botón pasa una respuesta legal. Esta decisión JCP-DEC-053 sustituye el bloqueo de JCP-DEC-050; no se cambió UCE ni ninguna regla.
+
+## 2026-09-13 — Segunda prueba humana: ataque sin botón y mejoras legibles
+
+- El diseñador confirmó que la ruta «Ir a Combate» seguía siendo demasiado compleja. Se leyó S01 para conservar sus reglas de fases y cartas: la transición Principal 1 → Combate ahora ocurre al pulsar primero la criatura propia y luego el objetivo rival; acto seguido se declara el ataque legal mediante UCE. El botón superior pasa a «Pasar sin atacar» y salta a Principal 2 solo a petición del jugador. No se modifica una sola regla de combate.
+- La selección y los mensajes diferencian equipo vinculado (por ejemplo E02 +1 DEF al portador), magia persistente global G04 (+1 DEF automático a todas las criaturas propias en Guardia), G05 disparada por cambio de postura y el artefacto E04, que solo mueve un equipo ya vinculado. Un clic en criatura con G04/G05/E04 seleccionadas ya no sustituye silenciosamente la carta: informa que esas cartas no se asignan. El resultado de jugar G04 se comunica como activo aunque aún no haya criaturas en Guardia.
+- Pruebas GUI con eventos de ratón: ataque desde Principal 1 sin botón, primera ronda sin ataque, E02 vinculada a objetivo y G04 colocada en Apoyo con bono automático de DEF. Se preserva la caché de acciones legales y la geometría aprobada. Resultados completos y límites, en cuaderno 4.
+
+## 2026-09-13 — Prueba humana: latencia y descubrimiento de acciones
+
+- Se reprodujo la latencia al seleccionar cinco cartas iniciales: aproximadamente 2,0–2,7 segundos por cambio. La causa era que un refresco consultaba decenas de veces las mismas acciones legales de UCE; cada consulta aislada costaba unos 56 ms. `demo/juego_cartas_table.gd` ahora usa una caché estricta por versión de estado y espectador, sin alterar UCE. Sonda posterior: 45–49 ms por selección. La sonda reproducible queda en `tools/profile_table_selection.gd`.
+- Se enviaron clics gráficos reales dentro de Godot. G01 no se ejecuta al seleccionarla: exige pulsar un objetivo propio; al hacerlo, aumenta el ATQ de M01 de 2 a 4 y pasa al Cementerio. Un ataque legal también se ejecuta por clic atacante → rival tras entrar en Combate y superar el primer turno. Las pruebas están en `tests/run_jcp_table_spell_gui.gd` y `tests/run_jcp_table_attack_gui.gd`. Esto no descarta un fallo en la magia concreta descrita por el diseñador, todavía sin nombre.
+- Los mensajes de éxito y de clic prematuro eran casi invisibles porque solo se mostraban arriba los errores y el resto quedaba como tooltip. Se hicieron visibles, y el rail explica cuándo un apoyo es persistente o respuesta preparada, cómo entrar en Combate y cómo elegir dos materiales compatibles para Fusión. No se tocó geometría, motor, reglas, IA ni catálogo. Resultados de suites en cuaderno 4.
+- Se regeneró y verificó el acceso directo del escritorio para que abra la escena explícita de la mesa en F con Godot 4.7. El capturador gráfico produjo cinco imágenes reales de 1600×900, incluidas cartas en Ataque y Guardia; se comprobó que las instrucciones permanecen en el HUD/rail y no desplazan casillas ni fases.
+- La nueva prueba `tests/run_jcp_table_fusion_gui.gd` progresa una partida real hasta dos materiales compatibles (M01 y M07), pulsa ambos controles gráficos, comprueba que el segundo clic abre una elección sin mutación prematura y confirma una Fusión mediante su opción. La suite vertical del motor sigue siendo independiente.
+
 ## 2026-09-13 — UX A/B de invocación de criatura
 
 - Se comprobaron el estado Git y el respaldo de perspectiva (`mesa_perspectiva_ok_v1` y copia física de diecisiete archivos), se leyeron `AGENTS.md`, índice y los cuatro cuadernos, y se confirmó la caché de diseño 6/6. Se preservó el estado de fondo negro previo a UX en un punto Git separado: `mesa_fondo_negro_preux` (`89bf866`). No hubo pull, descarga ni merge y el respaldo de perspectiva no se sobrescribió.
-- `demo/table_interaction_state.gd` encapsula fuente, acciones UCE candidatas, destinos legales, modo y cancelabilidad. `demo/card_tile.gd` inicia el drag desde la mano y `demo/creature_drop_slot.gd` valida la entrega. `demo/juego_cartas_table.gd` lleva tanto clic-clic como drag a la misma selección de casilla y solo ejecuta la acción UCE al elegir Ataque/Guardia —o la casilla si solo hay un modo—. Escape, clic vacío y drag fallido cancelan; Terminar turno queda bloqueado mientras falta un paso. Ningún otro tipo de carta recibe nueva UX.
+- `demo/table_interaction_state.gd` encapsula fuente, acciones UCE candidatas, destinos legales, modo y cancelabilidad. `demo/card_tile.gd` inicia el drag desde la mano y `demo/creature_drop_slot.gd` valida la entrega. `demo/juego_cartas_table.gd` lleva tanto clic-clic como drag a la misma selección de casilla y solo ejecuta la acción UCE al elegir Ataque/Guardia —o la casilla si solo hay un modo—. Escape, clic vacío y drag fallido cancelan. El bloqueo original de Terminar turno mientras faltaba un paso se sustituyó después en JCP-DEC-053. Ningún otro tipo de carta recibió nueva UX en aquella pasada.
 - La prueba de eventos GUI reales detectó que `PlayerSupportRow` interceptaba los clics de la mano pese a ser visualmente transparente; se ajustó únicamente su filtro de ratón, sin moverlo ni alterar la plantilla. El menú contextual se recolocó en el hueco entre territorios para no tapar cartas. Se añadieron pruebas de lógica y entrada gráfica y se adaptó la aserción antigua que esperaba el selector central de postura: la invocación ahora tiene una fase intermedia junto a la casilla. Las capturas de selección, menú y carta confirmada se generaron a 1600×900. Resultados finales y límites, en el cuaderno 4.
 - Las criaturas con varias acciones UCE distintas para el mismo modo, como una habilidad de entrada que exige objetivo, no se introducen artificialmente en este menú de dos modos: conservan el flujo anterior hasta abordar la UX de habilidades. La puerta final de suites se repitió tras esta salvaguarda.
 - Una aserción GUI adicional descubrió que los contenedores del campo consumían el clic en vacío antes de `_unhandled_input`; se movió la cancelación a `_input` y se distingue un botón real bajo el puntero de una superficie vacía. La prueba gráfica de clic vacío pasó sin mutación; el resto de botones no se intercepta.
@@ -644,3 +707,32 @@ Hallazgos y decisiones:
 - Se cerraron por decisión actual los destinos base de devolución y separación de una Fusión, además de su entrada boca arriba y sin ataque inmediato.
 
 Archivos modificados: documento de principios y cuatro cuadernos vivos. No se modificó código ni se requirieron pruebas runtime.
+
+## 2026-09-15 — Auditoría de la fuente oficial y reconciliación previa al Atlas
+
+Fuentes leídas y contrastadas: S01 en Terrenos, efectos elementales, mejoras apiladas, compatibilidad y transformaciones; S03, S04 y S05 completos. Se verificó además la carpeta oficial de Drive y sus seis hijos S00–S05 contra el manifiesto y la caché local.
+
+Hallazgos:
+
+- La carpeta correcta es `JUEGO_CARTAS_PROPIO` (`1m54Q-WmufRhdVleWMq6mTwUbP3Nzxqcl`), no la carpeta antigua de nombre parecido.
+- El índice local contiene las 60 entradas de S03, pero su columna de afinidades no refleja completa la matriz V0.4 y contiene dos diferencias directas: Oscuridad en Insectoides y Neutral en Gigantes.
+- Los nombres y recetas de F001–F125 ya procedían de S04. Las cifras y habilidades de las ocho Fusiones jugables son extensiones locales, no valores de S04.
+- El límite local provisional de una Fusión por jugador y turno contradice la declaración de S04 de que no existe un límite universal.
+- Los nombres de M01–M18, G01–G07, T01–T06 y parte de E01–E06 son propuestas locales compatibles en general; anatomías, disciplinas y aptitudes adicionales deben ratificarse individualmente.
+- S05 contiene P01 Vagabundo, P02 Señor/Rey de las Cartas, P03 Invocador de Bestias, P04 Señor de la Tormenta/Trueno, P05 Maese del Risco y P06 reservado.
+
+Archivos creados o modificados en esta auditoría:
+
+- `docs/diseno/AUDITORIA_RECONCILIACION_DRIVE_CONTENIDO_LOCAL_V0_1.md`;
+- `docs/fuentes_diseno/README.md`;
+- los cuatro cuadernos vivos.
+
+No se modificaron motor, UCE, mesa, interfaz, reglas implementadas, cartas, cifras, habilidades, balance ni Fusiones implementadas. El Atlas nuevo queda detenido.
+
+## 2026-09-15 — Resincronización del repositorio existente con el proyecto local
+
+- Se revisaron `AGENTS.md`, el índice de cuadernos, los cuatro cuadernos, el estado local/remoto y las exclusiones antes de preparar el envío. El local estaba tres commits por delante de `origin/main`, sin divergencia.
+- Antes de modificar `main` remoto se creó y comprobó `backup/pre_sync_local_actual_20260915` en GitHub, apuntando al antiguo `b0cc5dad3b2d35193c4626be966518964ccaf3f8`.
+- Se incorporan el trabajo local vigente y los documentos recientes de fuentes, reconciliación, balance, mesa, pruebas y cuadernos. Se ignoran las copias físicas `artifacts/backup_*`, `.godot`, importaciones PNG y temporales; se versionan los `.gd.uid` estables.
+- La importación con Godot 4.7 pasó. Las 26 suites específicas del juego pasaron; las diez suites de interacción gráfica pasaron en modo gráfico (dos no eran válidas bajo `--headless` por depender del renderizado). Pasaron además nueve suites UCE, diagnóstico 15/15, experimento integral 80/80 y caché de fuentes 6/6.
+- Se registra el envío a `main` mediante el commit `chore: resync repository with current local project`, sin pull, merge, eliminación de historial, modificación de Zapity principal ni cambio de reglas. El SHA final se obtiene del propio `main` publicado.

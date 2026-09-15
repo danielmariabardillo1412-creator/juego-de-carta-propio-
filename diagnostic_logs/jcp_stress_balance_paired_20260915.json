@@ -1,0 +1,297 @@
+{
+	"action_counts": {
+		"activate_creature_ability": 34,
+		"activate_reaction": 106,
+		"advance_phase": 3426,
+		"attack": 427,
+		"change_position": 548,
+		"choose_fusion_combat_bonus": 25,
+		"decline_redirect": 4,
+		"equip_item": 92,
+		"fuse_creatures": 24,
+		"pass_reaction": 253,
+		"play_main_spell": 47,
+		"play_persistent": 54,
+		"play_terrain": 71,
+		"relocate_equipment": 43,
+		"set_creature": 100,
+		"set_support": 141,
+		"summon_creature": 228
+	},
+	"balance_observation": {
+		"cards": {
+			"E01": {
+				"played": 19,
+				"seen": 22,
+				"won_when_played": 14,
+				"won_when_seen": 15
+			},
+			"E02": {
+				"played": 15,
+				"seen": 15,
+				"won_when_played": 7,
+				"won_when_seen": 7
+			},
+			"E03": {
+				"played": 22,
+				"seen": 23,
+				"won_when_played": 11,
+				"won_when_seen": 11
+			},
+			"E04": {
+				"played": 18,
+				"seen": 19,
+				"won_when_played": 9,
+				"won_when_seen": 10
+			},
+			"E05": {
+				"played": 19,
+				"seen": 24,
+				"won_when_played": 11,
+				"won_when_seen": 11
+			},
+			"E06": {
+				"played": 17,
+				"seen": 19,
+				"won_when_played": 9,
+				"won_when_seen": 10
+			},
+			"G01": {
+				"played": 15,
+				"seen": 16,
+				"won_when_played": 7,
+				"won_when_seen": 7
+			},
+			"G02": {
+				"played": 17,
+				"seen": 18,
+				"won_when_played": 11,
+				"won_when_seen": 11
+			},
+			"G03": {
+				"played": 15,
+				"seen": 15,
+				"won_when_played": 5,
+				"won_when_seen": 5
+			},
+			"G04": {
+				"played": 19,
+				"seen": 19,
+				"won_when_played": 9,
+				"won_when_seen": 9
+			},
+			"G05": {
+				"played": 17,
+				"seen": 18,
+				"won_when_played": 8,
+				"won_when_seen": 9
+			},
+			"G06": {
+				"played": 19,
+				"seen": 20,
+				"won_when_played": 9,
+				"won_when_seen": 9
+			},
+			"G07": {
+				"played": 15,
+				"seen": 16,
+				"won_when_played": 5,
+				"won_when_seen": 6
+			},
+			"M01": {
+				"played": 17,
+				"seen": 19,
+				"won_when_played": 8,
+				"won_when_seen": 8
+			},
+			"M02": {
+				"played": 15,
+				"seen": 15,
+				"won_when_played": 8,
+				"won_when_seen": 8
+			},
+			"M03": {
+				"played": 19,
+				"seen": 19,
+				"won_when_played": 10,
+				"won_when_seen": 10
+			},
+			"M04": {
+				"played": 13,
+				"seen": 13,
+				"won_when_played": 6,
+				"won_when_seen": 6
+			},
+			"M05": {
+				"played": 17,
+				"seen": 17,
+				"won_when_played": 5,
+				"won_when_seen": 5
+			},
+			"M06": {
+				"played": 16,
+				"seen": 16,
+				"won_when_played": 7,
+				"won_when_seen": 7
+			},
+			"M07": {
+				"played": 19,
+				"seen": 19,
+				"won_when_played": 9,
+				"won_when_seen": 9
+			},
+			"M08": {
+				"played": 20,
+				"seen": 20,
+				"won_when_played": 9,
+				"won_when_seen": 9
+			},
+			"M09": {
+				"played": 18,
+				"seen": 18,
+				"won_when_played": 9,
+				"won_when_seen": 9
+			},
+			"M10": {
+				"played": 17,
+				"seen": 18,
+				"won_when_played": 9,
+				"won_when_seen": 10
+			},
+			"M11": {
+				"played": 19,
+				"seen": 20,
+				"won_when_played": 9,
+				"won_when_seen": 10
+			},
+			"M12": {
+				"played": 16,
+				"seen": 16,
+				"won_when_played": 10,
+				"won_when_seen": 10
+			},
+			"M13": {
+				"played": 13,
+				"seen": 13,
+				"won_when_played": 5,
+				"won_when_seen": 5
+			},
+			"M14": {
+				"played": 18,
+				"seen": 18,
+				"won_when_played": 11,
+				"won_when_seen": 11
+			},
+			"M15": {
+				"played": 21,
+				"seen": 21,
+				"won_when_played": 10,
+				"won_when_seen": 10
+			},
+			"M16": {
+				"played": 18,
+				"seen": 18,
+				"won_when_played": 11,
+				"won_when_seen": 11
+			},
+			"M17": {
+				"played": 16,
+				"seen": 16,
+				"won_when_played": 7,
+				"won_when_seen": 7
+			},
+			"M18": {
+				"played": 13,
+				"seen": 14,
+				"won_when_played": 7,
+				"won_when_seen": 8
+			},
+			"R01": {
+				"played": 24,
+				"seen": 24,
+				"won_when_played": 11,
+				"won_when_seen": 11
+			},
+			"R02": {
+				"played": 21,
+				"seen": 21,
+				"won_when_played": 9,
+				"won_when_seen": 9
+			},
+			"R03": {
+				"played": 26,
+				"seen": 26,
+				"won_when_played": 12,
+				"won_when_seen": 12
+			},
+			"T01": {
+				"played": 17,
+				"seen": 18,
+				"won_when_played": 10,
+				"won_when_seen": 10
+			},
+			"T02": {
+				"played": 19,
+				"seen": 19,
+				"won_when_played": 12,
+				"won_when_seen": 12
+			},
+			"T03": {
+				"played": 24,
+				"seen": 24,
+				"won_when_played": 14,
+				"won_when_seen": 14
+			},
+			"T04": {
+				"played": 16,
+				"seen": 17,
+				"won_when_played": 6,
+				"won_when_seen": 6
+			},
+			"T05": {
+				"played": 17,
+				"seen": 19,
+				"won_when_played": 10,
+				"won_when_seen": 11
+			},
+			"T06": {
+				"played": 14,
+				"seen": 16,
+				"won_when_played": 8,
+				"won_when_seen": 10
+			}
+		},
+		"decided_matches": 16,
+		"first_player_wins": 11,
+		"method": "full_life_30_mirrored_decks_paired_starting_seats_weighted_policies",
+		"openings_without_creature": 1,
+		"turns_total": 579,
+		"warning": "Bot-vs-bot correlations are not causal card power or human play data.",
+		"wins_by_seat": {
+			"0": 9,
+			"1": 7
+		}
+	},
+	"elapsed_msec": 852439,
+	"finish_reasons": {
+		"life_zero": 16
+	},
+	"games_completed": 16,
+	"games_requested": 16,
+	"last_seed": 1015,
+	"maximum_actions_in_match": 653,
+	"policy_counts": {
+		"aggressive": 4,
+		"development": 4,
+		"reactive": 4,
+		"uniform": 4
+	},
+	"replays_checked": 2,
+	"start_seed": 1000,
+	"starting_life_counts": {
+		"30": 16
+	},
+	"status": "PASS",
+	"tied_matches": 0,
+	"total_actions": 5623
+}

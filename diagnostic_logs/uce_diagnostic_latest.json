@@ -13,7 +13,7 @@
 	"environment": {
 		"command_line": [
 			"--script",
-			"res://tests/diagnostics/run_engine_diagnostics.gd"
+			"tests/diagnostics/run_engine_diagnostics.gd"
 		],
 		"distribution": "Windows",
 		"godot": {
@@ -33,7 +33,7 @@
 		"project_path": "F:/Taller de Juegos Zapity/juego_cartas_propio/engine/",
 		"user_path": "C:/Users/danie/AppData/Roaming/Godot/app_userdata/Juego de Cartas Propio - Laboratorio/"
 	},
-	"finished_unix": 1789104073,
+	"finished_unix": 1789449792,
 	"report_paths": [
 		"F:/Taller de Juegos Zapity/juego_cartas_propio/engine/diagnostic_logs/uce_diagnostic_latest.json",
 		"C:/Users/danie/AppData/Roaming/Godot/app_userdata/Juego de Cartas Propio - Laboratorio/uce_diagnostics/uce_diagnostic_latest.json",
@@ -48,7 +48,7 @@
 			"details": {
 				"command_line": [
 					"--script",
-					"res://tests/diagnostics/run_engine_diagnostics.gd"
+					"tests/diagnostics/run_engine_diagnostics.gd"
 				],
 				"distribution": "Windows",
 				"godot": {
@@ -72,7 +72,7 @@
 			"message": "Godot and operating-system metadata captured.",
 			"stage": "environment",
 			"status": "PASS",
-			"unix": 1789104071
+			"unix": 1789449790
 		},
 		{
 			"code": "RESOURCES_LOADABLE",
@@ -84,7 +84,7 @@
 			"message": "All required scripts exist and load through ResourceLoader.",
 			"stage": "resource_scan",
 			"status": "PASS",
-			"unix": 1789104071
+			"unix": 1789449791
 		},
 		{
 			"code": "ACTION_ENVELOPE_ISOLATED",
@@ -93,7 +93,7 @@
 			"message": "Validation, reduction and action logging use isolated canonical action snapshots.",
 			"stage": "action_envelope_isolation",
 			"status": "PASS",
-			"unix": 1789104071
+			"unix": 1789449791
 		},
 		{
 			"code": "MODULE_READY",
@@ -104,7 +104,7 @@
 			"message": "The example game module instantiated and accepted its configuration.",
 			"stage": "module_construction",
 			"status": "PASS",
-			"unix": 1789104071
+			"unix": 1789449791
 		},
 		{
 			"code": "ENGINE_READY",
@@ -113,7 +113,7 @@
 			"message": "The universal engine accepted the module and configuration.",
 			"stage": "engine_construction",
 			"status": "PASS",
-			"unix": 1789104071
+			"unix": 1789449791
 		},
 		{
 			"code": "ENGINE_STARTED",
@@ -126,7 +126,7 @@
 			"message": "Engine created its initial deterministic state.",
 			"stage": "engine_start",
 			"status": "PASS",
-			"unix": 1789104071
+			"unix": 1789449791
 		},
 		{
 			"code": "VIEWS_AND_PRIVACY_OK",
@@ -138,7 +138,7 @@
 			"message": "Initial public/private views and legal-action boundaries are coherent.",
 			"stage": "initial_views",
 			"status": "PASS",
-			"unix": 1789104072
+			"unix": 1789449791
 		},
 		{
 			"code": "EXTERNAL_INTERFACES_OK",
@@ -150,7 +150,7 @@
 			"message": "Unknown viewers are rejected and bot selection remains inside the canonical legal set.",
 			"stage": "external_interfaces",
 			"status": "PASS",
-			"unix": 1789104072
+			"unix": 1789449791
 		},
 		{
 			"code": "REJECTION_ATOMIC",
@@ -162,7 +162,7 @@
 			"message": "A rejected action did not mutate state or advance state_version.",
 			"stage": "rejected_action_atomicity",
 			"status": "PASS",
-			"unix": 1789104072
+			"unix": 1789449791
 		},
 		{
 			"code": "MATCH_FINISHED",
@@ -186,7 +186,7 @@
 			"message": "The example game completed from initial deal to declared winner.",
 			"stage": "complete_match",
 			"status": "PASS",
-			"unix": 1789104072
+			"unix": 1789449791
 		},
 		{
 			"code": "STATE_INTEGRITY_OK",
@@ -200,7 +200,7 @@
 			"message": "Digest and runtime-snapshot accounting are coherent.",
 			"stage": "state_integrity",
 			"status": "PASS",
-			"unix": 1789104072
+			"unix": 1789449791
 		},
 		{
 			"code": "PERSISTENCE_OK",
@@ -211,7 +211,7 @@
 			"message": "Build, encode, checksum, atomic write and read-back succeeded.",
 			"stage": "persistence",
 			"status": "PASS",
-			"unix": 1789104072
+			"unix": 1789449792
 		},
 		{
 			"code": "REPLAY_MATCHED",
@@ -223,7 +223,7 @@
 			"message": "Seed plus accepted action log rebuilt the complete runtime snapshot.",
 			"stage": "replay",
 			"status": "PASS",
-			"unix": 1789104073
+			"unix": 1789449792
 		},
 		{
 			"code": "SYNC_PACKET_OK",
@@ -235,7 +235,7 @@
 			"message": "Client-safe state, visible events and digest were packaged.",
 			"stage": "sync",
 			"status": "PASS",
-			"unix": 1789104073
+			"unix": 1789449792
 		},
 		{
 			"code": "DETERMINISTIC_DEAL_OK",
@@ -246,10 +246,10 @@
 			"message": "Two engines with the same seed produced the same private deal.",
 			"stage": "determinism",
 			"status": "PASS",
-			"unix": 1789104073
+			"unix": 1789449792
 		}
 	],
-	"started_unix": 1789104071,
+	"started_unix": 1789449790,
 	"summary": {
 		"fail": 0,
 		"pass": 15,

@@ -1,5 +1,66 @@
 # Cuaderno 4 — Pruebas, riesgos y pendientes
 
+## Línea base del primer mazo — 2026-09-15
+
+- Fuentes S01/S02/S04: fechas de modificación de Drive iguales a `SOURCE_MANIFEST.json`; caché local **PASS 6/6**. Godot 4.7, `run_jcp_stress_matches.gd -- --balance --games=16 --start-seed=1000 --report-tag=balance_paired_20260915`: **PASS 16/16** con 30 vidas, 5.623 acciones, dos replays contrastados, 16 finales válidos por vida a cero y ningún límite de 900 acciones alcanzado (máximo 653). Cuatro partidas por política, alternando jugador inicial. JSON: `diagnostic_logs/jcp_stress_balance_paired_20260915.json`; documento interpretativo: `docs/diseno/LINEA_BASE_EQUILIBRIO_MAZO_2026_09_15.md`.
+- Estrés normal tras el cambio optativo: **PASS 1/1**, semilla 2100, 12 acciones, un replay y vida abreviada normal para ese arnés. `report_jcp_saved_match.gd`: **PASS de lectura/decodificación** del guardado local existente; confirmó `RUNNING`, turno 1, cero acciones y ninguna victoria. No se ha probado aún el lector con un guardado humano `FINISHED`, pues no existe uno disponible.
+- Observaciones, no dictamen de potencia: 24 Fusiones, 427 ataques, 106 respuestas; 1/32 manos iniciales sin criatura. E05 19/24 vista/jugada y E01 19/22 son candidatas a observar por oportunidad de equipamiento, no a modificar ahora. El 11/16 del jugador inicial y el 9/7 entre asientos tienen incertidumbre alta. No se modificó mazo, IA de mesa, UCE, reglas ni tablero; por tanto no se atribuyen a esta fase nuevas ejecuciones de las suites generales históricas.
+- Riesgo principal: los cuatro bots ponderados tienden a jugar casi toda carta vista; preparación de una Trampa no equivale a activación ni victoria correlacionada con una carta equivale a ventaja causada por ella. La instrumentación solo cuenta uso único por carta/jugador/partida y no mide calidad de la decisión. Siguiente paso requerido para cerrar equilibrio: partidas humanas completas guardadas una por una, con semilla, vencedor y ejemplos de cartas que se atascan o dominan. El guardado actual usa una sola ranura y se sobrescribe; antes de iniciar otra partida debe preservarse la anterior si se desea compararlas.
+
+## Presentación de Magias y Trampas activadas — 2026-09-14
+
+- Godot 4.7, ocho suites headless secuenciales **PASS**: mesa **221/221**, ataque **11/11**, IA **9/9**, habilidades de criaturas **38/38**, ocho Fusiones **82/82**, respuestas **48/48**, Magias reactivas **30/30** y disparadores **53/53**. No cambió el módulo ni se atribuyen aquí las suites generales históricas de UCE.
+- Nueva prueba gráfica `run_jcp_table_activation_reveal.gd` **PASS** a 1600×900: preparar carta no muestra identidad; dos anuncios se encadenan en orden; magia principal pendiente se anuncia una sola vez; G01 jugada realmente desde la mesa muestra ficha, y G06 reactiva real muestra frontal y efecto; el temporizador avanza automáticamente tras cuatro segundos; la cortina 2P oculta el anuncio hasta revelarse; el pase automático de respuesta espera mientras la ficha rival está visible y continúa al cerrarla. Captura real revisada: `artifacts/manual_table_activation_reveal.png`.
+- GUI de magia dirigida, mejora persistente, respuesta sin decisión y pase explícito **PASS** en la primera ejecución. GUI de ataque y Fusión fallaron al encadenarse tras varias ventanas y pasaron aisladamente **PASS**; el arnés gráfico conserva el riesgo conocido de foco/temporización. La prueba nueva se repitió tras ampliar comprobaciones y volvió a pasar.
+- Respaldo físico previo: `artifacts/backup_pre_activation_reveal_20260914/juego_cartas_table.gd`. Acceso directo del escritorio regenerado y comprobado: Godot 4.7, proyecto vigente de F y escena explícita. `git diff --check` sin errores (avisos LF/CRLF). Sin cambios de reglas, UCE, E03 ni geometría. Pendiente: prueba humana del ritmo de cuatro segundos y revisión de legibilidad cuando una futura carta tenga un texto mucho más largo.
+
+## Diálogos, igualdad y respuesta — 2026-09-14
+
+- Godot 4.7, siete suites headless secuenciales **PASS**: mesa **221/221**, flujo de ataque **11/11**, IA **9/9**, habilidades de criaturas **38/38**, ocho Fusiones **82/82**, combate **53/53** y respuestas **48/48**. No se ejecutaron de nuevo las suites generales de UCE porque el motor no cambió.
+- GUI: nueva `run_jcp_table_choice_dialogs.gd` **PASS** (tres variantes de invocación y cuatro de una Fusión se reducen a dos posturas; los objetivos se muestran en el siguiente paso); nueva `run_jcp_table_uncontested_response.gd` **PASS** (respuesta rival real, sin reacción propia, pase UCE automático y resultado visible). Fusión por arrastre, ataque, postura, pase explícito con reacción, magia y mejora: **PASS**. Captura real de diálogo de Fusión 1600×900: `artifacts/manual_table_fusion_preview.png`, revisada con un resultado y dos posturas.
+- `run_juego_cartas_propio_creature_gui_input.gd` falló en el primer clic cuando se ejecutó encadenada tras varias ventanas Godot; repetida aisladamente pasó **15/15**. El arnés gráfico conserva un riesgo de foco/temporización. La regla de empate ATQ contra DEF queda cubierta por la suite de combate; la nueva presentación deriva del evento filtrado, sin recalcular resultados ni cambiar daño. Falta validar con el diseñador otra partida humana con una Fusión dirigida como F068.
+- Respaldo físico pre-UI: `artifacts/backup_pre_choice_response_20260914/juego_cartas_table.gd`. No cambian UCE, reglas, IA rival ni geometría. En 2P se mantiene el pase explícito; con IA se automatiza únicamente cuando no existe ninguna decisión reactiva.
+- Acceso directo `C:/Users/danie/OneDrive/Desktop/Juego de Cartas Propio - Pruebas.lnk` regenerado y comprobado: Godot 4.7, raíz de F y `res://demo/juego_cartas_table.tscn`. `git diff --check`: sin errores de espacios; solo avisos LF/CRLF.
+
+## Acciones junto a criatura — 2026-09-14
+
+- Puerta proporcional secuencial Godot 4.7: reparto aleatorio **22/22**, mesa manual **221/221**, flujo de ataque **11/11**, IA **9/9**, UX de criatura **62/62**, habilidades **38/38** y ocho Fusiones **82/82**. GUI de invocación **15/15**, ataque, postura, magia, mejoras, Fusión y pase de respuesta **PASS** en la ronda final; ninguna regla ni módulo principal cambiaron. No se atribuyen suites universales históricas a esta pasada.
+- `run_jcp_table_attack_gui.gd` ahora pulsa Atacar junto a una criatura real, comprueba iluminación, objetivo y Combate automático, y genera `artifacts/manual_table_creature_actions.png` a 1600×900. `run_jcp_table_posture_gui.gd` prueba que el cambio voluntario está deshabilitado el turno de entrada, habilitado en un turno posterior y ejecuta una sola acción UCE a Guardia visible. Capturador de mesa **PASS**, cinco imágenes 1600×900 con Ataque/Guardia reales. El acceso directo del escritorio se comprobó y regeneró hacia el proyecto F.
+- La primera posición del menú, a la derecha de C1, interceptó el segundo clic sobre C2 en la GUI de Fusión. Se desplazó debajo de la carta/fila y se repitieron Fusión y ataque hasta PASS; la captura final muestra esa posición. Una ejecución gráfica de ataque también falló de forma intermitente en una secuencia de procesos y pasó al repetirla separadamente; queda como riesgo de foco/temporización del arnés gráfico, no como resultado ocultado.
+- Respaldo físico previo: `artifacts/backup_pre_creature_context_20260914/juego_cartas_table.gd`. Pendientes: prueba humana del menú en varios estados y cartas que prohíban Guardia por efecto; la aclaración del diseñador no cambió los límites existentes de S01. El menú local no modifica geometría, tamaño de cartas ni color del tapete.
+
+## Semilla fresca en cada partida humana — 2026-09-14
+
+- Nueva `run_jcp_table_random_starts.gd` **22/22**: inicio con semilla válida, tres pulsaciones de «Nueva partida» sin repetir la inmediata, mano inicial realmente distinta, cinco cartas y 35 restantes en cada lado, semilla visible en Herramientas y repetición exacta de la mano con «Jugar semilla».
+- Puerta secuencial Godot 4.7: mesa manual **221/221**, flujo de ataque **11/11**, IA **9/9**, UX de criatura **62/62**, habilidades de criaturas **38/38**, ocho Fusiones **82/82**; GUI de invocación **15/15**, ataque, magia, mejoras y Fusión **PASS**; todos los procesos con código 0. Capturador gráfico **PASS**: cinco vistas 1600×900, Ataque y Guardia reales, mediante semilla fijada en el propio capturador. No se tocó el módulo principal ni se atribuyen aquí las suites generales históricas.
+- Respaldo previo: `artifacts/backup_pre_random_starts_20260914/juego_cartas_table.gd`. Acceso directo del escritorio regenerado y verificado hacia Godot 4.7, proyecto F y escena explícita. Sigue pendiente una prueba humana de varios repartos; la mezcla puede dar manos mejores o peores y no garantiza materiales compatibles temprano. Cambiar composición o asegurar Fusión inicial requeriría una decisión de diseño separada.
+
+## Frontal numérico provisional — 2026-09-14
+
+- Mesa manual **221/221** tras añadir comprobaciones de una criatura real visible en mano y preview (coste, ATQ, DEF, hueco de ilustración, efecto y detalle lateral), además de privacidad en cara y tooltip ocultos. Ataque **11/11**, IA **9/9**, habilidades de criaturas **38/38**, ocho Fusiones **82/82** y UX de criatura **62/62**; todos con código 0 tras corregir una expectativa de mensaje ya desactualizada en la suite de ataque. No se atribuye a esta pasada una nueva ejecución de las suites generales del motor.
+- Capturador gráfico **PASS**: cinco imágenes reales 1600×900 en `artifacts/manual_table_*.png`, incluidas criatura seleccionada con ficha ampliada, Ataque y Guardia. GUI de ataque, magia dirigida, mejoras y Fusión **PASS** en ventana real. Revisión visual: coste/ATQ/DEF visibles en la mano y preview; el efecto se lee en la ampliación, la ilustración sigue vacía, la mesa y fases no se desplazan. Respaldo físico previo en `artifacts/backup_pre_card_front_20260914/`. Acceso directo del escritorio regenerado para Godot 4.7, proyecto F y escena de mesa explícita.
+- Riesgo abierto: el tamaño 86×120 obliga a abreviar nombres largos y a mostrar el efecto completo en la ficha ampliada/rail; no se ha diseñado todavía arte, iconos definitivos ni la legibilidad de otros tamaños de ventana. La mano rival permanece oculta. Falta una nueva prueba humana de lectura durante partida.
+
+## Fusión por arrastre y coste mostrado — 2026-09-14
+
+- `run_jcp_table_fusion_gui.gd` **PASS gráfico 1600×900**: dos criaturas compatibles naturales M01/M07, pareja iluminada al comenzar el arrastre, rechazo de material inventado o de sí misma, entrega real sobre la otra carta, confirmación sin mutación, pago 0 visible, cancelación sin consumo, dos clics alternativos y Fusión confirmada por UCE. Captura de la confirmación: `artifacts/manual_table_fusion_preview.png` (resultado «Alfa de la Manada de Naturaleza», Ataque/Guardia y 0 Energía).
+- Puerta secuencial tras el cambio: mesa manual **208/208**, flujo de ataque **11/11**, IA **9/9**, habilidades de criaturas **38/38**, ocho Fusiones verticales **82/82**, GUI de invocación **15/15**, criatura UX **62/62**, GUI de ataque, magia, mejoras y pase de respuesta **PASS**; todos los procesos con código 0. Capturador de mesa **PASS**: cinco imágenes 1600×900 con cartas reales en Ataque y Guardia. No se ejecutaron de nuevo las suites universales del motor porque no cambió UCE ni el módulo de reglas.
+- Respaldo previo de scripts y prueba en `artifacts/backup_pre_fusion_drag_20260914/`; la etiqueta geométrica `mesa_perspectiva_ok_v1` y el respaldo físico original permanecen intactos. Acceso directo del escritorio regenerado para Godot 4.7, escena explícita de F. Riesgo abierto: variantes de Fusión con costes, efectos y resultados diferentes no están diseñadas; el rótulo de 0 Energía describe únicamente la Fusión normal actual. Sigue pendiente la validación humana de comodidad del arrastre.
+
+## Fin de turno y pase de respuesta — 2026-09-13
+
+- La regresión `run_juego_cartas_propio_creature_ux.gd` pasa **62/62**: el botón sigue habilitado con origen o modo pendiente y confirmar cancela la intención sin ejecutarla, después entrega el turno. `run_jcp_table_end_turn_response.gd` **PASS**: con G06 preparada y ataque real, la respuesta activa muestra «Pasar respuesta» y el clic ejecuta exactamente un `pass_reaction`; no termina el turno del atacante. Puerta secuencial completa Godot 4.7: mesa manual **208/208**, ataque **11/11**, IA básica **9/9**, habilidades **38/38**, ocho Fusiones **82/82**, criatura UX **62/62** y las GUI de magia, ataque, mejoras, Fusión y pase de respuesta **PASS**, todas con código 0.
+- Límite deliberado: mientras la prioridad sea rival, el jugador espera la reacción del otro; no se permite saltarla ni forzar una fase ilegal. Tampoco se sustituye una elección obligatoria que no tenga `pass_reaction`. El comportamiento humano del mando debe probarse desde el acceso directo. Sin cambios de reglas, motor ni geometría.
+- Capturador gráfico **PASS**: cinco capturas de 1600×900 en `artifacts/manual_table_*.png`, incluidas criaturas reales en Ataque y Guardia. Se regeneró y verificó el acceso directo `C:/Users/danie/OneDrive/Desktop/Juego de Cartas Propio - Pruebas.lnk` con Godot 4.7 y la escena de F.
+
+## Selección, magia dirigida y ataque mediante clic GUI — 2026-09-13
+
+- Sonda headless Godot 4.7: antes de la caché, 2,0–2,7 s por selección de mano; después, diez selecciones entre 45 y 49 ms. Una consulta directa de acciones legales cuesta unos 56 ms y no debe repetirse dentro del mismo refresco. La medición corresponde a la misma máquina/escena, no garantiza todos los equipos.
+- Nuevas pruebas de entrada GUI real: `run_jcp_table_spell_gui.gd` **PASS** (G01 requiere objetivo, M01 pasa de ATQ 2 a 4, G01 va al Cementerio y el resultado es visible); `run_jcp_table_attack_gui.gd` **PASS** (tras primer turno y entrada a Combate, clic atacante → criatura rival ejecuta `attack`). Se conservó la selección legal basada en UCE.
+- Puerta proporcional ejecutada: mesa manual **208/208**, flujo de ataque **11/11**, IA básica **9/9**, habilidades de criaturas **38/38**, ocho Fusiones verticales **82/82** y efectos **66/66**, todos código 0. No se atribuye a esta pasada una prueba de partida humana completa ni de todas las cartas mágicas desde GUI.
+- Prueba GUI de Fusión `run_jcp_table_fusion_gui.gd` **PASS**: dos invocaciones en turnos distintos, dos clics sobre M01/M07 compatibles, menú de resultado sin mutación previa y acción `fuse_creatures` confirmada. Pendiente: pedir al diseñador el nombre de la magia que observó sin efecto y reproducir su secuencia exacta. Las respuestas preparadas se colocan boca abajo y pueden no activarse de inmediato; las persistentes dependen de condiciones. Falta validación humana del nuevo texto en una partida completa. No se modificaron reglas, geometría ni motor.
+- Captura gráfica de mesa a 1600×900 **PASS**: cinco imágenes en `artifacts/manual_table_*.png`, incluida selección, opción de postura y criaturas reales en Ataque/Guardia. Inspección de la selección: mensaje superior y rail visibles, sin modificación de casillas. Acceso directo `C:/Users/danie/OneDrive/Desktop/Juego de Cartas Propio - Pruebas.lnk` regenerado y verificado con Godot 4.7, proyecto en F y `res://demo/juego_cartas_table.tscn`.
+
 ## Verificación UX A/B de criatura — 2026-09-13
 
 - Punto de seguridad separado: `mesa_fondo_negro_preux` (`89bf866`); `mesa_perspectiva_ok_v1` y `artifacts/backup_mesa_perspectiva_ok_v1/` siguen intactos. Comparación Git contra el punto pre-UX: `field_template_layer.gd`, `projected_field_piece.gd`, `duel_table_backdrop.gd` y la escena no tienen diferencias; en la mesa solo cambian lógica de selección, menú y filtro de ratón de filas, no coordenadas ni proyección. Ningún cambio de reglas/UCE/IA/catálogo/persistencia/privacidad ni pull/merge. `git diff --check` sin errores de espacios (avisos normales LF/CRLF).
@@ -355,3 +416,34 @@ Una fase no está cerrada hasta que:
 - replay y persistencia siguen pasando;
 - todas las suites afectadas y las puertas generales terminan realmente en PASS;
 - los cuatro cuadernos quedan actualizados.
+
+## Auditoría documental de fuentes — 2026-09-15
+
+- Carpeta oficial de Drive localizada: `JUEGO_CARTAS_PROPIO`, ID `1m54Q-WmufRhdVleWMq6mTwUbP3Nzxqcl`.
+- Inventario directo: PASS, seis documentos esperados con IDs y padre correctos.
+- Frescura: PASS, las seis fechas de modificación de Drive coinciden con `SOURCE_MANIFEST.json`.
+- Caché local: PASS, `tools/check_design_source_cache.ps1` termina 6/6.
+- Lectura de alcance: S03, S04 y S05 completos; bloques pertinentes de S01 contrastados.
+- Código/runtime: no ejecutado por tratarse de una auditoría exclusivamente documental sin cambios de motor.
+
+Riesgos y pendientes antes del Atlas:
+
+1. Resolver el conflicto entre el límite local de una Fusión por turno y S04, que niega un límite universal.
+2. Corregir la matriz resumida del compendio solo después de aprobación; la auditoría enumera todas sus omisiones/diferencias.
+3. Ratificar LOB-06 como rama ígnea excepcional o convertirlo en ruta transformada.
+4. Ratificar anatomías, disciplinas y aptitudes nuevas de M01–M18, evitando deducir Sapiente por especie.
+5. Mantener P01–P05 y P06 reservado fuera del primer mazo hasta su fase de diseño.
+6. No ampliar familias, variantes elementales ni recetas para rellenar huecos.
+
+Informe completo: `docs/diseno/AUDITORIA_RECONCILIACION_DRIVE_CONTENIDO_LOCAL_V0_1.md`.
+
+## Puerta de resincronización GitHub — 2026-09-15
+
+- `tools/check_design_source_cache.ps1`: PASS 6/6.
+- Godot 4.7 `--headless --editor --path . --quit`: PASS; proyecto importa y los recursos se cargan sin errores de parseo.
+- `tests/run_juego_cartas_propio_*.gd`: 26 suites PASS, incluidas mesa manual, ataque, IA, habilidades, Fusiones, fases, posturas, reacciones, Terrenos y zonas.
+- `tests/run_jcp_table_*.gd`: diez suites PASS en modo gráfico, incluidas revelación de activaciones, ataque, mejoras, diálogos, fin de turno/respuesta, Fusión, postura, inicio aleatorio, magia y respuesta sin disputa. Una ejecución inicial `--headless` de revelación falló y la de ataque por clic se quedó esperando el frame dibujado; ambas pasaron al repetirlas con OpenGL, requisito de estas suites GUI.
+- `tests/run_uce_*.gd`: nueve suites PASS; `tests/diagnostics/run_engine_diagnostics.gd`: PASS 15/15, FAIL 0; `tests/full/run_complete_engine_experiment.gd`: PASS 80/80.
+- Seguridad de publicación: `backup/pre_sync_local_actual_20260915` conserva el remoto anterior `b0cc5dad3b2d35193c4626be966518964ccaf3f8`. Se comprueba el árbol staged para excluir `.godot`, `.png.import`, `artifacts/backup_*` y temporales antes del push; los `.gd.uid` son identificadores de recursos que sí se versionan.
+
+Pendiente de diseño, no de la resincronización: la evidencia humana para equilibrio y los conflictos con S04 y la matriz de afinidades siguen abiertos tal como se enumeran arriba. Esta puerta no autoriza retocar cartas, cifras ni reglas.
