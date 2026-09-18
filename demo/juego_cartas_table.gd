@@ -38,7 +38,7 @@ const DEFAULT_SAVE_PATH := "user://juego_cartas_propio/partida_manual.json"
 const PLAYER_NAMES := ["Jugador 1", "Jugador 2"]
 const DIRECT_BOARD_ACTIONS := [
 	"summon_creature", "set_creature", "set_support", "play_persistent", "play_terrain",
-	"play_main_spell", "equip_item", "attack",
+	"play_main_spell", "equip_item", "attack", "activate_creature_ability", "activate_fusion_ability",
 ]
 const ZONE_LABELS := {
 	"deck": "Baraja",
@@ -1751,11 +1751,14 @@ func _render_creature_action_popup(actions: Array, visible_cards: Dictionary) ->
 		return
 	var attack_available := _can_offer_attack_from_main()
 	var posture_action: Dictionary = {}
+	var ability_actions: Array = []
 	for action in actions:
 		if action["type"] == "attack" and action["payload"].get("attacker_id", "") == _selected_card_id:
 			attack_available = true
 		if action["type"] == "change_position" and action["payload"].get("instance_id", "") == _selected_card_id:
 			posture_action = action
+		if action["type"] in ["activate_creature_ability", "activate_fusion_ability"] and action["payload"].get("source_instance_id", "") == _selected_card_id:
+			ability_actions.append(action)
 	var attack_button := Button.new()
 	attack_button.name = "CreatureAttackAction"
 	attack_button.text = "Atacar"
@@ -1772,6 +1775,16 @@ func _render_creature_action_popup(actions: Array, visible_cards: Dictionary) ->
 	if not posture_action.is_empty():
 		posture_button.pressed.connect(_perform_action.bind(posture_action))
 	_creature_action_buttons.add_child(posture_button)
+	if not ability_actions.is_empty():
+		var ability_button := Button.new()
+		ability_button.name = "CreatureAbilityAction"
+		ability_button.text = "Habilidad"
+		ability_button.tooltip_text = ability_actions[0].get("label", "Activar habilidad") if ability_actions.size() == 1 else "Elige el objetivo de la habilidad."
+		if ability_actions.size() == 1:
+			ability_button.pressed.connect(_perform_action.bind(ability_actions[0]))
+		else:
+			ability_button.pressed.connect(_open_action_choices.bind(ability_actions))
+		_creature_action_buttons.add_child(ability_button)
 	_creature_action_popup.visible = true
 	call_deferred("_place_creature_action_popup")
 
@@ -1872,6 +1885,8 @@ func _selection_instruction(actions: Array, visible_index: Dictionary, visible_c
 		return "%s\nTERRENO: pulsa tu zona central de Territorio." % name
 	if "summon_creature" in action_types or "set_creature" in action_types:
 		return "%s\nCRIATURA: elige una casilla. Después decidirás ataque visible o guardia oculta." % name
+	if "activate_creature_ability" in action_types or "activate_fusion_ability" in action_types:
+		return "%s\nHABILIDAD: usa el botón contextual junto a la criatura. Si necesita objetivo, la elección aparecerá después." % name
 	if "attack" in action_types:
 		return "%s\nATACANTE: pulsa una criatura rival iluminada o la Vida rival si el ataque directo está permitido." % name
 	var location: Dictionary = _visible_card_locations.get(_selected_card_id, {})
