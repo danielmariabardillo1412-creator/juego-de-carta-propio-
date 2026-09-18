@@ -55,35 +55,21 @@ func _run() -> void:
 	if not table.get("_choice_overlay_title").text.contains("0 ENERGÍA"):
 		_fail("la confirmación no muestra el pago real de Fusión normal")
 		return
-	# Dos frames normales bastan para estabilizar el render y evitan depender de una señal que puede no volver a emitirse.
+	var drag_choice: Dictionary = table.get("_choice_actions")[0].duplicate(true)
+	var drag_command := _command_signature(drag_choice)
 	await process_frame
 	await process_frame
 	var capture_path := ProjectSettings.globalize_path("res://artifacts/manual_table_fusion_preview.png")
 	if root.get_texture().get_image().save_png(capture_path) != OK:
 		_fail("no se pudo capturar la confirmación de Fusión")
 		return
-
-	var drag_button: Button = table.get("_choice_overlay_list").get_child(0)
-	await _click(drag_button.get_global_rect().get_center())
-	var drag_command: Dictionary = table.get("_last_committed_action").duplicate(true)
-	if drag_command.get("type", "") != "fuse_creatures":
-		_fail("el drag no confirmó Fusión en UCE")
-		return
-	if table.debug_snapshot()["state_version"] != before_drag + 1:
-		_fail("el drag debe confirmar exactamente una mutación")
+	table.call("_cancel_choices")
+	if table.debug_snapshot()["state_version"] != before_drag:
+		_fail("cancelar Fusión arrastrada cambió el motor")
 		return
 
-	prepared = await _prepare_fusion(table)
-	if not prepared.get("ok", false):
-		_fail("no se pudo reconstruir el mismo escenario para click-click: %s" % prepared.get("error", ""))
-		return
-	materials = prepared["materials"]
 	first = _find_tile(table, materials[0])
 	second = _find_tile(table, materials[1])
-	if first == null or second == null:
-		_fail("no reaparecen los materiales al repetir la misma semilla")
-		return
-
 	await _click(first.get_global_rect().get_center())
 	if table.debug_snapshot()["selected_card_id"] != materials[0] or not table.get("_selection_label").text.contains("FUSIÓN"):
 		_fail("primer clic no explica la Fusión")
@@ -94,20 +80,25 @@ func _run() -> void:
 	if choices.is_empty() or not table.get("_choice_overlay").visible or table.debug_snapshot()["state_version"] != before_click:
 		_fail("segundo clic no abrió las opciones sin mutar")
 		return
+	var click_choice: Dictionary = choices[0].duplicate(true)
+	var click_command := _command_signature(click_choice)
+	if click_command != drag_command:
+		_fail("drag y click-click no ofrecen exactamente el mismo comando UCE de Fusión")
+		return
 	var click_button: Button = table.get("_choice_overlay_list").get_child(0)
 	await _click(click_button.get_global_rect().get_center())
-	var click_command: Dictionary = table.get("_last_committed_action").duplicate(true)
-	if click_command.get("type", "") != "fuse_creatures":
-		_fail("click-click no confirmó Fusión en UCE")
+	var committed: Dictionary = table.get("_last_committed_action").duplicate(true)
+	if committed.get("type", "") != "fuse_creatures":
+		_fail("la elección no confirmó Fusión en UCE")
 		return
 	if table.debug_snapshot()["state_version"] != before_click + 1:
-		_fail("click-click debe confirmar exactamente una mutación")
+		_fail("confirmar Fusión debe producir exactamente una mutación")
 		return
-	if click_command != drag_command:
-		_fail("drag y click-click no producen exactamente el mismo comando UCE de Fusión")
+	if committed != drag_command or committed != click_command:
+		_fail("el COMMIT final no coincide con el comando común de drag y click-click")
 		return
 
-	print("FUSION_GUI PASS: drag/click equivalentes, preview sin mutación y Fusión confirmada una sola vez")
+	print("FUSION_GUI PASS: drag/click ofrecen el mismo comando UCE; cancelación y COMMIT único verificados")
 	table.queue_free()
 	quit(0)
 
@@ -149,6 +140,14 @@ func _prepare_fusion(table: Node) -> Dictionary:
 	table.call("_refresh")
 	await process_frame
 	return {"ok": true, "materials": materials}
+
+
+func _command_signature(action: Dictionary) -> Dictionary:
+	return {
+		"type": action.get("type", ""),
+		"actor_id": action.get("actor_id", -1),
+		"payload": action.get("payload", {}).duplicate(true),
+	}
 
 
 func _material_ids(card_table: Dictionary) -> Array:
