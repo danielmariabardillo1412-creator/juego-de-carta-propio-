@@ -397,8 +397,7 @@ func _test_dragon_extra_attack() -> void:
 	state = module.reduce(state, fusion)["state"]
 	state = module.reduce(state, GameAction.new("advance_phase", 0, {}))["state"]
 	var attack = GameAction.new("attack", 0, {"attacker_id": dragon, "target_slot": 0})
-	_expect(not module.validate_action(state, attack)["ok"], "F005 no ataca el turno de entrada")
-	state["cards"]["instances"][dragon]["metadata"]["summoned_turn"] = -1
+	_expect(module.validate_action(state, attack)["ok"], "F005 puede atacar el mismo turno si se forma antes del Combate")
 	for index in range(2):
 		_expect(module.validate_action(state, attack)["ok"], "F005 puede declarar ataque %d" % (index + 1))
 		var legal_found := false
