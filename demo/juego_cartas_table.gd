@@ -306,6 +306,7 @@ func debug_snapshot() -> Dictionary:
 		"ai_running": _ai_running,
 		"rendered_card_count": _count_card_tiles(_board_surface) if _board_surface != null else 0,
 		"rendered_action_count": _action_list.get_child_count() if _action_list != null else 0,
+		"direct_board_action_types": DIRECT_BOARD_ACTIONS.duplicate(),
 		"event_expanded": _event_expanded,
 		"phase_track_count": 1 if _phase_indicator != null else 0,
 		"event_text": _event_log.text if _event_log != null else "",
@@ -1772,6 +1773,7 @@ func _render_creature_action_popup(actions: Array, visible_cards: Dictionary) ->
 		ability_button.name = "CreatureAbilityAction"
 		ability_button.text = "Habilidad"
 		ability_button.tooltip_text = ability_actions[0].get("label", "Activar habilidad") if ability_actions.size() == 1 else "Elige el objetivo de la habilidad."
+		ability_button.set_meta("jcp_ability_actions", ability_actions.duplicate(true))
 		if ability_actions.size() == 1:
 			ability_button.pressed.connect(_perform_action.bind(ability_actions[0]))
 		else:
