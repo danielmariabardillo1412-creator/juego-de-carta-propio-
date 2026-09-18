@@ -48,11 +48,11 @@ func _run() -> void:
 	_expect_equal(selected["view"]["game"]["card_table"]["zones"]["hand:0"]["count"], original_hand, "la criatura permanece en mano")
 	if original_energy >= 0:
 		_expect_equal(selected["view"]["game"]["players"][0]["energy"], original_energy, "seleccionar no gasta Energía")
-	_expect(not table.get("_end_turn_button").disabled, "Terminar turno sigue disponible con acción incompleta")
+	_expect(table.get("_end_turn_button").disabled, "Terminar turno queda bloqueado con acción incompleta")
+	_expect(table.get("_advance_button").disabled, "Cambiar de fase queda bloqueado con acción incompleta")
 	table.call("_end_turn_pressed")
-	_expect(table.get("_end_turn_dialog").visible, "Terminar turno abre confirmación aun con selección pendiente")
-	table.get("_end_turn_dialog").hide()
-	_expect_equal(table.debug_snapshot()["state_version"], original_version, "abrir confirmación no muta UCE")
+	_expect(not table.get("_end_turn_dialog").visible, "Terminar turno no abre confirmación con selección pendiente")
+	_expect_equal(table.debug_snapshot()["state_version"], original_version, "intentar terminar durante PRE-COMMIT no muta UCE")
 	var escape := InputEventKey.new()
 	escape.keycode = KEY_ESCAPE
 	escape.pressed = true
@@ -96,7 +96,8 @@ func _run() -> void:
 	_expect(not pending["choice_overlay_visible"], "la ventana central permanece oculta")
 	_expect_equal(pending["state_version"], original_version, "elegir destino todavía no muta")
 	_expect_equal(pending["request_number"], original_requests, "elegir destino todavía no envía acción")
-	_expect(not table.get("_end_turn_button").disabled, "Terminar turno sigue disponible al elegir modo")
+	_expect(table.get("_end_turn_button").disabled, "Terminar turno sigue bloqueado al elegir modo")
+	_expect(table.get("_advance_button").disabled, "Cambiar de fase sigue bloqueado al elegir modo")
 	var attack := _candidate(pending, table, "summon_creature")
 	var guard := _candidate(pending, table, "set_creature")
 	_expect(not attack.is_empty() and not guard.is_empty(), "UCE ofrece dos modos legales exactos")
@@ -154,11 +155,19 @@ func _run() -> void:
 	await process_frame
 	source_id = _first_creature_id(table.debug_snapshot()["legal_actions"])
 	table.call("_select_card", source_id)
-	_expect_equal(table.debug_snapshot()["creature_interaction"]["phase"], "TARGET_SELECTION", "hay una invocación a medias antes de terminar")
+	var pending_end: Dictionary = table.debug_snapshot()
+	_expect_equal(pending_end["creature_interaction"]["phase"], "TARGET_SELECTION", "hay una invocación a medias antes de terminar")
+	var pending_end_version: int = pending_end["state_version"]
 	table.call("_confirm_end_turn")
-	var ended: Dictionary = table.debug_snapshot()
-	_expect_equal(ended["creature_interaction"]["phase"], "IDLE", "terminar cancela la invocación a medias")
-	_expect_equal(ended["view"]["game"]["active_player"], 1, "terminar entrega el turno al rival")
+	var refused_end: Dictionary = table.debug_snapshot()
+	_expect_equal(refused_end["creature_interaction"]["phase"], "TARGET_SELECTION", "confirmar fin de turno no destruye la invocación PRE-COMMIT")
+	_expect_equal(refused_end["view"]["game"]["active_player"], 0, "confirmar fin de turno no entrega el turno con una jugada pendiente")
+	_expect_equal(refused_end["state_version"], pending_end_version, "confirmar fin de turno no muta UCE con PRE-COMMIT activo")
+	var final_escape := InputEventKey.new()
+	final_escape.keycode = KEY_ESCAPE
+	final_escape.pressed = true
+	table.call("_input", final_escape)
+	_check_idle(table, pending_end_version, "Escape final")
 	_finish(table)
 
 
