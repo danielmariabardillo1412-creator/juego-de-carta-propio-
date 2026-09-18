@@ -2513,10 +2513,7 @@ func _validate_attack(state: Dictionary, player_id: int, payload: Dictionary) ->
 
 
 func _attack_entry_is_blocked(state: Dictionary, player_id: int, attacker_id: String) -> bool:
-	if state["turn"]["turn_number"] == 1 and player_id == state["config"]["starting_player"]:
-		return true
-	var metadata: Dictionary = state["cards"]["instances"][attacker_id]["metadata"]
-	return metadata.get("summoned_turn", -1) == state["turn"]["turn_number"] and metadata.has("fusion_entity")
+	return state["turn"]["turn_number"] == 1 and player_id == state["config"]["starting_player"]
 
 
 func _active_base_definition_id(state: Dictionary, creature_id: String) -> String:
