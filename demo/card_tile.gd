@@ -1,4 +1,4 @@
-extends Button
+extends "res://demo/projected_hit_button.gd"
 ## Carta visual provisional con silueta, postura y reverso. Las reglas siguen perteneciendo al motor.
 
 signal card_selected(instance_id: String)

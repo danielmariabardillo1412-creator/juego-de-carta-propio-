@@ -13,6 +13,7 @@ const FieldTemplateLayer = preload("res://demo/field_template_layer.gd")
 const DuelTableBackdrop = preload("res://demo/duel_table_backdrop.gd")
 const TableInteractionState = preload("res://demo/table_interaction_state.gd")
 const CreatureDropSlot = preload("res://demo/creature_drop_slot.gd")
+const ProjectedHitButton = preload("res://demo/projected_hit_button.gd")
 
 # Contrato visual greybox 63:88, medido sobre una referencia de 1600×900.
 const DESIGN_U := 72.0
@@ -1119,6 +1120,11 @@ func _layout_template_field() -> void:
 				local_quad.append(corner - piece.position - visual.position)
 			visual.template_corners = local_quad
 			visual.queue_redraw()
+			if piece.has_method("set_projected_hit_polygon"):
+				piece.call("set_projected_hit_polygon", local_quad)
+			for child in piece.get_children():
+				if child is CardTile:
+					child.set_projected_hit_polygon(local_quad)
 
 
 func _depth_row(row: Control, depth_scale: float) -> Control:
@@ -1156,7 +1162,7 @@ func _add_field_side_zones(
 
 
 func _add_side_pile(row: Control, title: String, count: int, x: float, side_size: Vector2, opponent: bool) -> void:
-	var pile := Button.new()
+	var pile := ProjectedHitButton.new()
 	pile.set_meta("board_role", "pile_zone")
 	pile.set_anchors_preset(Control.PRESET_CENTER_TOP)
 	pile.offset_left = x
@@ -1179,7 +1185,7 @@ func _add_side_pile(row: Control, title: String, count: int, x: float, side_size
 func _add_terrain_side(row: Control, table: Dictionary, player_id: int, opponent: bool, x: float, side_size: Vector2) -> void:
 	var zone: Dictionary = table["zones"]["terrain:%d" % player_id]
 	var destination := player_id == _viewer_id and _has_selected_action_type("play_terrain")
-	var terrain := Button.new()
+	var terrain := ProjectedHitButton.new()
 	terrain.name = "TerrainLane"
 	terrain.set_meta("board_role", "terrain_lane")
 	terrain.set_anchors_preset(Control.PRESET_CENTER_TOP)
