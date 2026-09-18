@@ -120,8 +120,6 @@ var _creature_mode_buttons: HBoxContainer
 var _creature_action_popup: PanelContainer
 var _creature_action_buttons: VBoxContainer
 var _end_turn_dialog: ConfirmationDialog
-var _terrain_dialog: ConfirmationDialog
-var _pending_terrain_action: Dictionary = {}
 
 
 func _ready() -> void:
@@ -546,12 +544,6 @@ func _build_interface() -> void:
 	_end_turn_dialog.cancel_button_text = "Seguir jugando"
 	_end_turn_dialog.confirmed.connect(_confirm_end_turn)
 	add_child(_end_turn_dialog)
-	_terrain_dialog = ConfirmationDialog.new()
-	_terrain_dialog.title = "Cambiar el Territorio"
-	_terrain_dialog.ok_button_text = "Jugar Terreno"
-	_terrain_dialog.cancel_button_text = "Cancelar"
-	_terrain_dialog.confirmed.connect(_confirm_terrain)
-	add_child(_terrain_dialog)
 
 	_privacy_panel = PanelContainer.new()
 	_privacy_panel.name = "PrivacyOverlay"
@@ -2511,14 +2503,6 @@ func _on_terrain_pressed(player_id: int) -> void:
 			return
 	_status_message = "La carta seleccionada no puede jugarse como Terreno ahora."
 	_refresh()
-
-
-func _confirm_terrain() -> void:
-	if _pending_terrain_action.is_empty():
-		return
-	var action := _pending_terrain_action
-	_pending_terrain_action = {}
-	_perform_action(action)
 
 
 func _has_selected_action_type(action_type: String) -> bool:
