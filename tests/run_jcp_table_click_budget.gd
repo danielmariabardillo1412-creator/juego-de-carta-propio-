@@ -21,13 +21,14 @@ func _run() -> void:
 	table.get("_auto_follow").button_pressed = false
 
 	var found := _find_seed_with_m09(table)
-	_check(found.get("ok", false), "se encuentra una apertura reproducible con M09 jugable")
+	_check(found.get("ok", false), "se encuentra una apertura reproducible con M09 en mano")
 	if not found.get("ok", false):
 		_finish(table)
 		return
 	var m09_id: String = found["instance_id"]
+	_check(_advance_until_source_action(table, "summon_creature", m09_id, 0), "el flujo real alcanza un turno con Energía suficiente para M09")
 	var summon: Dictionary = _action_for_source(table.debug_snapshot()["legal_actions"], "summon_creature", m09_id)
-	_check(not summon.is_empty(), "M09 dispone de invocación normal")
+	_check(not summon.is_empty(), "M09 dispone de invocación normal cuando la Energía lo permite")
 	if summon.is_empty() or not table.call("_perform_action", summon):
 		_failures.append("no se pudo invocar M09 para probar su habilidad")
 		_finish(table)
@@ -78,16 +79,22 @@ func _run() -> void:
 
 
 func _find_seed_with_m09(table: Node) -> Dictionary:
-	for seed in range(1, 121):
+	for seed in range(1, 41):
 		table.start_match(seed)
 		var snapshot: Dictionary = table.debug_snapshot()
 		for card in snapshot["view"]["game"]["card_table"]["zones"]["hand:0"]["cards"]:
-			if card["definition"].get("id", "") != "M09":
-				continue
-			var instance_id: String = card["instance"]["id"]
-			if not _action_for_source(snapshot["legal_actions"], "summon_creature", instance_id).is_empty():
-				return {"ok": true, "seed": seed, "instance_id": instance_id}
+			if card["definition"].get("id", "") == "M09":
+				return {"ok": true, "seed": seed, "instance_id": card["instance"]["id"]}
 	return {"ok": false}
+
+
+func _advance_until_source_action(table: Node, action_type: String, instance_id: String, player_id: int) -> bool:
+	for _turn in range(5):
+		if not _action_for_source(table.debug_snapshot()["legal_actions"], action_type, instance_id).is_empty():
+			return true
+		if not _advance_to_next_own_main(table, player_id):
+			return false
+	return not _action_for_source(table.debug_snapshot()["legal_actions"], action_type, instance_id).is_empty()
 
 
 func _action_for_source(actions: Array, action_type: String, instance_id: String) -> Dictionary:
@@ -113,14 +120,16 @@ func _advance_to_next_own_main(table: Node, player_id: int) -> bool:
 			table.call("_refresh")
 			return true
 		var actor: int = game["response_window"].get("priority_player_id", game["active_player"]) if game["response_window"].get("active", false) else game["active_player"]
-		var action: Dictionary = {}
+		var action_type := ""
+		var action_payload: Dictionary = {}
 		for legal in engine.get_legal_actions(actor):
 			if legal.type in ["pass_reaction", "advance_phase"]:
-				action = legal.to_dict()
+				action_type = legal.type
+				action_payload = legal.payload.duplicate(true)
 				break
-		if action.is_empty():
+		if action_type.is_empty():
 			return false
-		var result = engine.perform_action(GameAction.new(action["type"], actor, action["payload"], "click-budget-%02d" % step))
+		var result = engine.perform_action(GameAction.new(action_type, actor, action_payload, "click-budget-%02d" % step))
 		if not result.success:
 			return false
 	table.call("_refresh")
