@@ -15,6 +15,7 @@ func _init() -> void:
 	_test_multiple_fusions_same_turn()
 	_test_additional_enabled_recipes()
 	_test_destroy_releases_everything_to_graveyard()
+	_test_inherited_equipment_does_not_open_t05()
 	_test_generated_fusion_cannot_return_to_hand()
 	if _failures.is_empty():
 		print("JCP-FUSION-ACTION PASS: %d checks" % _checks)
@@ -175,6 +176,34 @@ func _test_destroy_releases_everything_to_graveyard() -> void:
 	_expect(state["cards"]["zones"]["fusion_materials:0"]["cards"].is_empty(), "no quedan materiales contenidos tras la destruccion")
 	_expect(not state["cards"]["instances"][m04]["metadata"].has("fusion_entity"), "la identidad generada desaparece al destruirse")
 	_expect(module.validate_state(state)["ok"], "la destruccion de F010 conserva el estado valido")
+
+
+func _test_inherited_equipment_does_not_open_t05() -> void:
+	var prepared: Dictionary = _prepared_main_state(["M04", "M09"], {"E02": "M09"})
+	_expect(prepared["ok"], "se prepara F010 con Equipo heredable frente a T05")
+	if not prepared["ok"]:
+		return
+	var module = prepared["module"]
+	var state: Dictionary = prepared["state"]
+	var trap_id: String = _instance_for(state, "T05", 1)
+	var trap_setup: Dictionary = _move_to_field(state, trap_id, "support:1", {"face_up": false, "active": false, "set_turn": 0})
+	_expect(trap_setup["ok"], "T05 rival queda preparada")
+	if not trap_setup["ok"]:
+		return
+	state = trap_setup["state"]
+	var carrier: String = prepared["ids"]["M04"]
+	var fused: Dictionary = module.reduce(state, GameAction.new("fuse_creatures", 0, {
+		"material_instance_ids": [carrier, prepared["ids"]["M09"]],
+		"position": "guard",
+	}))
+	_expect(fused["ok"], "la Fusion hereda E02")
+	if not fused["ok"]:
+		return
+	state = fused["state"]
+	_expect_equal(state["cards"]["instances"][prepared["ids"]["E02"]]["metadata"]["linked_to"], carrier, "E02 mantiene continuidad de vinculo en la Fusion")
+	_expect(state["pending_response"].is_empty(), "HEREDAR_VINCULO no abre ventana T05")
+	_expect(trap_id in state["cards"]["zones"]["support:1"]["cards"], "T05 permanece preparada al no existir nueva vinculacion")
+	_expect(module.validate_state(state)["ok"], "la herencia sin T05 conserva un estado valido")
 
 
 func _test_generated_fusion_cannot_return_to_hand() -> void:
