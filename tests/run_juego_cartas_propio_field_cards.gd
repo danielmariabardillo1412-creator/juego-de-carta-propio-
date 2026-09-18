@@ -15,6 +15,8 @@ func _init() -> void:
 	_test_visible_persistent()
 	_test_equipment_link()
 	_test_equipment_requirement()
+	_test_hidden_equipment_contract()
+	_test_manual_weapon_compatibility()
 	_test_terrain()
 	if _failures.is_empty():
 		print("JCP-FIELD-CARDS PASS: %d checks" % _checks)
@@ -133,6 +135,65 @@ func _test_equipment_requirement() -> void:
 	_expect(not equip.success, "una criatura no manipuladora rechaza el arma")
 	_expect_equal(equip.code, "JCP_EQUIP_REQUIREMENT_FAILED", "el rechazo explica el requisito")
 	_expect_equal(engine.export_module_state()["cards"]["zones"]["hand:0"]["cards"].count(item_id), 1, "el rechazo no mueve el equipo")
+
+
+func _test_hidden_equipment_contract() -> void:
+	var prepared: Dictionary = _engine_with_opening(["M10", "E01", "E02"])
+	_expect(prepared["ok"], "se encuentra M10 con arma y coraza para probar informacion oculta")
+	if not prepared["ok"]:
+		return
+	var engine = prepared["engine"]
+	_expect(_reach_main(engine), "se alcanza Principal 1 para equipar una criatura oculta")
+	var state: Dictionary = engine.export_module_state()
+	var creature_id: String = _find_definition_in_hand(state, 0, "M10")
+	var sword_id: String = _find_definition_in_hand(state, 0, "E01")
+	var armor_id: String = _find_definition_in_hand(state, 0, "E02")
+	var set_result = engine.perform_action(GameAction.new(
+		"set_creature", 0, {"instance_id": creature_id}, _next_request("hidden-set")
+	))
+	_expect(set_result.success, "M10 se coloca boca abajo")
+	var sword = engine.perform_action(GameAction.new(
+		"equip_item", 0, {"instance_id": sword_id, "target_instance_id": creature_id}, _next_request("hidden-sword")
+	))
+	_expect(not sword.success, "E01 no puede comprobar Manipulador en una criatura oculta")
+	_expect_equal(sword.code, "JCP_EQUIP_REQUIREMENT_FAILED", "E01 oculta falla sin filtrar la aptitud")
+	var armor = engine.perform_action(GameAction.new(
+		"equip_item", 0, {"instance_id": armor_id, "target_instance_id": creature_id}, _next_request("hidden-armor")
+	))
+	_expect(armor.success, "E02 puede vincularse sin consultar identidad oculta")
+	state = engine.export_module_state()
+	_expect(not state["cards"]["instances"][creature_id]["metadata"]["face_up"], "equipar E02 no revela la criatura")
+	_expect_equal(state["cards"]["instances"][armor_id]["metadata"]["linked_to"], creature_id, "E02 queda vinculada a la criatura oculta")
+	_expect(sword_id in state["cards"]["zones"]["hand:0"]["cards"], "E01 sigue en mano tras el intento ilegal")
+	_expect(engine.validate_internal_consistency()["ok"], "el contrato de Equipo oculto conserva integridad")
+
+
+func _test_manual_weapon_compatibility() -> void:
+	var prepared: Dictionary = _engine_with_opening(["M02", "E01", "E06"])
+	_expect(prepared["ok"], "se encuentra una manipuladora con dos armas manuales")
+	if not prepared["ok"]:
+		return
+	var engine = prepared["engine"]
+	_expect(_reach_main(engine), "se alcanza Principal 1 para compatibilidad manual")
+	var state: Dictionary = engine.export_module_state()
+	var creature_id: String = _find_definition_in_hand(state, 0, "M02")
+	var sword_id: String = _find_definition_in_hand(state, 0, "E01")
+	var hammer_id: String = _find_definition_in_hand(state, 0, "E06")
+	_expect(engine.perform_action(GameAction.new(
+		"summon_creature", 0, {"instance_id": creature_id}, _next_request("manual-summon")
+	)).success, "M02 entra boca arriba")
+	_expect(engine.perform_action(GameAction.new(
+		"equip_item", 0, {"instance_id": sword_id, "target_instance_id": creature_id}, _next_request("manual-first")
+	)).success, "la primera arma manual se vincula")
+	var second = engine.perform_action(GameAction.new(
+		"equip_item", 0, {"instance_id": hammer_id, "target_instance_id": creature_id}, _next_request("manual-second")
+	))
+	_expect(not second.success, "una segunda arma manual incompatible se rechaza")
+	_expect_equal(second.code, "JCP_EQUIP_REQUIREMENT_FAILED", "el conflicto manual usa el contrato normal de compatibilidad")
+	state = engine.export_module_state()
+	_expect_equal(state["cards"]["zones"]["attachments:0"]["cards"].size(), 1, "solo una arma manual permanece vinculada")
+	_expect(hammer_id in state["cards"]["zones"]["hand:0"]["cards"], "E06 no se mueve tras el rechazo")
+	_expect(engine.validate_internal_consistency()["ok"], "la compatibilidad manual conserva integridad")
 
 
 func _test_terrain() -> void:
