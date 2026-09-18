@@ -4,6 +4,9 @@ on:
   push:
     branches:
       - prehumana-v01-reglas
+  pull_request:
+    branches:
+      - main
   workflow_dispatch:
 
 jobs:
