@@ -57,12 +57,6 @@ func _run() -> void:
 		return
 	var drag_choice: Dictionary = table.get("_choice_actions")[0].duplicate(true)
 	var drag_command := _command_signature(drag_choice)
-	await process_frame
-	await process_frame
-	var capture_path := ProjectSettings.globalize_path("res://artifacts/manual_table_fusion_preview.png")
-	if root.get_texture().get_image().save_png(capture_path) != OK:
-		_fail("no se pudo capturar la confirmación de Fusión")
-		return
 	table.call("_cancel_choices")
 	if table.debug_snapshot()["state_version"] != before_drag:
 		_fail("cancelar Fusión arrastrada cambió el motor")
