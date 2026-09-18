@@ -1084,21 +1084,9 @@ func _build_field_row(table: Dictionary, player_id: int, kind: String, opponent:
 				visual.offset_bottom = tile_size.y * 0.5
 				tile.modulate = Color.TRANSPARENT
 			if kind == "creatures" and card is Dictionary and not card.get("hidden", false):
-				var equipment_names := _equipment_names_for(table, player_id, card["instance"]["id"])
-				if not equipment_names.is_empty():
-					var equipment := Label.new()
-					equipment.text = "⚒ " + ", ".join(equipment_names)
-					equipment.tooltip_text = "Equipo vinculado: " + ", ".join(equipment_names)
-					equipment.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-					equipment.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
-					equipment.add_theme_font_size_override("font_size", 9)
-					equipment.add_theme_color_override("font_color", Color("e2ca81"))
-					equipment.set_anchors_preset(Control.PRESET_CENTER_BOTTOM)
-					equipment.offset_left = -52
-					equipment.offset_right = 52
-					equipment.offset_top = -13
-					equipment.offset_bottom = 0
-					holder.add_child(equipment)
+				var equipment_cards := _equipment_cards_for(table, player_id, card["instance"]["id"])
+				if not equipment_cards.is_empty():
+					holder.add_child(_build_equipment_strip(equipment_cards, card["instance"]["id"]))
 			row.add_child(holder)
 	_add_field_side_zones(row, table, player_id, kind, opponent)
 	return row
@@ -1226,12 +1214,51 @@ func _projected_piece(
 	return visual
 
 
-func _equipment_names_for(table: Dictionary, player_id: int, carrier_id: String) -> Array:
-	var names: Array = []
+func _equipment_cards_for(table: Dictionary, player_id: int, carrier_id: String) -> Array:
+	var cards: Array = []
 	for card in table["zones"]["attachments:%d" % player_id]["cards"]:
 		if card["instance"]["metadata"].get("linked_to", "") == carrier_id:
-			names.append(card["definition"]["attributes"].get("display_name", "Equipo"))
-	return names
+			cards.append(card)
+	return cards
+
+
+func _build_equipment_strip(equipment_cards: Array, carrier_id: String) -> Control:
+	var strip := HBoxContainer.new()
+	strip.name = "EquipmentStrip"
+	strip.set_meta("board_role", "equipment_strip")
+	strip.set_meta("carrier_id", carrier_id)
+	strip.alignment = BoxContainer.ALIGNMENT_CENTER
+	strip.add_theme_constant_override("separation", 2)
+	strip.set_anchors_preset(Control.PRESET_CENTER_BOTTOM)
+	strip.offset_left = -50
+	strip.offset_right = 50
+	strip.offset_top = -20
+	strip.offset_bottom = 0
+	for index in range(equipment_cards.size()):
+		var card: Dictionary = equipment_cards[index]
+		var instance_id: String = card["instance"]["id"]
+		var display_name: String = card["definition"]["attributes"].get("display_name", "Equipo")
+		var chip := Button.new()
+		chip.name = "EquipmentChip"
+		chip.set_meta("board_role", "equipment_chip")
+		chip.set_meta("carrier_id", carrier_id)
+		chip.set_meta("equipment_instance_id", instance_id)
+		chip.text = "⚒ %s" % _short_equipment_name(display_name) if equipment_cards.size() == 1 else "⚒%d" % (index + 1)
+		chip.tooltip_text = "Equipo vinculado: %s\nPulsa para inspeccionarlo." % display_name
+		chip.custom_minimum_size = Vector2(28, 18)
+		chip.add_theme_font_size_override("font_size", 9)
+		chip.add_theme_color_override("font_color", Color("fff0b0") if instance_id == _selected_card_id else Color("e2ca81"))
+		chip.add_theme_stylebox_override("normal", _style_box(Color("182026e8"), Color("ad9558"), 1, 5))
+		chip.add_theme_stylebox_override("hover", _style_box(Color("2a3032f2"), Color("f1cf70"), 2, 5))
+		chip.pressed.connect(_select_card.bind(instance_id))
+		strip.add_child(chip)
+	return strip
+
+
+func _short_equipment_name(display_name: String) -> String:
+	if display_name.length() <= 9:
+		return display_name
+	return display_name.substr(0, 8) + "…"
 
 
 func _build_terrain_lane(table: Dictionary, player_id: int, opponent: bool) -> Control:
