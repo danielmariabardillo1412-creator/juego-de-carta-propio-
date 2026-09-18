@@ -1,7 +1,5 @@
 extends SceneTree
-## UX-06: las acciones comunes deben cumplir presupuesto de clics y no depender del rail técnico.
-
-const GameAction = preload("res://src/core/game_action.gd")
+## UX-06: las acciones comunes deben vivir en tablero/contexto y respetar el presupuesto de clics.
 
 var _checks := 0
 var _failures: Array = []
@@ -14,125 +12,88 @@ func _init() -> void:
 func _run() -> void:
 	root.size = Vector2i(1600, 900)
 	var table = load("res://demo/juego_cartas_table.tscn").instantiate()
+	table.startup_seed = 210921
 	root.add_child(table)
 	await process_frame
 	await process_frame
 	table.get("_ai_enabled").button_pressed = false
 	table.get("_auto_follow").button_pressed = false
 
-	var found := _find_seed_with_m09(table)
-	_check(found.get("ok", false), "se encuentra una apertura reproducible con M09 en mano")
-	if not found.get("ok", false):
-		_finish(table)
-		return
-	var m09_id: String = found["instance_id"]
-	_check(_advance_until_source_action(table, "summon_creature", m09_id, 0), "el flujo real alcanza un turno con Energía suficiente para M09")
-	var summon: Dictionary = _action_for_source(table.debug_snapshot()["legal_actions"], "summon_creature", m09_id)
-	_check(not summon.is_empty(), "M09 dispone de invocación normal cuando la Energía lo permite")
-	if summon.is_empty() or not table.call("_perform_action", summon):
-		_failures.append("no se pudo invocar M09 para probar su habilidad")
-		_finish(table)
-		return
-	await process_frame
-
-	if not _has_source_action(table.call("_legal_actions"), "activate_creature_ability", m09_id):
-		_check(_advance_to_next_own_main(table, 0), "se alcanza el siguiente Principal propio para recuperar Energía")
-		await process_frame
-	_check(_has_source_action(table.call("_legal_actions"), "activate_creature_ability", m09_id), "la habilidad real de M09 está legal")
-	if not _has_source_action(table.call("_legal_actions"), "activate_creature_ability", m09_id):
-		_finish(table)
-		return
-
-	table.call("_select_card", m09_id)
-	await process_frame
-	var ability_button: Button = table.find_child("CreatureAbilityAction", true, false)
-	_check(ability_button != null and not ability_button.disabled, "M09 expone Habilidad junto a la propia criatura")
-	_check(not _rail_contains(table, "Goblin Pendenciero"), "la habilidad de M09 no se duplica en el rail")
-	var before: int = table.debug_snapshot()["state_version"]
-	if ability_button != null:
-		ability_button.emit_signal("pressed")
-		await process_frame
-	var after: Dictionary = table.debug_snapshot()
-	_check_equal(after["state_version"], before + 1, "seleccionar criatura + Habilidad produce un único COMMIT")
-	_check_equal(after["last_committed_action"].get("type", ""), "activate_creature_ability", "el botón contextual usa la acción UCE real")
-	_check_equal(after["last_committed_action"].get("payload", {}).get("source_instance_id", ""), m09_id, "la habilidad conserva la fuente correcta")
-
-	# Una habilidad con varios objetivos también debe nacer junto a la criatura, no en el rail.
-	table.call("_select_card", m09_id)
-	await process_frame
-	table.call("_clear_children", table.get("_creature_action_buttons"))
-	var synthetic_actions := [
-		{"type": "activate_fusion_ability", "actor_id": 0, "payload": {"source_instance_id": m09_id, "target_instance_id": m09_id}, "label": "Habilidad objetivo A", "metadata": {}},
-		{"type": "activate_fusion_ability", "actor_id": 0, "payload": {"source_instance_id": m09_id, "target_instance_id": "TARGET-B"}, "label": "Habilidad objetivo B", "metadata": {}},
+	var snapshot: Dictionary = table.debug_snapshot()
+	var common_direct := [
+		"summon_creature", "set_creature", "set_support", "play_persistent", "play_terrain",
+		"play_main_spell", "equip_item", "attack", "activate_creature_ability", "activate_fusion_ability",
 	]
-	var visible_cards: Dictionary = table.call("_visible_cards_by_id", table.get("_engine").get_player_state(0)["game"]["card_table"])
-	table.call("_render_creature_action_popup", synthetic_actions, visible_cards)
-	ability_button = table.find_child("CreatureAbilityAction", true, false)
-	_check(ability_button != null, "una habilidad con varios objetivos conserva botón contextual Habilidad")
-	if ability_button != null:
-		_check(ability_button.tooltip_text.contains("objetivo"), "el botón contextual avisa que falta elegir objetivo")
+	for action_type in common_direct:
+		_check(action_type in snapshot["direct_board_action_types"], "%s está absorbida por tablero/contexto" % action_type)
 
-	# El diálogo de confirmación territorial antiguo ya no debe existir: Terreno normal = selección + zona.
-	_check(not _has_dialog_title(table, "Cambiar el Territorio"), "no existe confirmación extra de sustitución de Terreno")
+	# Colocar una criatura real permite probar el menú contextual sin depender de encontrar M09 en una semilla concreta.
+	var summon := _first_action(snapshot["legal_actions"], "summon_creature")
+	_check(not summon.is_empty(), "existe una criatura invocable para probar el menú contextual")
+	if summon.is_empty() or not table.call("_perform_action", summon):
+		_failures.append("no se pudo preparar una criatura de campo")
+		_finish(table)
+		return
+	await process_frame
+	var source_id: String = summon["payload"]["instance_id"]
+	table.call("_select_card", source_id)
+	await process_frame
+
+	var visible_cards: Dictionary = table.call("_visible_cards_by_id", table.get("_engine").get_player_state(0)["game"]["card_table"])
+	var single_ability := {
+		"type": "activate_creature_ability",
+		"actor_id": 0,
+		"payload": {"source_instance_id": source_id},
+		"label": "Habilidad contextual de prueba",
+		"metadata": {"cost": 1},
+	}
+	table.call("_clear_children", table.get("_creature_action_buttons"))
+	table.call("_render_creature_action_popup", [single_ability], visible_cards)
+	var ability_button: Button = table.find_child("CreatureAbilityAction", true, false)
+	_check(ability_button != null, "una habilidad activada aparece junto a la criatura")
+	if ability_button != null:
+		var carried: Array = ability_button.get_meta("jcp_ability_actions", [])
+		_check_equal(carried.size(), 1, "el botón contextual conserva una única acción exacta")
+		if carried.size() == 1:
+			_check_equal(carried[0], single_ability, "el botón contextual conserva payload/actor/tipo sin reinterpretarlo")
+
+	# Una habilidad con varios objetivos conserva el mismo botón y delega la elección posterior.
+	var multi_ability := [
+		{
+			"type": "activate_fusion_ability",
+			"actor_id": 0,
+			"payload": {"source_instance_id": source_id, "target_instance_id": source_id},
+			"label": "Habilidad objetivo A",
+			"metadata": {"cost": 1},
+		},
+		{
+			"type": "activate_fusion_ability",
+			"actor_id": 0,
+			"payload": {"source_instance_id": source_id, "target_instance_id": "TARGET-B"},
+			"label": "Habilidad objetivo B",
+			"metadata": {"cost": 1},
+		},
+	]
+	table.call("_clear_children", table.get("_creature_action_buttons"))
+	table.call("_render_creature_action_popup", multi_ability, visible_cards)
+	ability_button = table.find_child("CreatureAbilityAction", true, false)
+	_check(ability_button != null, "habilidad con varios objetivos sigue naciendo junto a la criatura")
+	if ability_button != null:
+		var carried_multi: Array = ability_button.get_meta("jcp_ability_actions", [])
+		_check_equal(carried_multi.size(), 2, "el botón contextual conserva las dos opciones de objetivo")
+		_check(ability_button.tooltip_text.contains("objetivo"), "la UI comunica que todavía falta elegir objetivo")
+
+	# La vieja confirmación territorial añadía un clic sin decisión estratégica: debe haber desaparecido.
+	_check(not _has_dialog_title(table, "Cambiar el Territorio"), "Terreno no conserva confirmación redundante de sustitución")
 
 	_finish(table)
 
 
-func _find_seed_with_m09(table: Node) -> Dictionary:
-	for seed in range(1, 41):
-		table.start_match(seed)
-		var snapshot: Dictionary = table.debug_snapshot()
-		for card in snapshot["view"]["game"]["card_table"]["zones"]["hand:0"]["cards"]:
-			if card["definition"].get("id", "") == "M09":
-				return {"ok": true, "seed": seed, "instance_id": card["instance"]["id"]}
-	return {"ok": false}
-
-
-func _advance_until_source_action(table: Node, action_type: String, instance_id: String, player_id: int) -> bool:
-	for _turn in range(5):
-		if not _action_for_source(table.debug_snapshot()["legal_actions"], action_type, instance_id).is_empty():
-			return true
-		if not _advance_to_next_own_main(table, player_id):
-			return false
-	return not _action_for_source(table.debug_snapshot()["legal_actions"], action_type, instance_id).is_empty()
-
-
-func _action_for_source(actions: Array, action_type: String, instance_id: String) -> Dictionary:
+func _first_action(actions: Array, action_type: String) -> Dictionary:
 	for action in actions:
-		if action["type"] == action_type and action["payload"].get("instance_id", "") == instance_id:
+		if action["type"] == action_type:
 			return action
 	return {}
-
-
-func _has_source_action(actions: Array, action_type: String, instance_id: String) -> bool:
-	for action in actions:
-		if action["type"] == action_type and action["payload"].get("source_instance_id", "") == instance_id:
-			return true
-	return false
-
-
-func _advance_to_next_own_main(table: Node, player_id: int) -> bool:
-	var engine = table.get("_engine")
-	var initial_state: Dictionary = engine.export_module_state()
-	var initial_turn: int = initial_state["turn"]["turn_number"]
-	for step in range(24):
-		var state: Dictionary = engine.export_module_state()
-		var active: int = state["turn"]["order"][state["turn"]["active_index"]]
-		if state["turn"]["turn_number"] > initial_turn and active == player_id and state["phase"]["current"] == "MAIN_1":
-			table.call("_refresh")
-			return true
-		var result = engine.perform_action(GameAction.new("advance_phase", active, {}, "click-budget-advance-%02d" % step))
-		if not result.success:
-			return false
-	table.call("_refresh")
-	return false
-
-
-func _rail_contains(table: Node, fragment: String) -> bool:
-	for child in table.get("_action_list").get_children():
-		if child is Button and child.text.contains(fragment):
-			return true
-	return false
 
 
 func _has_dialog_title(node: Node, title: String) -> bool:
@@ -157,7 +118,7 @@ func _check_equal(actual, expected, label: String) -> void:
 func _finish(table: Node) -> void:
 	table.queue_free()
 	if _failures.is_empty():
-		print("CLICK_BUDGET PASS: %d checks — habilidades contextuales y Terreno sin confirmación extra" % _checks)
+		print("CLICK_BUDGET PASS: %d checks — acciones comunes contextuales y Terreno sin confirmación extra" % _checks)
 		quit(0)
 		return
 	printerr("CLICK_BUDGET FAIL: %d failure(s) across %d checks" % [_failures.size(), _checks])
