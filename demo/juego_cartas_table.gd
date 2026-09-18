@@ -38,7 +38,7 @@ const DEFAULT_SAVE_PATH := "user://juego_cartas_propio/partida_manual.json"
 const PLAYER_NAMES := ["Jugador 1", "Jugador 2"]
 const DIRECT_BOARD_ACTIONS := [
 	"summon_creature", "set_creature", "set_support", "play_persistent", "play_terrain",
-	"play_main_spell", "equip_item", "attack",
+	"play_main_spell", "equip_item", "attack", "activate_creature_ability", "activate_fusion_ability",
 ]
 const ZONE_LABELS := {
 	"deck": "Baraja",
@@ -120,8 +120,6 @@ var _creature_mode_buttons: HBoxContainer
 var _creature_action_popup: PanelContainer
 var _creature_action_buttons: VBoxContainer
 var _end_turn_dialog: ConfirmationDialog
-var _terrain_dialog: ConfirmationDialog
-var _pending_terrain_action: Dictionary = {}
 
 
 func _ready() -> void:
@@ -308,6 +306,7 @@ func debug_snapshot() -> Dictionary:
 		"ai_running": _ai_running,
 		"rendered_card_count": _count_card_tiles(_board_surface) if _board_surface != null else 0,
 		"rendered_action_count": _action_list.get_child_count() if _action_list != null else 0,
+		"direct_board_action_types": DIRECT_BOARD_ACTIONS.duplicate(),
 		"event_expanded": _event_expanded,
 		"phase_track_count": 1 if _phase_indicator != null else 0,
 		"event_text": _event_log.text if _event_log != null else "",
@@ -546,12 +545,6 @@ func _build_interface() -> void:
 	_end_turn_dialog.cancel_button_text = "Seguir jugando"
 	_end_turn_dialog.confirmed.connect(_confirm_end_turn)
 	add_child(_end_turn_dialog)
-	_terrain_dialog = ConfirmationDialog.new()
-	_terrain_dialog.title = "Cambiar el Territorio"
-	_terrain_dialog.ok_button_text = "Jugar Terreno"
-	_terrain_dialog.cancel_button_text = "Cancelar"
-	_terrain_dialog.confirmed.connect(_confirm_terrain)
-	add_child(_terrain_dialog)
 
 	_privacy_panel = PanelContainer.new()
 	_privacy_panel.name = "PrivacyOverlay"
@@ -1751,11 +1744,14 @@ func _render_creature_action_popup(actions: Array, visible_cards: Dictionary) ->
 		return
 	var attack_available := _can_offer_attack_from_main()
 	var posture_action: Dictionary = {}
+	var ability_actions: Array = []
 	for action in actions:
 		if action["type"] == "attack" and action["payload"].get("attacker_id", "") == _selected_card_id:
 			attack_available = true
 		if action["type"] == "change_position" and action["payload"].get("instance_id", "") == _selected_card_id:
 			posture_action = action
+		if action["type"] in ["activate_creature_ability", "activate_fusion_ability"] and action["payload"].get("source_instance_id", "") == _selected_card_id:
+			ability_actions.append(action)
 	var attack_button := Button.new()
 	attack_button.name = "CreatureAttackAction"
 	attack_button.text = "Atacar"
@@ -1772,6 +1768,17 @@ func _render_creature_action_popup(actions: Array, visible_cards: Dictionary) ->
 	if not posture_action.is_empty():
 		posture_button.pressed.connect(_perform_action.bind(posture_action))
 	_creature_action_buttons.add_child(posture_button)
+	if not ability_actions.is_empty():
+		var ability_button := Button.new()
+		ability_button.name = "CreatureAbilityAction"
+		ability_button.text = "Habilidad"
+		ability_button.tooltip_text = ability_actions[0].get("label", "Activar habilidad") if ability_actions.size() == 1 else "Elige el objetivo de la habilidad."
+		ability_button.set_meta("jcp_ability_actions", ability_actions.duplicate(true))
+		if ability_actions.size() == 1:
+			ability_button.pressed.connect(_perform_action.bind(ability_actions[0]))
+		else:
+			ability_button.pressed.connect(_open_action_choices.bind(ability_actions))
+		_creature_action_buttons.add_child(ability_button)
 	_creature_action_popup.visible = true
 	call_deferred("_place_creature_action_popup")
 
@@ -1869,9 +1876,22 @@ func _selection_instruction(actions: Array, visible_index: Dictionary, visible_c
 	if "set_support" in action_types:
 		return "%s\nTRAMPA O RESPUESTA: elige una casilla de Apoyo. Queda boca abajo; colocarla no activa su efecto. Se usa después, cuando sea legal responder." % name
 	if "play_terrain" in action_types:
+		var table: Dictionary = _engine.get_player_state(_viewer_id)["game"]["card_table"] if _engine != null else {}
+		var terrain_zone: Dictionary = table.get("zones", {}).get("terrain:%d" % _viewer_id, {})
+		if terrain_zone.get("count", 0) > 0:
+			var current: Dictionary = terrain_zone["cards"][0]
+			var current_identity: Dictionary = current.get("terrain_identity", {})
+			var incoming_id: String = selected_card.get("definition", {}).get("id", "")
+			var incoming_name: String = selected_card.get("definition", {}).get("attributes", {}).get("display_name", "Terreno nuevo")
+			var preview_key := "%s|%s" % [current_identity.get("id", ""), incoming_id]
+			if TERRAIN_PREVIEWS.has(preview_key):
+				return "%s\nTERRENO: pulsa TERRITORIO. Resultado público: %s + %s → %s." % [name, current_identity.get("display_name", "Terreno actual"), incoming_name, TERRAIN_PREVIEWS[preview_key]]
+			return "%s\nTERRENO: pulsa TERRITORIO. %s sustituirá a %s y el anterior irá al Cementerio." % [name, incoming_name, current_identity.get("display_name", "Terreno actual")]
 		return "%s\nTERRENO: pulsa tu zona central de Territorio." % name
 	if "summon_creature" in action_types or "set_creature" in action_types:
 		return "%s\nCRIATURA: elige una casilla. Después decidirás ataque visible o guardia oculta." % name
+	if "activate_creature_ability" in action_types or "activate_fusion_ability" in action_types:
+		return "%s\nHABILIDAD: usa el botón contextual junto a la criatura. Si necesita objetivo, la elección aparecerá después." % name
 	if "attack" in action_types:
 		return "%s\nATACANTE: pulsa una criatura rival iluminada o la Vida rival si el ataque directo está permitido." % name
 	var location: Dictionary = _visible_card_locations.get(_selected_card_id, {})
@@ -2479,20 +2499,12 @@ func _on_terrain_pressed(player_id: int) -> void:
 					_status_message = "Transformación de Territorio: %s + %s → %s." % [current_identity.get("display_name", "Terreno actual"), incoming_name, transformation_name]
 					_refresh()
 				return
-			_terrain_dialog.dialog_text = "%s sustituirá a %s.\nLa carta anterior irá al Cementerio." % [incoming_name, current_identity.get("display_name", "el Terreno actual")]
-			_pending_terrain_action = action
-			_terrain_dialog.popup_centered()
+			if _perform_action(action):
+				_status_message = "%s sustituye a %s; el Terreno anterior va al Cementerio." % [incoming_name, current_identity.get("display_name", "el Terreno actual")]
+				_refresh()
 			return
 	_status_message = "La carta seleccionada no puede jugarse como Terreno ahora."
 	_refresh()
-
-
-func _confirm_terrain() -> void:
-	if _pending_terrain_action.is_empty():
-		return
-	var action := _pending_terrain_action
-	_pending_terrain_action = {}
-	_perform_action(action)
 
 
 func _has_selected_action_type(action_type: String) -> bool:
