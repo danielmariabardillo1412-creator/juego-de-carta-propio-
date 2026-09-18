@@ -138,20 +138,20 @@ func _test_equipment_requirement() -> void:
 
 
 func _test_hidden_equipment_contract() -> void:
-	var prepared: Dictionary = _engine_with_opening(["M10", "E01", "E02"])
-	_expect(prepared["ok"], "se encuentra M10 con arma y coraza para probar informacion oculta")
+	var prepared: Dictionary = _engine_with_opening(["M02", "E01", "E02"])
+	_expect(prepared["ok"], "se encuentra M02 con arma y coraza para probar informacion oculta")
 	if not prepared["ok"]:
 		return
 	var engine = prepared["engine"]
 	_expect(_reach_main(engine), "se alcanza Principal 1 para equipar una criatura oculta")
 	var state: Dictionary = engine.export_module_state()
-	var creature_id: String = _find_definition_in_hand(state, 0, "M10")
+	var creature_id: String = _find_definition_in_hand(state, 0, "M02")
 	var sword_id: String = _find_definition_in_hand(state, 0, "E01")
 	var armor_id: String = _find_definition_in_hand(state, 0, "E02")
 	var set_result = engine.perform_action(GameAction.new(
 		"set_creature", 0, {"instance_id": creature_id}, _next_request("hidden-set")
 	))
-	_expect(set_result.success, "M10 se coloca boca abajo")
+	_expect(set_result.success, "M02 se coloca boca abajo")
 	var sword = engine.perform_action(GameAction.new(
 		"equip_item", 0, {"instance_id": sword_id, "target_instance_id": creature_id}, _next_request("hidden-sword")
 	))
