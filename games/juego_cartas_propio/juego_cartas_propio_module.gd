@@ -141,7 +141,7 @@ func create_initial_state(config: Dictionary, seed: int) -> Dictionary:
 		"players": registry_result["value"],
 		"cards": cards_result["value"],
 		"turn": turn_result["value"],
-		"turn_usage": {"fusion_used": false, "normal_summon_used": false},
+		"turn_usage": {"fusion_sequence": 0, "normal_summon_used": false, "terrain_used": false},
 		"phase": phase_result["value"],
 		"life": life,
 		"pending_response": {},
@@ -171,10 +171,12 @@ func validate_state(state: Dictionary) -> Dictionary:
 		return turn_check
 	var turn_usage_keys: Array = state["turn_usage"].keys() if state["turn_usage"] is Dictionary else []
 	turn_usage_keys.sort()
-	if not state["turn_usage"] is Dictionary or turn_usage_keys != ["fusion_used", "normal_summon_used"]:
+	if not state["turn_usage"] is Dictionary or turn_usage_keys != ["fusion_sequence", "normal_summon_used", "terrain_used"]:
 		return _failure("JCP_TURN_USAGE_INVALID", "El registro de acciones del turno no es valido.")
-	if not state["turn_usage"]["normal_summon_used"] is bool or not state["turn_usage"]["fusion_used"] is bool:
+	if not state["turn_usage"]["normal_summon_used"] is bool or not state["turn_usage"]["terrain_used"] is bool:
 		return _failure("JCP_TURN_USAGE_FLAG_INVALID", "Los indicadores de acciones del turno deben ser booleanos.")
+	if not state["turn_usage"]["fusion_sequence"] is int or state["turn_usage"]["fusion_sequence"] < 0:
+		return _failure("JCP_TURN_USAGE_FUSION_SEQUENCE_INVALID", "La secuencia tecnica de Fusion debe ser un entero no negativo.")
 	var phase_check: Dictionary = PhaseMachine.validate(state["phase"])
 	if not phase_check["ok"]:
 		return phase_check
@@ -786,7 +788,7 @@ func reduce(state: Dictionary, action: Object) -> Dictionary:
 		if not turn_result["ok"]:
 			return _transition_failure(turn_result)
 		next_state["turn"] = turn_result["value"]
-		next_state["turn_usage"] = {"fusion_used": false, "normal_summon_used": false}
+		next_state["turn_usage"] = {"fusion_sequence": 0, "normal_summon_used": false, "terrain_used": false}
 		var fresh_phase: Dictionary = _new_phase_state()
 		if not fresh_phase["ok"]:
 			return _transition_failure(fresh_phase)
@@ -960,7 +962,7 @@ func get_legal_actions(state: Dictionary, viewer_id: int) -> Array:
 				result.append(set_result["value"])
 	if state["phase"]["current"] in [PHASE_MAIN_1, PHASE_MAIN_2]:
 		result.append_array(_field_card_legal_actions(state, viewer_id))
-		if not state["turn_usage"]["fusion_used"]:
+		if true:
 			var fusion_zone: Array = state["cards"]["zones"][_zone_id("creatures", viewer_id)]["cards"]
 			for left_index in range(fusion_zone.size()):
 				for right_index in range(left_index + 1, fusion_zone.size()):
@@ -1289,7 +1291,13 @@ func _reaction_is_eligible(state: Dictionary, player_id: int, support_slot: int)
 		return definition_id == "T06"
 	var context: Dictionary = pending["context"]
 	if definition_id in ["G06", "G07", "T02"]:
-		return context["target_slot"] >= 0
+		if context["target_slot"] < 0:
+			return false
+		if definition_id == "G07":
+			var target_id: String = context.get("target_id", "")
+			if target_id.is_empty() or state["cards"]["instances"][target_id]["metadata"].has("fusion_entity"):
+				return false
+		return true
 	if definition_id == "T01":
 		return _creature_cost(state, context["attacker_id"]) <= 2
 	return false
@@ -1339,7 +1347,7 @@ func _field_card_legal_actions(state: Dictionary, player_id: int) -> Array:
 				var target_id: String = enemy_result["value"][target_slot]
 				var target_metadata: Dictionary = state["cards"]["instances"][target_id]["metadata"]
 				var target_definition: Dictionary = _definition_for_instance(state, target_id)
-				if not target_metadata.get("face_up", true) or _creature_cost(state, target_id) > 2:
+				if target_metadata.has("fusion_entity") or not target_metadata.get("face_up", true) or _creature_cost(state, target_id) > 2:
 					continue
 				var return_spell_result: Dictionary = LegalAction.create(
 					ACTION_PLAY_MAIN_SPELL,
@@ -1381,7 +1389,7 @@ func _field_card_legal_actions(state: Dictionary, player_id: int) -> Array:
 					"Equipar objeto"
 				)
 				result.append(equip_result["value"])
-		if card_type == "terrain":
+		if card_type == "terrain" and not state["turn_usage"]["terrain_used"]:
 			var terrain_action: Dictionary = LegalAction.create(
 				ACTION_PLAY_TERRAIN,
 				player_id,
@@ -1750,6 +1758,8 @@ func _validate_play_main_spell(state: Dictionary, player_id: int, payload: Dicti
 		return _failure("JCP_MAIN_SPELL_TARGET_INVALID", "La casilla objetivo no contiene una criatura.")
 	if spell_definition_id == "G03":
 		var target_id: String = target_zone["value"][target_slot]
+		if state["cards"]["instances"][target_id]["metadata"].has("fusion_entity"):
+			return _failure("JCP_GENERATED_ENTITY_RETURN_INVALID", "Una entidad generada no puede devolverse a la mano con un efecto generico.")
 		if not state["cards"]["instances"][target_id]["metadata"].get("face_up", true):
 			return _failure("JCP_G03_TARGET_HIDDEN", "G03 solo puede comprobar el coste de una criatura visible.")
 		if _creature_cost(state, target_id) > 2:
@@ -2031,6 +2041,8 @@ func _validate_play_terrain(state: Dictionary, player_id: int, payload: Dictiona
 		return common
 	if _definition_for_instance(state, payload["instance_id"])["attributes"]["card_type"] != "terrain":
 		return _failure("JCP_CARD_NOT_TERRAIN", "La carta elegida no es un Terreno.")
+	if state["turn_usage"]["terrain_used"]:
+		return _failure("JCP_TERRAIN_ALREADY_USED", "La jugada normal de Terreno de este turno ya se ha utilizado.")
 	return _success()
 
 
@@ -2089,6 +2101,7 @@ func _reduce_play_terrain(state: Dictionary, player_id: int, instance_id: String
 	if not move_result["ok"]:
 		return _transition_failure(move_result)
 	next_state["cards"] = move_result["value"]
+	next_state["turn_usage"]["terrain_used"] = true
 	var event_type := "terrain_played"
 	var event_payload := {
 		"player_id": player_id,
@@ -2166,8 +2179,6 @@ func _validate_fuse_creatures(state: Dictionary, player_id: int, payload: Dictio
 		return _failure("JCP_FUSION_POSITION_INVALID", "La Fusion debe aparecer en ataque o guardia.")
 	if state["phase"]["current"] not in [PHASE_MAIN_1, PHASE_MAIN_2]:
 		return _failure("JCP_FUSION_PHASE_INVALID", "Una Fusion normal solo puede realizarse en una fase principal propia.")
-	if state["turn_usage"]["fusion_used"]:
-		return _failure("JCP_FUSION_ALREADY_USED", "Ya se realizo una accion de Fusion este turno.")
 	var material_ids: Array = payload["material_instance_ids"]
 	if material_ids.size() != 2 or material_ids[0] == material_ids[1]:
 		return _failure("JCP_FUSION_MATERIALS_INVALID", "La Fusion necesita dos criaturas fisicas distintas.")
@@ -2201,7 +2212,7 @@ func _build_enabled_fusion(state: Dictionary, material_ids: Array, player_id: in
 	for material_id in material_ids:
 		if state["cards"]["instances"].has(material_id) and state["cards"]["instances"][material_id]["metadata"].has("fusion_entity"):
 			return _failure("JCP_FUSION_CHAIN_NOT_ENABLED", "Esta primera accion no admite una Fusion previa como material.")
-	var generated_id := "fusion.p%d.t%d" % [player_id, state["turn"]["turn_number"]]
+	var generated_id := "fusion.p%d.t%d.n%d" % [player_id, state["turn"]["turn_number"], state["turn_usage"]["fusion_sequence"]]
 	var built: Dictionary = FusionCatalog.build_for_cards(state["cards"], material_ids, generated_id, KNOWN_ANATOMIES, KNOWN_APTITUDES)
 	if not built["ok"]:
 		return built
@@ -2341,12 +2352,14 @@ func _reduce_fuse_creatures(state: Dictionary, player_id: int, material_ids: Arr
 		return _transition_failure(material_move)
 	next_state["cards"] = material_move["value"]
 	var contained_metadata: Dictionary = next_state["cards"]["instances"][contained_id]["metadata"].duplicate(true)
+	for key in ["last_attack_turn", "last_position_change_turn", "temporary_attack_bonus", "temporary_bonus_turn", "temporary_defense_bonus", "alpha_leadership_turn", "fusion_ability_turn", "fusion_combat_choice_turn", "thicket_guard_turn", "troll_regeneration_turn", "steam_attack_penalty", "steam_penalty_owner_turns_remaining", "dragon_bonus_turn", "dragon_bonus_available", "energy_recovery_turn", "creature_ability_turn", "redirect_turn"]:
+		contained_metadata.erase(key)
 	contained_metadata["contained_by"] = carrier_id
 	var contained_update: Dictionary = CardState.update_instance_metadata(next_state["cards"], contained_id, contained_metadata)
 	if not contained_update["ok"]:
 		return _transition_failure(contained_update)
 	next_state["cards"] = contained_update["value"]
-	next_state["turn_usage"]["fusion_used"] = true
+	next_state["turn_usage"]["fusion_sequence"] += 1
 	var events: Array = [{
 		"type": "creatures_fused",
 		"payload": {
@@ -2381,18 +2394,28 @@ func _reduce_fuse_creatures(state: Dictionary, player_id: int, material_ids: Arr
 
 func _can_equip(state: Dictionary, equipment_definition_id: String, target_id: String) -> bool:
 	var target_metadata: Dictionary = state["cards"]["instances"][target_id]["metadata"]
-	if not target_metadata.get("face_up", true):
+	var is_hidden: bool = not target_metadata.get("face_up", true)
+	if is_hidden and equipment_definition_id not in ["E02", "E05"]:
 		return false
 	var equipment_definition: Dictionary = state["cards"]["definitions"][equipment_definition_id]
-	var target_attributes: Dictionary = _creature_attributes(state, target_id)
 	var equipment_attributes: Dictionary = equipment_definition["attributes"]
-	var allowed_anatomies: Array = equipment_attributes.get("allowed_anatomies", [])
-	if not allowed_anatomies.is_empty() and target_attributes.get("anatomy", "unassigned") not in allowed_anatomies:
-		return false
-	var aptitudes: Array = target_attributes.get("aptitudes", [])
-	for required_aptitude in equipment_attributes.get("required_aptitudes", []):
-		if required_aptitude not in aptitudes:
+	if not is_hidden:
+		var target_attributes: Dictionary = _creature_attributes(state, target_id)
+		var allowed_anatomies: Array = equipment_attributes.get("allowed_anatomies", [])
+		if not allowed_anatomies.is_empty() and target_attributes.get("anatomy", "unassigned") not in allowed_anatomies:
 			return false
+		var aptitudes: Array = target_attributes.get("aptitudes", [])
+		for required_aptitude in equipment_attributes.get("required_aptitudes", []):
+			if required_aptitude not in aptitudes:
+				return false
+	if equipment_definition_id in ["E01", "E06"]:
+		var owner_id: int = target_metadata.get("owner_id", -1)
+		if owner_id >= 0:
+			for attachment_id in state["cards"]["zones"][_zone_id("attachments", owner_id)]["cards"]:
+				if state["cards"]["instances"][attachment_id]["metadata"].get("linked_to", "") != target_id:
+					continue
+				if _definition_for_instance(state, attachment_id)["id"] in ["E01", "E06"]:
+					return false
 	return true
 
 
@@ -2471,8 +2494,6 @@ func _validate_attack(state: Dictionary, player_id: int, payload: Dictionary) ->
 		return _failure("JCP_ATTACKER_NOT_READY", "Solo una criatura visible en postura de ataque puede atacar.")
 	if state["turn"]["turn_number"] == 1 and player_id == state["config"]["starting_player"]:
 		return _failure("JCP_ATTACK_INITIAL_TURN", "El jugador inicial no puede atacar durante el primer turno de la partida.")
-	if attacker_metadata.get("summoned_turn", -1) == state["turn"]["turn_number"] and attacker_metadata.has("fusion_entity"):
-		return _failure("JCP_ATTACKER_FUSED_THIS_TURN", "Una Fusion no puede atacar durante el turno en que se forma.")
 	if attacker_metadata.get("last_attack_turn", -1) == state["turn"]["turn_number"] and not _has_dragon_extra_attack(state, attacker_id):
 		return _failure("JCP_ATTACK_ALREADY_USED", "La criatura ya ha usado su ataque este turno.")
 	var opponent_id: int = _opponent_id(state, player_id)
@@ -3076,6 +3097,7 @@ func _resolve_attack(
 		return _transition_success(next_state, events)
 
 	var target_id: String = next_state["cards"]["zones"][_zone_id("creatures", opponent_id)]["cards"][target_slot]
+	var target_is_m16: bool = _active_base_definition_id(next_state, target_id) == "M16"
 	var target_metadata: Dictionary = next_state["cards"]["instances"][target_id]["metadata"].duplicate(true)
 	var target_was_hidden: bool = not target_metadata.get("face_up", true)
 	if target_was_hidden:
@@ -3172,17 +3194,17 @@ func _resolve_attack(
 	})
 	_finish_if_life_depleted(next_state, events)
 	if target_destroyed and attacker_is_m16:
-		var collector_metadata: Dictionary = next_state["cards"]["instances"][attacker_id]["metadata"].duplicate(true)
-		if collector_metadata.get("energy_recovery_turn", -1) != next_state["turn"]["turn_number"]:
-			collector_metadata["energy_recovery_turn"] = next_state["turn"]["turn_number"]
-			var collector_update: Dictionary = CardState.update_instance_metadata(next_state["cards"], attacker_id, collector_metadata)
-			if not collector_update["ok"]:
-				return _transition_failure(collector_update)
-			next_state["cards"] = collector_update["value"]
-			var resource: Dictionary = next_state["energy"][_player_key(player_id)]
-			var before_energy: int = resource["available"]
-			resource["available"] = min(resource["maximum"], resource["available"] + 1)
-			events.append({"type": "creature_energy_recovered", "payload": {"player_id": player_id, "creature_id": attacker_id, "definition_id": "M16", "amount": resource["available"] - before_energy}})
+		var attacker_recovery: Dictionary = _recover_m16_energy(next_state, player_id, attacker_id)
+		if not attacker_recovery["ok"]:
+			return _transition_failure(attacker_recovery)
+		next_state = attacker_recovery["state"]
+		events.append_array(attacker_recovery["events"])
+	if attacker_destroyed and target_is_m16:
+		var target_recovery: Dictionary = _recover_m16_energy(next_state, opponent_id, target_id)
+		if not target_recovery["ok"]:
+			return _transition_failure(target_recovery)
+		next_state = target_recovery["state"]
+		events.append_array(target_recovery["events"])
 	if not is_finished(next_state) and target_destroyed != attacker_destroyed:
 		var destroyed_player_id: int = opponent_id if target_destroyed else player_id
 		var destroyed_creature_id: String = target_id if target_destroyed else attacker_id
@@ -3288,6 +3310,8 @@ func _destroy_creature_and_links(state: Dictionary, player_id: int, creature_id:
 
 
 func _return_creature_and_break_links(state: Dictionary, player_id: int, creature_id: String) -> Dictionary:
+	if state["cards"]["instances"][creature_id]["metadata"].has("fusion_entity"):
+		return _failure("JCP_GENERATED_ENTITY_RETURN_INVALID", "Una entidad generada no puede ocupar la mano mediante un retorno generico.")
 	var next_state: Dictionary = state.duplicate(true)
 	var attachments_result: Dictionary = CardState.zone_card_ids(next_state["cards"], _zone_id("attachments", player_id))
 	if not attachments_result["ok"]:
@@ -3341,6 +3365,24 @@ func _return_creature_and_break_links(state: Dictionary, player_id: int, creatur
 		return creature_move
 	next_state["cards"] = creature_move["value"]
 	return {"ok": true, "code": "OK", "message": "", "state": next_state, "linked_ids": linked_ids}
+
+
+func _recover_m16_energy(state: Dictionary, player_id: int, creature_id: String) -> Dictionary:
+	var next_state: Dictionary = state.duplicate(true)
+	var events: Array = []
+	var collector_metadata: Dictionary = next_state["cards"]["instances"][creature_id]["metadata"].duplicate(true)
+	if collector_metadata.get("energy_recovery_turn", -1) == next_state["turn"]["turn_number"]:
+		return {"ok": true, "code": "OK", "message": "", "state": next_state, "events": events}
+	collector_metadata["energy_recovery_turn"] = next_state["turn"]["turn_number"]
+	var collector_update: Dictionary = CardState.update_instance_metadata(next_state["cards"], creature_id, collector_metadata)
+	if not collector_update["ok"]:
+		return collector_update
+	next_state["cards"] = collector_update["value"]
+	var resource: Dictionary = next_state["energy"][_player_key(player_id)]
+	var before_energy: int = resource["available"]
+	resource["available"] = min(resource["maximum"], resource["available"] + 1)
+	events.append({"type": "creature_energy_recovered", "payload": {"player_id": player_id, "creature_id": creature_id, "definition_id": "M16", "amount": resource["available"] - before_energy}})
+	return {"ok": true, "code": "OK", "message": "", "state": next_state, "events": events}
 
 
 func _finish_if_life_depleted(state: Dictionary, events: Array) -> void:
