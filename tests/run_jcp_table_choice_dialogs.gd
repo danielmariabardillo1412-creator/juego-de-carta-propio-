@@ -43,7 +43,33 @@ func _run() -> void:
 	if list.get_child_count() != 2 or not list.get_child(0).text.begins_with("ATAQUE") or not list.get_child(1).text.begins_with("GUARDIA"):
 		_fail("una criatura con habilidad de entrada debe ofrecer solo Ataque o Guardia inicialmente")
 		return
-	print("CHOICE_DIALOGS PASS: una Fusión/un monstruo, dos posturas y objetivos separados")
+
+	# UX-01: una secuencia PRE-COMMIT debe bloquear cambio de fase/fin de turno y Escape debe cancelarla sin mutar UCE.
+	var engine = table.get("_engine")
+	var before_version: int = engine.state_version()
+	table.set("_selected_card_id", "MATERIAL-UX")
+	table.set("_choice_actions", fusion_actions)
+	table.call("_update_advance_button", engine.get_public_state()["game"])
+	if not table.get("_end_turn_button").disabled or not table.get("_advance_button").disabled:
+		_fail("una elección PRE-COMMIT no bloquea los controles irreversibles")
+		return
+	table.call("_end_turn_pressed")
+	if table.get("_end_turn_dialog").visible or engine.state_version() != before_version:
+		_fail("Terminar turno no debe abrir diálogo ni mutar mientras hay una elección PRE-COMMIT")
+		return
+	var escape := InputEventKey.new()
+	escape.keycode = KEY_ESCAPE
+	escape.pressed = true
+	table.call("_input", escape)
+	await process_frame
+	var snapshot: Dictionary = table.debug_snapshot()
+	if snapshot["choice_action_count"] != 0 or snapshot["selected_card_id"] != "" or snapshot["precommit_active"]:
+		_fail("Escape no cancela por completo la elección PRE-COMMIT")
+		return
+	if engine.state_version() != before_version:
+		_fail("Escape mutó UCE al cancelar una elección PRE-COMMIT")
+		return
+	print("CHOICE_DIALOGS PASS: opciones compactas y seguridad PRE-COMMIT con Escape/controles bloqueados")
 	table.queue_free()
 	quit(0)
 
