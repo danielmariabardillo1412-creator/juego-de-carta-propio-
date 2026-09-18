@@ -289,6 +289,7 @@ func debug_snapshot() -> Dictionary:
 		"related_action_count": related_count,
 		"choice_action_count": _choice_actions.size(),
 		"choice_overlay_visible": _choice_overlay.visible if _choice_overlay != null else false,
+		"precommit_active": _precommit_interaction_active(),
 		"creature_interaction": _creature_interaction.snapshot(),
 		"creature_mode_popup_visible": _creature_mode_popup.visible if _creature_mode_popup != null else false,
 		"request_number": _request_number,
@@ -1832,10 +1833,29 @@ func _open_action_choices(actions: Array) -> void:
 
 
 func _cancel_choices() -> void:
+	_cancel_pending_interaction("Selección cancelada; no se ha comprometido ninguna acción.")
+
+
+func _cancel_pending_interaction(message: String = "Selección cancelada.") -> void:
+	_creature_interaction.reset()
+	_selected_card_id = ""
+	_attack_targeting = false
 	_choice_actions = []
 	_choice_stage = ""
 	_pending_visual_placement = {}
+	_status_message = message
 	_refresh()
+
+
+func _precommit_interaction_active() -> bool:
+	if not _choice_actions.is_empty() or _attack_targeting or _creature_interaction.phase != TableInteractionState.Phase.IDLE or not _pending_visual_placement.is_empty():
+		return true
+	if _selected_card_id.is_empty():
+		return false
+	for action in _legal_actions():
+		if action["type"] != "concede" and _action_mentions_card(action, _selected_card_id):
+			return true
+	return false
 
 
 func _perform_choice(action: Dictionary) -> void:
@@ -2259,23 +2279,18 @@ func _on_fusion_dropped(source_id: String, target_id: String) -> void:
 func _cancel_creature_interaction() -> void:
 	if _creature_interaction.phase == TableInteractionState.Phase.IDLE:
 		return
-	_creature_interaction.reset()
-	_selected_card_id = ""
-	_attack_targeting = false
-	_choice_actions = []
-	_choice_stage = ""
-	_pending_visual_placement = {}
-	_status_message = ""
-	_refresh()
+	_cancel_pending_interaction("")
 
 
 func _input(event: InputEvent) -> void:
+	if event is InputEventKey and event.pressed and not event.echo and event.keycode == KEY_ESCAPE:
+		if not _selected_card_id.is_empty() or not _choice_actions.is_empty() or _attack_targeting or _creature_interaction.phase != TableInteractionState.Phase.IDLE:
+			_cancel_pending_interaction()
+			get_viewport().set_input_as_handled()
+		return
 	if _creature_interaction.phase == TableInteractionState.Phase.IDLE:
 		if _creature_action_popup.visible or _attack_targeting:
-			if event is InputEventKey and event.pressed and not event.echo and event.keycode == KEY_ESCAPE:
-				_cancel_creature_context()
-				get_viewport().set_input_as_handled()
-			elif event is InputEventMouseButton and event.pressed and event.button_index == MOUSE_BUTTON_LEFT and _board_surface.get_global_rect().has_point(event.global_position):
+			if event is InputEventMouseButton and event.pressed and event.button_index == MOUSE_BUTTON_LEFT and _board_surface.get_global_rect().has_point(event.global_position):
 				var hovered_context := get_viewport().gui_get_hovered_control()
 				var over_control := false
 				while hovered_context != null:
@@ -2287,10 +2302,7 @@ func _input(event: InputEvent) -> void:
 					_cancel_creature_context()
 					get_viewport().set_input_as_handled()
 		return
-	if event is InputEventKey and event.pressed and not event.echo and event.keycode == KEY_ESCAPE:
-		_cancel_creature_interaction()
-		get_viewport().set_input_as_handled()
-	elif event is InputEventMouseButton and event.pressed and event.button_index == MOUSE_BUTTON_LEFT and _board_surface != null and _board_surface.get_global_rect().has_point(event.global_position):
+	if event is InputEventMouseButton and event.pressed and event.button_index == MOUSE_BUTTON_LEFT and _board_surface != null and _board_surface.get_global_rect().has_point(event.global_position):
 		var hovered := get_viewport().gui_get_hovered_control()
 		var over_button := false
 		while hovered != null:
@@ -2304,10 +2316,7 @@ func _input(event: InputEvent) -> void:
 
 
 func _cancel_creature_context() -> void:
-	_selected_card_id = ""
-	_attack_targeting = false
-	_status_message = "Selección cancelada."
-	_refresh()
+	_cancel_pending_interaction()
 
 
 func _on_board_card_selected(instance_id: String, player_id: int, kind: String, _visual_slot: int) -> void:
@@ -2521,11 +2530,13 @@ func _update_advance_button(game: Dictionary) -> void:
 	var actor: int = _current_actor(game)
 	var owns_turn: bool = game["active_player"] == _viewer_id
 	var response_active: bool = game["response_window"].get("active", false)
-	var blocked: bool = actor != _viewer_id or not owns_turn or _privacy_hidden or _engine.lifecycle_name() != "RUNNING" or response_active
+	var precommit_active := _precommit_interaction_active()
+	var blocked: bool = actor != _viewer_id or not owns_turn or _privacy_hidden or _engine.lifecycle_name() != "RUNNING" or response_active or precommit_active
 	_advance_button.visible = game["phase"] in ["MAIN_1", "COMBAT"]
 	_advance_button.disabled = blocked
 	_end_turn_button.text = "TERMINAR TURNO"
-	_end_turn_button.disabled = not owns_turn or _privacy_hidden or _engine.lifecycle_name() != "RUNNING"
+	_end_turn_button.disabled = not owns_turn or _privacy_hidden or _engine.lifecycle_name() != "RUNNING" or precommit_active
+	_end_turn_button.tooltip_text = "Cancela la selección pendiente antes de terminar el turno." if precommit_active else ""
 	if response_active:
 		_end_turn_button.text = "PASAR RESPUESTA" if actor == _viewer_id else "ESPERANDO RESPUESTA"
 		var can_pass := false
@@ -2534,7 +2545,7 @@ func _update_advance_button(game: Dictionary) -> void:
 				if action["type"] == "pass_reaction":
 					can_pass = true
 					break
-		_end_turn_button.disabled = _privacy_hidden or _engine.lifecycle_name() != "RUNNING" or not can_pass
+		_end_turn_button.disabled = _privacy_hidden or _engine.lifecycle_name() != "RUNNING" or not can_pass or precommit_active
 	if actor != _viewer_id:
 		_advance_button.text = "Turno del rival…"
 		return
@@ -2546,6 +2557,10 @@ func _update_phase_track(current_phase: String) -> void:
 
 
 func _on_phase_button_pressed() -> void:
+	if _precommit_interaction_active():
+		_status_message = "Cancela la selección pendiente antes de cambiar de fase."
+		_refresh()
+		return
 	var phase: String = _engine.get_public_state()["game"]["phase"]
 	_advance_phase_pressed()
 	if phase == "MAIN_1" and _engine.lifecycle_name() == "RUNNING":
@@ -2564,6 +2579,10 @@ func _advance_phase_pressed() -> void:
 func _end_turn_pressed() -> void:
 	if _engine == null or _engine.lifecycle_name() != "RUNNING" or _privacy_hidden:
 		return
+	if _precommit_interaction_active():
+		_status_message = "Cancela la selección pendiente antes de terminar el turno."
+		_refresh()
+		return
 	var game: Dictionary = _engine.get_public_state()["game"]
 	if game["response_window"].get("active", false):
 		if _current_actor(game) == _viewer_id:
@@ -2580,6 +2599,10 @@ func _end_turn_pressed() -> void:
 
 func _confirm_end_turn() -> void:
 	if _engine == null or _engine.lifecycle_name() != "RUNNING":
+		return
+	if _precommit_interaction_active():
+		_status_message = "La jugada pendiente sigue sin comprometerse. Cancélala antes de terminar el turno."
+		_refresh()
 		return
 	var game_before: Dictionary = _engine.get_public_state()["game"]
 	if game_before["response_window"].get("active", false):
