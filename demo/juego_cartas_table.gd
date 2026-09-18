@@ -1882,6 +1882,17 @@ func _selection_instruction(actions: Array, visible_index: Dictionary, visible_c
 	if "set_support" in action_types:
 		return "%s\nTRAMPA O RESPUESTA: elige una casilla de Apoyo. Queda boca abajo; colocarla no activa su efecto. Se usa después, cuando sea legal responder." % name
 	if "play_terrain" in action_types:
+		var table: Dictionary = _engine.get_player_state(_viewer_id)["game"]["card_table"] if _engine != null else {}
+		var terrain_zone: Dictionary = table.get("zones", {}).get("terrain:%d" % _viewer_id, {})
+		if terrain_zone.get("count", 0) > 0:
+			var current: Dictionary = terrain_zone["cards"][0]
+			var current_identity: Dictionary = current.get("terrain_identity", {})
+			var incoming_id: String = selected_card.get("definition", {}).get("id", "")
+			var incoming_name: String = selected_card.get("definition", {}).get("attributes", {}).get("display_name", "Terreno nuevo")
+			var preview_key := "%s|%s" % [current_identity.get("id", ""), incoming_id]
+			if TERRAIN_PREVIEWS.has(preview_key):
+				return "%s\nTERRENO: pulsa TERRITORIO. Resultado público: %s + %s → %s." % [name, current_identity.get("display_name", "Terreno actual"), incoming_name, TERRAIN_PREVIEWS[preview_key]]
+			return "%s\nTERRENO: pulsa TERRITORIO. %s sustituirá a %s y el anterior irá al Cementerio." % [name, incoming_name, current_identity.get("display_name", "Terreno actual")]
 		return "%s\nTERRENO: pulsa tu zona central de Territorio." % name
 	if "summon_creature" in action_types or "set_creature" in action_types:
 		return "%s\nCRIATURA: elige una casilla. Después decidirás ataque visible o guardia oculta." % name
@@ -2494,9 +2505,9 @@ func _on_terrain_pressed(player_id: int) -> void:
 					_status_message = "Transformación de Territorio: %s + %s → %s." % [current_identity.get("display_name", "Terreno actual"), incoming_name, transformation_name]
 					_refresh()
 				return
-			_terrain_dialog.dialog_text = "%s sustituirá a %s.\nLa carta anterior irá al Cementerio." % [incoming_name, current_identity.get("display_name", "el Terreno actual")]
-			_pending_terrain_action = action
-			_terrain_dialog.popup_centered()
+			if _perform_action(action):
+				_status_message = "%s sustituye a %s; el Terreno anterior va al Cementerio." % [incoming_name, current_identity.get("display_name", "el Terreno actual")]
+				_refresh()
 			return
 	_status_message = "La carta seleccionada no puede jugarse como Terreno ahora."
 	_refresh()
