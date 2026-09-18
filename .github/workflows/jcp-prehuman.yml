@@ -53,7 +53,12 @@ jobs:
             test_script="${tests[${index}]}"
             selected=$((selected + 1))
             echo "::group::${test_script}"
-            if ! "${GODOT}" --headless --path . --script "${test_script}"; then
+            if [ "${test_script}" = "tests/run_jcp_table_activation_reveal.gd" ]; then
+              if ! xvfb-run -a "${GODOT}" --audio-driver Dummy --path . --script "${test_script}"; then
+                echo "::error::Failed: ${test_script}"
+                failures=$((failures + 1))
+              fi
+            elif ! "${GODOT}" --headless --path . --script "${test_script}"; then
               echo "::error::Failed: ${test_script}"
               failures=$((failures + 1))
             fi
