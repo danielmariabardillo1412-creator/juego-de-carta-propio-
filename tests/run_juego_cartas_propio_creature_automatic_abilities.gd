@@ -16,6 +16,7 @@ func _init() -> void:
 	_test_m07_does_not_escape_fusion()
 	_test_m10_guard_attack()
 	_test_m16_energy_once_per_turn()
+	_test_m16_recovers_while_defending()
 	_test_m18_extra_attack()
 	if _failures.is_empty():
 		print("JCP-CREATURE-AUTOMATIC-ABILITIES PASS: %d checks" % _checks)
@@ -103,6 +104,22 @@ func _test_m16_energy_once_per_turn() -> void:
 	var second: Dictionary = module.reduce(state, GameAction.new("attack", 0, {"attacker_id": collector, "target_slot": 0}))
 	_expect_equal(second["state"]["energy"]["0"]["available"], 3, "M16 no recupera dos veces el mismo turno")
 	_expect(module.validate_state(second["state"])["ok"], "el marcador de M16 conserva el estado")
+
+
+func _test_m16_recovers_while_defending() -> void:
+	var prepared := _prepared_state({0: ["M11"], 1: ["M16"]})
+	var defender: String = prepared["ids"]["1:M16"]
+	prepared["state"]["energy"]["1"] = {"maximum": 5, "available": 2}
+	var result: Dictionary = _attack(prepared, "0:M11", 0)
+	_expect(result["ok"], "el combate con M16 defensor se resuelve")
+	if not result["ok"]:
+		return
+	_expect(prepared["ids"]["0:M11"] in result["state"]["cards"]["zones"]["graveyard:0"]["cards"], "M16 destruye al atacante por represalia")
+	_expect(defender in result["state"]["cards"]["zones"]["creatures:1"]["cards"], "M16 sobrevive como defensor")
+	_expect_equal(result["state"]["energy"]["1"]["available"], 3, "M16 recupera 1 Energia tambien al destruir defendiendo")
+	_expect_equal(_count_events(result["events"], "creature_energy_recovered"), 1, "la recuperacion defensiva de M16 emite un unico evento")
+	_expect(result["state"]["cards"]["instances"][defender]["metadata"].get("energy_recovery_turn", -1) == result["state"]["turn"]["turn_number"], "el uso defensivo queda registrado para ese turno")
+	_expect(prepared["module"].validate_state(result["state"])["ok"], "la recuperacion defensiva conserva un estado valido")
 
 
 func _test_m18_extra_attack() -> void:
