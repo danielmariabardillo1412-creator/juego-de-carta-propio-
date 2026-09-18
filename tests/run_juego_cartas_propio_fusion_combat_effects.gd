@@ -10,6 +10,8 @@ var _failures: Array = []
 
 
 func _init() -> void:
+	_test_fusion_formed_in_main1_can_attack()
+	_test_g07_cannot_return_generated_fusion()
 	_test_alpha_leadership_once_per_turn()
 	_test_dragon_extra_attack()
 	_test_dragon_no_false_trigger()
@@ -32,6 +34,61 @@ func _init() -> void:
 	for failure in _failures:
 		printerr(" - %s" % failure)
 	quit(1)
+
+
+func _test_fusion_formed_in_main1_can_attack() -> void:
+	var prepared := _prepared_state({0: ["M04", "M09"]})
+	_expect(prepared["ok"], "se prepara una Fusion en Principal 1")
+	if not prepared["ok"]:
+		return
+	var module = prepared["module"]
+	var state: Dictionary = prepared["state"]
+	var carrier: String = prepared["ids"]["0:M04"]
+	var fused: Dictionary = module.reduce(state, GameAction.new("fuse_creatures", 0, {
+		"material_instance_ids": [carrier, prepared["ids"]["0:M09"]],
+		"position": "attack",
+	}))
+	_expect(fused["ok"], "F010 se forma en Principal 1")
+	if not fused["ok"]:
+		return
+	state = fused["state"]
+	state = module.reduce(state, GameAction.new("advance_phase", 0, {}))["state"]
+	var attack = GameAction.new("attack", 0, {"attacker_id": carrier, "target_slot": -1})
+	_expect(module.validate_action(state, attack)["ok"], "una Fusion formada en Principal 1 puede atacar ese turno")
+	var result: Dictionary = module.reduce(state, attack)
+	_expect(result["ok"], "el ataque de la Fusion recien formada se resuelve")
+	_expect_equal(_count_events(result["events"], "direct_attack_resolved"), 1, "la Fusion produce un ataque directo normal")
+
+
+func _test_g07_cannot_return_generated_fusion() -> void:
+	var prepared := _prepared_state({0: ["M17"], 1: ["M04", "M09"]})
+	_expect(prepared["ok"], "se prepara una Fusion defensora frente a G07")
+	if not prepared["ok"]:
+		return
+	var module = prepared["module"]
+	var state: Dictionary = prepared["state"]
+	var fusion_carrier: String = prepared["ids"]["1:M04"]
+	var fused: Dictionary = module.reduce(state, GameAction.new("fuse_creatures", 1, {
+		"material_instance_ids": [fusion_carrier, prepared["ids"]["1:M09"]],
+		"position": "guard",
+	}))
+	_expect(fused["ok"], "el defensor forma F010")
+	if not fused["ok"]:
+		return
+	state = fused["state"]
+	var support: Dictionary = _place_support(state, _instance_for(state, "G07", 1), 1)
+	_expect(support["ok"], "G07 queda preparada desde un turno anterior")
+	if not support["ok"]:
+		return
+	state = support["state"]
+	state = module.reduce(state, GameAction.new("advance_phase", 0, {}))["state"]
+	var attack = GameAction.new("attack", 0, {"attacker_id": prepared["ids"]["0:M17"], "target_slot": 0})
+	_expect(module.validate_action(state, attack)["ok"], "se declara ataque contra la Fusion generada")
+	var result: Dictionary = module.reduce(state, attack)
+	_expect(result["ok"], "el combate contra la Fusion se resuelve sin ventana G07")
+	_expect(result["state"]["pending_response"].is_empty(), "G07 no aparece como respuesta legal contra una Fusion generada")
+	_expect(_instance_for(result["state"], "G07", 1) in result["state"]["cards"]["zones"]["support:1"]["cards"], "G07 permanece preparada y no se consume")
+	_expect_equal(_count_events(result["events"], "creature_combat_resolved"), 1, "el ataque no se cancela por un retorno ilegal")
 
 
 func _test_alpha_leadership_once_per_turn() -> void:
