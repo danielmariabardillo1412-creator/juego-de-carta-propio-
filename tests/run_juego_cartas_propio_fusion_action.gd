@@ -12,9 +12,10 @@ var _failures: Array = []
 func _init() -> void:
 	_test_fusion_action_and_ability()
 	_test_validation_guards()
+	_test_multiple_fusions_same_turn()
 	_test_additional_enabled_recipes()
 	_test_destroy_releases_everything_to_graveyard()
-	_test_return_restores_materials_to_hand()
+	_test_generated_fusion_cannot_return_to_hand()
 	if _failures.is_empty():
 		print("JCP-FUSION-ACTION PASS: %d checks" % _checks)
 		quit(0)
@@ -54,9 +55,9 @@ func _test_fusion_action_and_ability() -> void:
 	_expect_equal(carrier_metadata["position"], "guard", "la Fusion respeta la postura elegida")
 	_expect(carrier_metadata["face_up"], "la Fusion entra boca arriba")
 	_expect_equal(carrier_metadata["summoned_turn"], state["turn"]["turn_number"], "la Fusion cuenta como recien llegada")
-	_expect(state["turn_usage"]["fusion_used"], "la accion consume la Fusion normal del turno")
+	_expect_equal(state["turn_usage"]["fusion_sequence"], 1, "la secuencia tecnica avanza sin limitar Fusiones posteriores")
 	var entity: Dictionary = carrier_metadata["fusion_entity"]
-	_expect_equal(entity["id"], "fusion.p0.t1", "la identidad generada es determinista")
+	_expect_equal(entity["id"], "fusion.p0.t1.n0", "la identidad generada es determinista y unica por secuencia")
 	_expect_equal(entity["contained_physical_ids"], [m04, m09], "la entidad conserva ambos materiales fisicos")
 	var public_view: Dictionary = module.get_public_state(state)
 	var carrier_view: Dictionary = _card_from_zone(public_view["card_table"]["zones"]["creatures:0"]["cards"], m04)
@@ -103,15 +104,36 @@ func _test_validation_guards() -> void:
 	_expect_equal(module.validate_action(state, bad_position)["code"], "JCP_FUSION_POSITION_INVALID", "la postura de salida debe ser ataque o guardia")
 	var transition: Dictionary = module.reduce(state, GameAction.new("fuse_creatures", 0, valid_payload))
 	var used_state: Dictionary = transition["state"]
-	var second_attempt = GameAction.new("fuse_creatures", 0, {"material_instance_ids": [m04, m09], "position": "guard"})
-	var before: String = JSON.stringify(used_state)
-	var rejection: Dictionary = module.validate_action(used_state, second_attempt)
-	_expect_equal(rejection["code"], "JCP_FUSION_ALREADY_USED", "solo hay una accion de Fusion normal por turno")
-	_expect_equal(JSON.stringify(used_state), before, "un rechazo de Fusion es atomico")
-	used_state["turn_usage"]["fusion_used"] = false
+	_expect_equal(used_state["turn_usage"]["fusion_sequence"], 1, "una Fusion incrementa solo la secuencia tecnica")
 	var chained_ids := [m04, prepared["ids"]["M05"]]
 	_expect(not _has_fusion_action(module.get_legal_actions(used_state, 0), chained_ids, "attack"), "una Fusion previa no se anuncia como material de otra Fusion")
 	_expect_equal(module.validate_action(used_state, GameAction.new("fuse_creatures", 0, {"material_instance_ids": chained_ids, "position": "attack"}))["code"], "JCP_FUSION_CHAIN_NOT_ENABLED", "la validacion conserva el rechazo explicito de Fusion encadenada")
+
+
+func _test_multiple_fusions_same_turn() -> void:
+	var prepared: Dictionary = _prepared_main_state(["M04", "M09", "M01", "M07"])
+	_expect(prepared["ok"], "se prepara un campo con dos recetas independientes")
+	if not prepared["ok"]:
+		return
+	var module = prepared["module"]
+	var state: Dictionary = prepared["state"]
+	var first_ids := [prepared["ids"]["M04"], prepared["ids"]["M09"]]
+	var second_ids := [prepared["ids"]["M01"], prepared["ids"]["M07"]]
+	var first: Dictionary = module.reduce(state, GameAction.new("fuse_creatures", 0, {"material_instance_ids": first_ids, "position": "guard"}))
+	_expect(first["ok"], "la primera Fusion del turno se resuelve")
+	if not first["ok"]:
+		return
+	state = first["state"]
+	_expect(_has_fusion_action(module.get_legal_actions(state, 0), second_ids, "attack"), "una segunda Fusion independiente sigue siendo legal el mismo turno")
+	var second: Dictionary = module.reduce(state, GameAction.new("fuse_creatures", 0, {"material_instance_ids": second_ids, "position": "attack"}))
+	_expect(second["ok"], "la segunda Fusion independiente se resuelve")
+	if not second["ok"]:
+		return
+	state = second["state"]
+	_expect_equal(state["turn_usage"]["fusion_sequence"], 2, "la secuencia tecnica registra dos Fusiones sin imponer limite")
+	_expect_equal(state["cards"]["instances"][first_ids[0]]["metadata"]["fusion_entity"]["id"], "fusion.p0.t1.n0", "la primera Fusion usa secuencia n0")
+	_expect_equal(state["cards"]["instances"][second_ids[0]]["metadata"]["fusion_entity"]["id"], "fusion.p0.t1.n1", "la segunda Fusion usa secuencia n1")
+	_expect(module.validate_state(state)["ok"], "dos Fusiones independientes conservan un estado valido")
 
 
 func _test_additional_enabled_recipes() -> void:
@@ -155,9 +177,9 @@ func _test_destroy_releases_everything_to_graveyard() -> void:
 	_expect(module.validate_state(state)["ok"], "la destruccion de F010 conserva el estado valido")
 
 
-func _test_return_restores_materials_to_hand() -> void:
+func _test_generated_fusion_cannot_return_to_hand() -> void:
 	var prepared: Dictionary = _prepared_main_state(["M04", "M09"], {"E01": "M04"})
-	_expect(prepared["ok"], "se prepara F010 para devolverla")
+	_expect(prepared["ok"], "se prepara F010 para comprobar retorno generico")
 	if not prepared["ok"]:
 		return
 	var module = prepared["module"]
@@ -165,14 +187,12 @@ func _test_return_restores_materials_to_hand() -> void:
 	var m04: String = prepared["ids"]["M04"]
 	var m09: String = prepared["ids"]["M09"]
 	state = module.reduce(state, GameAction.new("fuse_creatures", 0, {"material_instance_ids": [m04, m09], "position": "guard"}))["state"]
+	var before: String = JSON.stringify(state)
 	var returned: Dictionary = module.call("_return_creature_and_break_links", state, 0, m04)
-	_expect(returned["ok"], "devolver F010 disuelve su entidad")
-	state = returned["state"]
-	_expect(m04 in state["cards"]["zones"]["hand:0"]["cards"] and m09 in state["cards"]["zones"]["hand:0"]["cards"], "ambos materiales vuelven a la mano")
-	_expect(prepared["ids"]["E01"] in state["cards"]["zones"]["graveyard:0"]["cards"], "el equipo se rompe y va al Cementerio")
-	_expect(state["cards"]["zones"]["fusion_materials:0"]["cards"].is_empty(), "la zona de contenidos queda vacia")
-	_expect(not state["cards"]["instances"][m09]["metadata"].has("contained_by"), "el material liberado pierde el enlace interno")
-	_expect(module.validate_state(state)["ok"], "la devolucion de F010 conserva el estado valido")
+	_expect(not returned["ok"], "una Fusion generada rechaza el retorno generico a la mano")
+	_expect_equal(returned["code"], "JCP_GENERATED_ENTITY_RETURN_INVALID", "el rechazo de retorno tiene codigo especifico")
+	_expect_equal(JSON.stringify(state), before, "el intento de retorno no altera la Fusion ni sus materiales")
+	_expect(module.validate_state(state)["ok"], "el rechazo conserva el estado fusionado valido")
 
 
 func _prepared_main_state(creature_definitions: Array, equipment_links: Dictionary = {}) -> Dictionary:
