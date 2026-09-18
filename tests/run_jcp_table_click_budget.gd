@@ -113,23 +113,15 @@ func _has_source_action(actions: Array, action_type: String, instance_id: String
 
 func _advance_to_next_own_main(table: Node, player_id: int) -> bool:
 	var engine = table.get("_engine")
-	var initial_turn: int = engine.get_public_state()["game"]["turn_number"]
-	for step in range(30):
-		var game: Dictionary = engine.get_public_state()["game"]
-		if game["turn_number"] > initial_turn and game["active_player"] == player_id and game["phase"] == "MAIN_1":
+	var initial_state: Dictionary = engine.export_module_state()
+	var initial_turn: int = initial_state["turn"]["turn_number"]
+	for step in range(24):
+		var state: Dictionary = engine.export_module_state()
+		var active: int = state["turn"]["order"][state["turn"]["active_index"]]
+		if state["turn"]["turn_number"] > initial_turn and active == player_id and state["phase"]["current"] == "MAIN_1":
 			table.call("_refresh")
 			return true
-		var actor: int = game["response_window"].get("priority_player_id", game["active_player"]) if game["response_window"].get("active", false) else game["active_player"]
-		var action_type := ""
-		var action_payload: Dictionary = {}
-		for legal in engine.get_legal_actions(actor):
-			if legal.type in ["pass_reaction", "advance_phase"]:
-				action_type = legal.type
-				action_payload = legal.payload.duplicate(true)
-				break
-		if action_type.is_empty():
-			return false
-		var result = engine.perform_action(GameAction.new(action_type, actor, action_payload, "click-budget-%02d" % step))
+		var result = engine.perform_action(GameAction.new("advance_phase", active, {}, "click-budget-advance-%02d" % step))
 		if not result.success:
 			return false
 	table.call("_refresh")
