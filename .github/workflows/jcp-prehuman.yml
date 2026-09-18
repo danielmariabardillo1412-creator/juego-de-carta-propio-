@@ -1,13 +1,14 @@
 name: JCP prehuman tests
 
 on:
-  push:
-    branches:
-      - prehumana-v01-reglas
   pull_request:
     branches:
       - main
   workflow_dispatch:
+
+concurrency:
+  group: jcp-prehuman-${{ github.event.pull_request.number || github.ref_name }}
+  cancel-in-progress: true
 
 jobs:
   godot-headless:
