@@ -57,9 +57,44 @@ func _run() -> void:
 		return
 	var drag_choice: Dictionary = drag_choices[0].duplicate(true)
 	var drag_command := _command_signature(drag_choice)
+
+	# Antes del COMMIT, el segundo material puede deseleccionarse sin perder el primero.
+	var change_second: Button = _find_named_button(table, "FusionChangeSecondMaterial")
+	if change_second == null:
+		_fail("la confirmación de Fusión no ofrece cambiar el segundo material")
+		return
+	change_second.emit_signal("pressed")
+	await process_frame
+	var back_to_one: Dictionary = table.debug_snapshot()
+	if back_to_one["state_version"] != before_drag:
+		_fail("cambiar el segundo material mutó UCE antes del COMMIT")
+		return
+	if back_to_one["selected_card_id"] != materials[0] or not back_to_one["status_message"].contains("FUSIÓN 1/2"):
+		_fail("cambiar segundo material no conserva claramente el primero")
+		return
+	if not table.get("_choice_actions").is_empty() or table.get("_choice_overlay").visible:
+		_fail("volver a FUSIÓN 1/2 dejó abierta la confirmación anterior")
+		return
+	second = _find_tile(table, materials[1])
+	var second_reenabled := false
+	if second != null:
+		for child in second.get_parent().get_children():
+			if child is ProjectedFieldPiece and child.highlighted:
+				second_reenabled = true
+	if not second_reenabled:
+		_fail("al deseleccionar el segundo material no se vuelven a iluminar socios compatibles")
+		return
+
+	# Volver a elegir el segundo material restaura una sola confirmación final.
+	var target_slot_back: int = table.call("_visual_slot_for", "creatures", 0, materials[1])
+	table.call("_on_board_card_selected", materials[1], 0, "creatures", target_slot_back)
+	if table.get("_choice_actions").is_empty() or not table.get("_choice_overlay").visible:
+		_fail("reelegir el segundo material no restaura la confirmación de Fusión")
+		return
 	table.call("_cancel_choices")
-	if table.debug_snapshot()["state_version"] != before_drag:
-		_fail("cancelar la ruta drag cambió el motor")
+	var canceled_all: Dictionary = table.debug_snapshot()
+	if canceled_all["state_version"] != before_drag or canceled_all["selected_card_id"] != "":
+		_fail("Cancelar Fusión no limpia toda la selección sin mutar UCE")
 		return
 
 	# Ruta lógica click-click sobre exactamente el mismo estado del motor.
@@ -93,7 +128,7 @@ func _run() -> void:
 		_fail("el COMMIT final no coincide con el comando común de drag y click-click")
 		return
 
-	print("FUSION_GUI PASS: rutas drag/click convergen en el mismo comando UCE; cancelación y COMMIT único verificados")
+	print("FUSION_GUI PASS: drag/click equivalentes; segundo material reversible, cancelación total y COMMIT único verificados")
 	table.queue_free()
 	quit(0)
 
@@ -158,6 +193,16 @@ func _definition_in_zone(card_table: Dictionary, zone: String, definition_id: St
 		if card["definition"].get("id", "") == definition_id:
 			return card["instance"]["id"]
 	return ""
+
+
+func _find_named_button(node: Node, button_name: String) -> Button:
+	if node is Button and node.name == button_name:
+		return node
+	for child in node.get_children():
+		var found := _find_named_button(child, button_name)
+		if found != null:
+			return found
+	return null
 
 
 func _find_tile(node: Node, instance_id: String) -> CardTile:

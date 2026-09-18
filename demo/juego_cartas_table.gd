@@ -846,6 +846,13 @@ func _refresh() -> void:
 		_selection_label.text = "Elige postura y, si el efecto lo requiere, su objetivo."
 		_choice_overlay.visible = true
 		_render_choice_buttons(visible_index)
+		if _choice_actions[0]["type"] == "fuse_creatures":
+			var change_material_button := Button.new()
+			change_material_button.name = "FusionChangeSecondMaterial"
+			change_material_button.text = "← CAMBIAR SEGUNDO MATERIAL"
+			change_material_button.tooltip_text = "Mantiene el primer material y vuelve a elegir el segundo. No compromete cartas ni Energía."
+			change_material_button.pressed.connect(_back_to_fusion_partner_selection)
+			_choice_overlay_list.add_child(change_material_button)
 		var cancel_button := Button.new()
 		cancel_button.text = "NO · CANCELAR FUSIÓN" if _choice_actions[0]["type"] == "fuse_creatures" else "Cancelar y volver al tablero"
 		cancel_button.pressed.connect(_cancel_choices)
@@ -1919,6 +1926,18 @@ func _selection_instruction(actions: Array, visible_index: Dictionary, visible_c
 func _open_action_choices(actions: Array) -> void:
 	_choice_actions = actions.duplicate(true)
 	_choice_stage = ""
+	_refresh()
+
+
+func _back_to_fusion_partner_selection() -> void:
+	if _choice_actions.is_empty() or _choice_actions[0].get("type", "") != "fuse_creatures":
+		return
+	if _selected_card_id.is_empty() or _fusion_partners(_selected_card_id).is_empty():
+		_cancel_pending_interaction("Fusión cancelada; los materiales ya no son válidos.")
+		return
+	_choice_actions = []
+	_choice_stage = ""
+	_status_message = "FUSIÓN 1/2 · primer material conservado. Elige otra criatura compatible o cancela."
 	_refresh()
 
 
