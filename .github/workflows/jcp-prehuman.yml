@@ -38,8 +38,16 @@ jobs:
             exit 1
           fi
           printf 'Running %d JCP scripts\n' "${#tests[@]}"
+          failures=0
           for test_script in "${tests[@]}"; do
             echo "::group::${test_script}"
-            "${GODOT}" --headless --path . --script "${test_script}"
+            if ! "${GODOT}" --headless --path . --script "${test_script}"; then
+              echo "::error::Failed: ${test_script}"
+              failures=$((failures + 1))
+            fi
             echo "::endgroup::"
           done
+          if [ "${failures}" -ne 0 ]; then
+            echo "${failures} JCP suite(s) failed" >&2
+            exit 1
+          fi
