@@ -46,11 +46,11 @@ func _test_equipment() -> bool:
 	if _creature(table, creature_id)["effective_stats"]["defense"] != before_def + 1:
 		return _fail("E02 no aplicó +1 DEF")
 	var equipment_chip: Button = _find_equipment_chip(table, item_id)
-	if equipment_chip == null or not equipment_chip.tooltip_text.contains("Coraza"):
+	if equipment_chip == null or not equipment_chip.tooltip_text.contains("Objeto E02"):
 		return _fail("el Equipo vinculado no queda representado como adjunto inspeccionable")
 	await _click(equipment_chip.get_global_rect().get_center())
 	var inspected: Dictionary = table.debug_snapshot()
-	if inspected["selected_card_id"] != item_id or not inspected["card_detail_text"].contains("Coraza"):
+	if inspected["selected_card_id"] != item_id or not inspected["card_detail_text"].contains("Objeto E02"):
 		return _fail("pulsar el adjunto no abre la ficha del Equipo")
 	var synthetic_strip: Control = table.call("_build_equipment_strip", [
 		{"instance": {"id": "EQ-A"}, "definition": {"attributes": {"display_name": "Espada Simple"}}},
