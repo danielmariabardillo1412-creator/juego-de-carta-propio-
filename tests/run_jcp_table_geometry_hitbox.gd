@@ -60,11 +60,13 @@ func _run() -> void:
 	table.call("_on_creature_drag_failed", source_id)
 	await process_frame
 
-	# Colocar una criatura en Ataque permite verificar que la carta ocupada usa el mismo trapecio que su visual.
-	var summon := _summon_attack_action(table, source_id, 2)
-	_check(not summon.is_empty(), "existe una invocación en Ataque hacia C3")
+	# Colocar una criatura en Ataque mediante el mismo estado contextual ya probado por CREATURE-UX.
+	table.call("_select_card", source_id)
+	table.call("_on_empty_slot_pressed", 0, "creatures", 2)
+	var summon := _candidate_action(table, "summon_creature")
+	_check(not summon.is_empty(), "C3 ofrece invocación en Ataque")
 	if not summon.is_empty():
-		_check(table.call("_perform_action", summon), "la invocación de prueba se resuelve")
+		table.call("_commit_creature_mode", summon)
 		await process_frame
 		var field_tile: CardTile = _find_tile(table, source_id)
 		_check(field_tile != null, "la criatura colocada sigue siendo una superficie interactiva")
@@ -156,17 +158,9 @@ func _first_creature_id(actions: Array) -> String:
 	return ""
 
 
-func _summon_attack_action(table: Node, instance_id: String, visual_slot: int) -> Dictionary:
-	for action in table.call("_legal_actions"):
-		if action["type"] != "summon_creature" or action["payload"].get("instance_id", "") != instance_id:
-			continue
-		if action["payload"].get("position", "") != "attack":
-			continue
-		if action["payload"].get("visual_slot", action["payload"].get("target_slot", -1)) == visual_slot:
-			return action
-	# El slot visual puede ser una decisión exclusiva de UI y no formar parte del payload UCE.
-	for action in table.call("_legal_actions"):
-		if action["type"] == "summon_creature" and action["payload"].get("instance_id", "") == instance_id and action["payload"].get("position", "") == "attack":
+func _candidate_action(table: Node, action_type: String) -> Dictionary:
+	for action in table.get("_creature_interaction").candidate_actions:
+		if action["type"] == action_type:
 			return action
 	return {}
 
