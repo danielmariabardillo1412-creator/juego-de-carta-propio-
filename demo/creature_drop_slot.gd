@@ -1,4 +1,4 @@
-extends Button
+extends "res://demo/projected_hit_button.gd"
 ## Hitbox existente con recepción de drag; la legalidad viene de acciones UCE recibidas.
 
 signal creature_dropped(instance_id: String, player_id: int, visual_slot: int)
