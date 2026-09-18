@@ -1396,6 +1396,11 @@ func _make_card_tile(
 		tile.set_creature_drag_enabled(not _legal_creature_actions(instance_id).is_empty())
 		tile.creature_drag_started.connect(_on_creature_drag_started)
 		tile.creature_drag_failed.connect(_on_creature_drag_failed)
+	if kind == "hand" and player_id == _viewer_id and card_type == "item":
+		var equip_targets := _equipment_targets_for_source(instance_id)
+		tile.set_equipment_drag_enabled(not equip_targets.is_empty())
+		tile.equipment_drag_started.connect(_on_equipment_drag_started)
+		tile.equipment_drag_failed.connect(_on_equipment_drag_failed)
 	if kind == "creatures" and player_id == _viewer_id:
 		var partners := _fusion_partners(instance_id)
 		tile.set_fusion_drag_enabled(not partners.is_empty())
@@ -1403,6 +1408,9 @@ func _make_card_tile(
 		tile.fusion_drag_started.connect(_on_fusion_drag_started)
 		tile.fusion_drag_failed.connect(_on_fusion_drag_failed)
 		tile.fusion_dropped.connect(_on_fusion_dropped)
+		var equipment_sources := _equipment_sources_for_target(instance_id)
+		tile.set_equipment_drop_sources(equipment_sources)
+		tile.equipment_dropped.connect(_on_equipment_dropped)
 	tile.set_selected(not instance_id.is_empty() and instance_id == _selected_card_id)
 	tile.set_targeted(not instance_id.is_empty() and _is_direct_target(instance_id, player_id, kind))
 	if player_id >= 0 and not kind.is_empty():
@@ -1432,6 +1440,35 @@ func _is_direct_target(instance_id: String, player_id: int, kind: String) -> boo
 		if _attack_targeting and action["type"] == "attack" and kind == "creatures" and player_id != _viewer_id and not location.is_empty() and payload.get("target_slot", -2) == location.get("slot", -3):
 			return true
 	return false
+
+
+func _equipment_targets_for_source(instance_id: String) -> Array:
+	var targets: Array = []
+	for action in _legal_actions():
+		if action["type"] != "equip_item" or action["payload"].get("instance_id", "") != instance_id:
+			continue
+		var target_id: String = action["payload"].get("target_instance_id", "")
+		if not target_id.is_empty() and target_id not in targets:
+			targets.append(target_id)
+	return targets
+
+
+func _equipment_sources_for_target(target_id: String) -> Array:
+	var sources: Array = []
+	for action in _legal_actions():
+		if action["type"] != "equip_item" or action["payload"].get("target_instance_id", "") != target_id:
+			continue
+		var source_id: String = action["payload"].get("instance_id", "")
+		if not source_id.is_empty() and source_id not in sources:
+			sources.append(source_id)
+	return sources
+
+
+func _equipment_action(source_id: String, target_id: String) -> Dictionary:
+	for action in _legal_actions():
+		if action["type"] == "equip_item" and action["payload"].get("instance_id", "") == source_id and action["payload"].get("target_instance_id", "") == target_id:
+			return action
+	return {}
 
 
 func _fusion_partners(instance_id: String) -> Array:
@@ -2279,6 +2316,26 @@ func _on_creature_dropped(instance_id: String, player_id: int, visual_slot: int)
 func _on_creature_drag_failed(instance_id: String) -> void:
 	if _creature_interaction.source_id == instance_id:
 		_cancel_creature_interaction()
+
+
+func _on_equipment_drag_started(instance_id: String) -> void:
+	if not _equipment_targets_for_source(instance_id).is_empty():
+		_select_card(instance_id, false)
+		_status_message = "Suelta el Equipo sobre una criatura propia iluminada para vincularlo."
+
+
+func _on_equipment_drag_failed(instance_id: String) -> void:
+	if _selected_card_id == instance_id:
+		_cancel_pending_interaction("Equipo no vinculado; no se ha comprometido ninguna acción.")
+
+
+func _on_equipment_dropped(source_id: String, target_id: String) -> void:
+	var action := _equipment_action(source_id, target_id)
+	if action.is_empty():
+		if _selected_card_id == source_id:
+			_cancel_pending_interaction("Ese portador no es compatible con el Equipo.")
+		return
+	_perform_action(action)
 
 
 func _on_fusion_drag_started(instance_id: String) -> void:

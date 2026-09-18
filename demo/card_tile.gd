@@ -7,6 +7,9 @@ signal creature_drag_failed(instance_id: String)
 signal fusion_drag_started(instance_id: String)
 signal fusion_drag_failed(instance_id: String)
 signal fusion_dropped(source_id: String, target_id: String)
+signal equipment_drag_started(instance_id: String)
+signal equipment_drag_failed(instance_id: String)
+signal equipment_dropped(source_id: String, target_id: String)
 
 const FIELD_ATTACK_SIZE := Vector2(72, 101)
 const FIELD_GUARD_SIZE := Vector2(101, 72)
@@ -27,6 +30,8 @@ var _playable := false
 var _creature_drag_enabled := false
 var _fusion_drag_enabled := false
 var _fusion_drop_sources: Array = []
+var _equipment_drag_enabled := false
+var _equipment_drop_sources: Array = []
 
 
 func setup(
@@ -96,11 +101,24 @@ func set_fusion_drop_sources(source_ids: Array) -> void:
 	_fusion_drop_sources = source_ids.duplicate()
 
 
+func set_equipment_drag_enabled(value: bool) -> void:
+	_equipment_drag_enabled = value
+	if value:
+		_playable = true
+	_apply_card_style(not disabled, _selected)
+
+
+func set_equipment_drop_sources(source_ids: Array) -> void:
+	_equipment_drop_sources = source_ids.duplicate()
+
+
 func _get_drag_data(_at_position: Vector2) -> Variant:
-	if (not _creature_drag_enabled and not _fusion_drag_enabled) or disabled or instance_id.is_empty():
+	if (not _creature_drag_enabled and not _fusion_drag_enabled and not _equipment_drag_enabled) or disabled or instance_id.is_empty():
 		return null
 	if _fusion_drag_enabled:
 		fusion_drag_started.emit(instance_id)
+	elif _equipment_drag_enabled:
+		equipment_drag_started.emit(instance_id)
 	else:
 		creature_drag_started.emit(instance_id)
 	var preview := PanelContainer.new()
@@ -114,15 +132,28 @@ func _get_drag_data(_at_position: Vector2) -> Variant:
 	label.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	preview.add_child(label)
 	set_drag_preview(preview)
-	return {"kind": "fusion_material" if _fusion_drag_enabled else "creature_from_hand", "instance_id": instance_id}
+	var drag_kind := "fusion_material" if _fusion_drag_enabled else ("equipment_from_hand" if _equipment_drag_enabled else "creature_from_hand")
+	return {"kind": drag_kind, "instance_id": instance_id}
 
 
 func _can_drop_data(_at_position: Vector2, data: Variant) -> bool:
-	return not disabled and data is Dictionary and data.get("kind", "") == "fusion_material" and data.get("instance_id", "") in _fusion_drop_sources
+	if disabled or not data is Dictionary:
+		return false
+	var source_id: String = data.get("instance_id", "")
+	match data.get("kind", ""):
+		"fusion_material":
+			return source_id in _fusion_drop_sources
+		"equipment_from_hand":
+			return source_id in _equipment_drop_sources
+	return false
 
 
 func _drop_data(at_position: Vector2, data: Variant) -> void:
-	if _can_drop_data(at_position, data):
+	if not _can_drop_data(at_position, data):
+		return
+	if data.get("kind", "") == "equipment_from_hand":
+		equipment_dropped.emit(data["instance_id"], instance_id)
+	else:
 		fusion_dropped.emit(data["instance_id"], instance_id)
 
 
@@ -131,6 +162,8 @@ func _notification(what: int) -> void:
 		creature_drag_failed.emit(instance_id)
 	if what == NOTIFICATION_DRAG_END and _fusion_drag_enabled and not get_viewport().gui_is_drag_successful():
 		fusion_drag_failed.emit(instance_id)
+	if what == NOTIFICATION_DRAG_END and _equipment_drag_enabled and not get_viewport().gui_is_drag_successful():
+		equipment_drag_failed.emit(instance_id)
 
 
 func _build_face(title: String, detail: String) -> void:

@@ -15,7 +15,7 @@ func _run() -> void:
 	if not await _test_persistent():
 		quit(1)
 		return
-	print("BOOST_GUI PASS: E02 vinculado/inspeccionable, adjuntos múltiples y G04 global automático")
+	print("BOOST_GUI PASS: E02 click/drag equivalentes, inspeccionable, adjuntos múltiples y G04 automático")
 	quit(0)
 
 
@@ -43,6 +43,7 @@ func _test_equipment() -> bool:
 	var after: Dictionary = table.debug_snapshot()
 	if after["state_version"] != before_version + 1 or after["view"]["game"]["card_table"]["zones"]["attachments:0"]["count"] != 1:
 		return _fail("E02 no se vinculó al objetivo elegido")
+	var click_command: Dictionary = after["last_committed_action"].duplicate(true)
 	if _creature(table, creature_id)["effective_stats"]["defense"] != before_def + 1:
 		return _fail("E02 no aplicó +1 DEF")
 	var equipment_chip: Button = _find_equipment_chip(table, item_id)
@@ -64,6 +65,30 @@ func _test_equipment() -> bool:
 		return _fail("los adjuntos múltiples no se compactan de forma legible")
 	synthetic_strip.free()
 	table.queue_free()
+	await process_frame
+
+	var drag_table = await _new_table(487)
+	var drag_hand: Array = drag_table.debug_snapshot()["view"]["game"]["card_table"]["zones"]["hand:0"]["cards"]
+	var drag_creature_id := _id_by_definition(drag_hand, "M01")
+	var drag_item_id := _id_by_definition(drag_hand, "E02")
+	var drag_summon := _action_for(drag_table, "summon_creature", drag_creature_id)
+	if drag_summon.is_empty() or not drag_table.call("_perform_action", drag_summon):
+		return _fail("no se pudo preparar M01 para la prueba de drag de E02")
+	await process_frame
+	var drag_item: CardTile = _find_tile(drag_table, drag_item_id)
+	var drag_target: CardTile = _find_tile(drag_table, drag_creature_id)
+	if drag_item == null or drag_target == null:
+		return _fail("faltan origen o destino visual para arrastrar E02")
+	if not drag_item.get("_equipment_drag_enabled") or drag_item_id not in drag_target.get("_equipment_drop_sources"):
+		return _fail("E02 no expone drag solo hacia su portador legal")
+	var drag_before: int = drag_table.debug_snapshot()["state_version"]
+	await _drag(drag_item.get_global_rect().get_center(), drag_target.get_global_rect().get_center())
+	var drag_after: Dictionary = drag_table.debug_snapshot()
+	if drag_after["state_version"] != drag_before + 1 or drag_after["view"]["game"]["card_table"]["zones"]["attachments:0"]["count"] != 1:
+		return _fail("arrastrar E02 no ejecuta un único equip_item")
+	if drag_after["last_committed_action"] != click_command:
+		return _fail("drag y click-click no producen exactamente el mismo comando UCE de Equipo")
+	drag_table.queue_free()
 	await process_frame
 	return true
 
@@ -183,6 +208,32 @@ func _click(point: Vector2) -> void:
 	up.global_position = point
 	up.button_index = MOUSE_BUTTON_LEFT
 	Input.parse_input_event(up)
+	await process_frame
+
+
+func _drag(origin: Vector2, target: Vector2) -> void:
+	var down := InputEventMouseButton.new()
+	down.position = origin
+	down.global_position = origin
+	down.button_index = MOUSE_BUTTON_LEFT
+	down.button_mask = MOUSE_BUTTON_MASK_LEFT
+	down.pressed = true
+	Input.parse_input_event(down)
+	await process_frame
+	for fraction in [0.12, 0.45, 0.72, 1.0]:
+		var motion := InputEventMouseMotion.new()
+		motion.position = origin.lerp(target, fraction)
+		motion.global_position = motion.position
+		motion.relative = (target - origin) * 0.25
+		motion.button_mask = MOUSE_BUTTON_MASK_LEFT
+		Input.parse_input_event(motion)
+		await process_frame
+	var up := InputEventMouseButton.new()
+	up.position = target
+	up.global_position = target
+	up.button_index = MOUSE_BUTTON_LEFT
+	Input.parse_input_event(up)
+	await process_frame
 	await process_frame
 
 
