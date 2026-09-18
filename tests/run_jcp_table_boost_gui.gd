@@ -15,7 +15,7 @@ func _run() -> void:
 	if not await _test_persistent():
 		quit(1)
 		return
-	print("BOOST_GUI PASS: E02 vinculado por clic y G04 global automático")
+	print("BOOST_GUI PASS: E02 vinculado/inspeccionable, adjuntos múltiples y G04 global automático")
 	quit(0)
 
 
@@ -45,6 +45,24 @@ func _test_equipment() -> bool:
 		return _fail("E02 no se vinculó al objetivo elegido")
 	if _creature(table, creature_id)["effective_stats"]["defense"] != before_def + 1:
 		return _fail("E02 no aplicó +1 DEF")
+	var equipment_chip: Button = _find_equipment_chip(table, item_id)
+	if equipment_chip == null or not equipment_chip.tooltip_text.contains("Objeto E02"):
+		return _fail("el Equipo vinculado no queda representado como adjunto inspeccionable")
+	await _click(equipment_chip.get_global_rect().get_center())
+	var inspected: Dictionary = table.debug_snapshot()
+	if inspected["selected_card_id"] != item_id or not inspected["card_detail_text"].contains("Objeto E02"):
+		return _fail("pulsar el adjunto no abre la ficha del Equipo")
+	var synthetic_strip: Control = table.call("_build_equipment_strip", [
+		{"instance": {"id": "EQ-A"}, "definition": {"attributes": {"display_name": "Espada Simple"}}},
+		{"instance": {"id": "EQ-B"}, "definition": {"attributes": {"display_name": "Coraza Pesada"}}},
+	], creature_id)
+	if synthetic_strip.get_child_count() != 2:
+		return _fail("dos Equipos vinculados no producen dos adjuntos independientes")
+	if synthetic_strip.get_child(0).get_meta("equipment_instance_id", "") != "EQ-A" or synthetic_strip.get_child(1).get_meta("equipment_instance_id", "") != "EQ-B":
+		return _fail("los adjuntos múltiples pierden identidad individual")
+	if synthetic_strip.get_child(0).text != "⚒1" or synthetic_strip.get_child(1).text != "⚒2":
+		return _fail("los adjuntos múltiples no se compactan de forma legible")
+	synthetic_strip.free()
 	table.queue_free()
 	await process_frame
 	return true
@@ -117,6 +135,16 @@ func _find_tile(node: Node, instance_id: String) -> CardTile:
 		return node
 	for child in node.get_children():
 		var found := _find_tile(child, instance_id)
+		if found != null:
+			return found
+	return null
+
+
+func _find_equipment_chip(node: Node, instance_id: String) -> Button:
+	if node is Button and node.get_meta("board_role", "") == "equipment_chip" and node.get_meta("equipment_instance_id", "") == instance_id:
+		return node
+	for child in node.get_children():
+		var found := _find_equipment_chip(child, instance_id)
 		if found != null:
 			return found
 	return null
