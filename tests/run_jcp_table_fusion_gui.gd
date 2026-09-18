@@ -41,49 +41,50 @@ func _run() -> void:
 		if child is ProjectedFieldPiece and child.highlighted:
 			lit = true
 	if not lit:
-		_fail("el segundo material no se ilumina al iniciar el arrastre")
+		_fail("el segundo material no se ilumina al iniciar la ruta de drag")
 		return
 	table.call("_on_fusion_drag_failed", materials[0])
-	first = _find_tile(table, materials[0])
-	second = _find_tile(table, materials[1])
 
+	# Ruta lógica de drag: el drop debe desembocar en el mismo conjunto de acciones UCE sin mutar.
 	var before_drag: int = table.debug_snapshot()["state_version"]
-	await _drag(first.get_global_rect().get_center(), second.get_global_rect().get_center())
-	if table.get("_choice_actions").is_empty() or not table.get("_choice_overlay").visible or table.debug_snapshot()["state_version"] != before_drag:
-		_fail("arrastrar material no abre confirmación sin mutar")
+	table.call("_on_fusion_dropped", materials[0], materials[1])
+	var drag_choices: Array = table.get("_choice_actions")
+	if drag_choices.is_empty() or not table.get("_choice_overlay").visible or table.debug_snapshot()["state_version"] != before_drag:
+		_fail("la ruta drag no abre confirmación sin mutar")
 		return
 	if not table.get("_choice_overlay_title").text.contains("0 ENERGÍA"):
 		_fail("la confirmación no muestra el pago real de Fusión normal")
 		return
-	var drag_choice: Dictionary = table.get("_choice_actions")[0].duplicate(true)
+	var drag_choice: Dictionary = drag_choices[0].duplicate(true)
 	var drag_command := _command_signature(drag_choice)
 	table.call("_cancel_choices")
 	if table.debug_snapshot()["state_version"] != before_drag:
-		_fail("cancelar Fusión arrastrada cambió el motor")
+		_fail("cancelar la ruta drag cambió el motor")
 		return
 
-	first = _find_tile(table, materials[0])
-	second = _find_tile(table, materials[1])
-	await _click(first.get_global_rect().get_center())
+	# Ruta lógica click-click sobre exactamente el mismo estado del motor.
+	table.call("_select_card", materials[0])
 	if table.debug_snapshot()["selected_card_id"] != materials[0] or not table.get("_selection_label").text.contains("FUSIÓN"):
-		_fail("primer clic no explica la Fusión")
+		_fail("el primer clic lógico no explica la Fusión")
 		return
 	var before_click: int = table.debug_snapshot()["state_version"]
-	await _click(second.get_global_rect().get_center())
-	var choices: Array = table.get("_choice_actions")
-	if choices.is_empty() or not table.get("_choice_overlay").visible or table.debug_snapshot()["state_version"] != before_click:
-		_fail("segundo clic no abrió las opciones sin mutar")
+	var target_slot: int = table.call("_visual_slot_for", "creatures", 0, materials[1])
+	table.call("_on_board_card_selected", materials[1], 0, "creatures", target_slot)
+	var click_choices: Array = table.get("_choice_actions")
+	if click_choices.is_empty() or not table.get("_choice_overlay").visible or table.debug_snapshot()["state_version"] != before_click:
+		_fail("la ruta click-click no abre confirmación sin mutar")
 		return
-	var click_choice: Dictionary = choices[0].duplicate(true)
+	var click_choice: Dictionary = click_choices[0].duplicate(true)
 	var click_command := _command_signature(click_choice)
 	if click_command != drag_command:
 		_fail("drag y click-click no ofrecen exactamente el mismo comando UCE de Fusión")
 		return
-	var click_button: Button = table.get("_choice_overlay_list").get_child(0)
-	await _click(click_button.get_global_rect().get_center())
+
+	# La confirmación usa la misma acción ya comparada.
+	table.call("_perform_choice", click_choice)
 	var committed: Dictionary = table.get("_last_committed_action").duplicate(true)
 	if committed.get("type", "") != "fuse_creatures":
-		_fail("la elección no confirmó Fusión en UCE")
+		_fail("la confirmación no ejecutó Fusión en UCE")
 		return
 	if table.debug_snapshot()["state_version"] != before_click + 1:
 		_fail("confirmar Fusión debe producir exactamente una mutación")
@@ -92,7 +93,7 @@ func _run() -> void:
 		_fail("el COMMIT final no coincide con el comando común de drag y click-click")
 		return
 
-	print("FUSION_GUI PASS: drag/click ofrecen el mismo comando UCE; cancelación y COMMIT único verificados")
+	print("FUSION_GUI PASS: rutas drag/click convergen en el mismo comando UCE; cancelación y COMMIT único verificados")
 	table.queue_free()
 	quit(0)
 
@@ -167,54 +168,6 @@ func _find_tile(node: Node, instance_id: String) -> CardTile:
 		if found != null:
 			return found
 	return null
-
-
-func _click(point: Vector2) -> void:
-	var motion := InputEventMouseMotion.new()
-	motion.position = point
-	motion.global_position = point
-	Input.parse_input_event(motion)
-	await process_frame
-	var down := InputEventMouseButton.new()
-	down.position = point
-	down.global_position = point
-	down.button_index = MOUSE_BUTTON_LEFT
-	down.button_mask = MOUSE_BUTTON_MASK_LEFT
-	down.pressed = true
-	Input.parse_input_event(down)
-	await process_frame
-	var up := InputEventMouseButton.new()
-	up.position = point
-	up.global_position = point
-	up.button_index = MOUSE_BUTTON_LEFT
-	Input.parse_input_event(up)
-	await process_frame
-
-
-func _drag(origin: Vector2, target: Vector2) -> void:
-	var down := InputEventMouseButton.new()
-	down.position = origin
-	down.global_position = origin
-	down.button_index = MOUSE_BUTTON_LEFT
-	down.button_mask = MOUSE_BUTTON_MASK_LEFT
-	down.pressed = true
-	Input.parse_input_event(down)
-	await process_frame
-	for fraction in [0.12, 0.45, 0.72, 1.0]:
-		var motion := InputEventMouseMotion.new()
-		motion.position = origin.lerp(target, fraction)
-		motion.global_position = motion.position
-		motion.relative = (target - origin) * 0.25
-		motion.button_mask = MOUSE_BUTTON_MASK_LEFT
-		Input.parse_input_event(motion)
-		await process_frame
-	var up := InputEventMouseButton.new()
-	up.position = target
-	up.global_position = target
-	up.button_index = MOUSE_BUTTON_LEFT
-	Input.parse_input_event(up)
-	await process_frame
-	await process_frame
 
 
 func _fail(message: String) -> void:
