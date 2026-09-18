@@ -55,7 +55,9 @@ func _run() -> void:
 	if not table.get("_choice_overlay_title").text.contains("0 ENERGÍA"):
 		_fail("la confirmación no muestra el pago real de Fusión normal")
 		return
-	await RenderingServer.frame_post_draw
+	# Dos frames normales bastan para estabilizar el render y evitan depender de una señal que puede no volver a emitirse.
+	await process_frame
+	await process_frame
 	var capture_path := ProjectSettings.globalize_path("res://artifacts/manual_table_fusion_preview.png")
 	if root.get_texture().get_image().save_png(capture_path) != OK:
 		_fail("no se pudo capturar la confirmación de Fusión")
