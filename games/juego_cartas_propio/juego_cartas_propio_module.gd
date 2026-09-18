@@ -306,7 +306,7 @@ func _validate_field_zones(state: Dictionary, player_id: int) -> Dictionary:
 			return _failure("JCP_ATTACHMENT_ZONE_TYPE_INVALID", "La zona de vinculos contiene una carta invalida.")
 		if definition["id"] == "E04" or instance["metadata"].get("linked_to", "") not in creature_ids:
 			return _failure("JCP_ATTACHMENT_LINK_INVALID", "Un equipo no conserva un portador valido.")
-		if not _can_equip(state, definition["id"], instance["metadata"]["linked_to"]):
+		if not _can_equip(state, definition["id"], instance["metadata"]["linked_to"], instance_id):
 			return _failure("JCP_ATTACHMENT_COMPATIBILITY_INVALID", "Un equipo vinculado ya no es compatible con su portador.")
 	var terrain_ids: Array = state["cards"]["zones"][_zone_id("terrain", player_id)]["cards"]
 	for instance_id in terrain_ids:
@@ -1380,7 +1380,7 @@ func _field_card_legal_actions(state: Dictionary, player_id: int) -> Array:
 			result.append(persistent_result["value"])
 		if card_type == "item" and definition_id != "E04":
 			for target_id in creature_result["value"]:
-				if not _can_equip(state, definition_id, target_id):
+				if not _can_equip(state, definition_id, target_id, instance_id):
 					continue
 				var equip_result: Dictionary = LegalAction.create(
 					ACTION_EQUIP_ITEM,
@@ -1409,7 +1409,7 @@ func _field_card_legal_actions(state: Dictionary, player_id: int) -> Array:
 			var current_target_id: String = state["cards"]["instances"][equipment_id]["metadata"].get("linked_to", "")
 			var equipment_definition_id: String = _definition_for_instance(state, equipment_id)["id"]
 			for target_id in creature_result["value"]:
-				if target_id == current_target_id or not _can_equip(state, equipment_definition_id, target_id):
+				if target_id == current_target_id or not _can_equip(state, equipment_definition_id, target_id, equipment_id):
 					continue
 				var relocation_result: Dictionary = LegalAction.create(
 					ACTION_RELOCATE_EQUIPMENT,
@@ -1895,7 +1895,7 @@ func _validate_equip_item(state: Dictionary, player_id: int, payload: Dictionary
 	var target_id: String = payload["target_instance_id"]
 	if not _is_in_zone(state, target_id, _zone_id("creatures", player_id)):
 		return _failure("JCP_EQUIP_TARGET_INVALID", "El objetivo no es una criatura controlada.")
-	if not _can_equip(state, definition["id"], target_id):
+	if not _can_equip(state, definition["id"], target_id, item_id):
 		return _failure("JCP_EQUIP_REQUIREMENT_FAILED", "La criatura no cumple los requisitos visibles del equipo.")
 	return _success()
 
@@ -1982,7 +1982,7 @@ func _validate_relocate_equipment(state: Dictionary, player_id: int, payload: Di
 		return _failure("JCP_RELOCATE_TARGET_INVALID", "La nueva portadora no es una criatura controlada.")
 	if target_id == current_target_id:
 		return _failure("JCP_RELOCATE_TARGET_UNCHANGED", "El equipo ya esta vinculado a esa criatura.")
-	if not _can_equip(state, equipment_definition["id"], target_id):
+	if not _can_equip(state, equipment_definition["id"], target_id, equipment_id):
 		return _failure("JCP_RELOCATE_REQUIREMENT_FAILED", "La nueva portadora no cumple los requisitos del equipo.")
 	return _success()
 
@@ -2334,7 +2334,7 @@ func _reduce_fuse_creatures(state: Dictionary, player_id: int, material_ids: Arr
 		var attachment_metadata: Dictionary = next_state["cards"]["instances"][attachment_id]["metadata"]
 		if attachment_metadata.get("linked_to", "") not in material_ids:
 			continue
-		if not _can_equip(next_state, _definition_for_instance(next_state, attachment_id)["id"], carrier_id):
+		if not _can_equip(next_state, _definition_for_instance(next_state, attachment_id)["id"], carrier_id, attachment_id):
 			var rejected_move: Dictionary = CardState.move_card(next_state["cards"], attachment_id, _zone_id("attachments", player_id), _zone_id("graveyard", player_id))
 			if not rejected_move["ok"]:
 				return _transition_failure(rejected_move)
@@ -2392,7 +2392,7 @@ func _reduce_fuse_creatures(state: Dictionary, player_id: int, material_ids: Arr
 	return _transition_success(next_state, events)
 
 
-func _can_equip(state: Dictionary, equipment_definition_id: String, target_id: String) -> bool:
+func _can_equip(state: Dictionary, equipment_definition_id: String, target_id: String, equipment_instance_id: String = "") -> bool:
 	var target_metadata: Dictionary = state["cards"]["instances"][target_id]["metadata"]
 	var is_hidden: bool = not target_metadata.get("face_up", true)
 	if is_hidden and equipment_definition_id not in ["E02", "E05"]:
@@ -2412,6 +2412,8 @@ func _can_equip(state: Dictionary, equipment_definition_id: String, target_id: S
 		var owner_id: int = target_metadata.get("owner_id", -1)
 		if owner_id >= 0:
 			for attachment_id in state["cards"]["zones"][_zone_id("attachments", owner_id)]["cards"]:
+				if attachment_id == equipment_instance_id:
+					continue
 				if state["cards"]["instances"][attachment_id]["metadata"].get("linked_to", "") != target_id:
 					continue
 				if _definition_for_instance(state, attachment_id)["id"] in ["E01", "E06"]:
