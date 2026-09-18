@@ -4,6 +4,7 @@ extends SceneTree
 const GameAction = preload("res://src/core/game_action.gd")
 const UniversalCardEngine = preload("res://src/core/universal_card_engine.gd")
 const GameModule = preload("res://games/juego_cartas_propio/juego_cartas_propio_module.gd")
+const CardState = preload("res://src/cards/card_state.gd")
 
 var _checks := 0
 var _failures: Array = []
@@ -15,6 +16,8 @@ func _init() -> void:
 	_test_visible_persistent()
 	_test_equipment_link()
 	_test_equipment_requirement()
+	_test_hidden_equipment_contract()
+	_test_manual_weapon_compatibility()
 	_test_terrain()
 	if _failures.is_empty():
 		print("JCP-FIELD-CARDS PASS: %d checks" % _checks)
@@ -135,6 +138,62 @@ func _test_equipment_requirement() -> void:
 	_expect_equal(engine.export_module_state()["cards"]["zones"]["hand:0"]["cards"].count(item_id), 1, "el rechazo no mueve el equipo")
 
 
+func _test_hidden_equipment_contract() -> void:
+	var prepared: Dictionary = _prepared_direct_equipment_state("M02", ["E01", "E02"], false)
+	_expect(prepared["ok"], "se prepara M02 oculta con arma y coraza sin depender del azar")
+	if not prepared["ok"]:
+		return
+	var module = prepared["module"]
+	var state: Dictionary = prepared["state"]
+	var creature_id: String = prepared["ids"]["M02"]
+	var sword_id: String = prepared["ids"]["E01"]
+	var armor_id: String = prepared["ids"]["E02"]
+	var sword_action = GameAction.new("equip_item", 0, {"instance_id": sword_id, "target_instance_id": creature_id})
+	var sword_validation: Dictionary = module.validate_action(state, sword_action)
+	_expect(not sword_validation["ok"], "E01 no puede comprobar Manipulador en una criatura oculta")
+	_expect_equal(sword_validation["code"], "JCP_EQUIP_REQUIREMENT_FAILED", "E01 oculta falla sin filtrar la aptitud")
+	var armor_action = GameAction.new("equip_item", 0, {"instance_id": armor_id, "target_instance_id": creature_id})
+	var armor_validation: Dictionary = module.validate_action(state, armor_action)
+	_expect(armor_validation["ok"], "E02 puede vincularse sin consultar identidad oculta")
+	if not armor_validation["ok"]:
+		return
+	var armor_result: Dictionary = module.reduce(state, armor_action)
+	_expect(armor_result["ok"], "E02 se vincula a la criatura oculta")
+	if not armor_result["ok"]:
+		return
+	state = armor_result["state"]
+	_expect(not state["cards"]["instances"][creature_id]["metadata"]["face_up"], "equipar E02 no revela la criatura")
+	_expect_equal(state["cards"]["instances"][armor_id]["metadata"]["linked_to"], creature_id, "E02 queda vinculada a la criatura oculta")
+	_expect(sword_id in state["cards"]["zones"]["hand:0"]["cards"], "E01 sigue en mano tras el intento ilegal")
+	_expect(module.validate_state(state)["ok"], "el contrato de Equipo oculto conserva integridad")
+
+
+func _test_manual_weapon_compatibility() -> void:
+	var prepared: Dictionary = _prepared_direct_equipment_state("M02", ["E01", "E06"], true)
+	_expect(prepared["ok"], "se prepara una manipuladora con dos armas manuales sin depender del azar")
+	if not prepared["ok"]:
+		return
+	var module = prepared["module"]
+	var state: Dictionary = prepared["state"]
+	var creature_id: String = prepared["ids"]["M02"]
+	var sword_id: String = prepared["ids"]["E01"]
+	var hammer_id: String = prepared["ids"]["E06"]
+	var first_action = GameAction.new("equip_item", 0, {"instance_id": sword_id, "target_instance_id": creature_id})
+	_expect(module.validate_action(state, first_action)["ok"], "la primera arma manual es legal")
+	var first: Dictionary = module.reduce(state, first_action)
+	_expect(first["ok"], "la primera arma manual se vincula")
+	if not first["ok"]:
+		return
+	state = first["state"]
+	var second_action = GameAction.new("equip_item", 0, {"instance_id": hammer_id, "target_instance_id": creature_id})
+	var second_validation: Dictionary = module.validate_action(state, second_action)
+	_expect(not second_validation["ok"], "una segunda arma manual incompatible se rechaza")
+	_expect_equal(second_validation["code"], "JCP_EQUIP_REQUIREMENT_FAILED", "el conflicto manual usa el contrato normal de compatibilidad")
+	_expect_equal(state["cards"]["zones"]["attachments:0"]["cards"].size(), 1, "solo una arma manual permanece vinculada")
+	_expect(hammer_id in state["cards"]["zones"]["hand:0"]["cards"], "E06 no se mueve tras el rechazo")
+	_expect(module.validate_state(state)["ok"], "la compatibilidad manual conserva integridad")
+
+
 func _test_terrain() -> void:
 	var prepared: Dictionary = _engine_with_opening(["R01"])
 	_expect(prepared["ok"], "se encuentra una apertura con Terreno")
@@ -152,6 +211,73 @@ func _test_terrain() -> void:
 	_expect(state["cards"]["instances"][terrain_id]["metadata"]["active"], "el Terreno queda activo")
 	_expect_equal(engine.get_public_state()["game"]["card_table"]["zones"]["terrain:0"]["cards"][0]["definition"]["id"], "R01", "el Terreno es publico")
 	_expect(engine.validate_internal_consistency()["ok"], "el Terreno conserva la integridad")
+
+
+func _prepared_direct_equipment_state(creature_definition: String, equipment_definitions: Array, creature_face_up: bool) -> Dictionary:
+	var module = GameModule.new()
+	var state: Dictionary = module.create_initial_state({"player_names": ["Lucia", "Alex"]}, 88001)
+	for _index in range(2):
+		var advanced: Dictionary = module.reduce(state, GameAction.new("advance_phase", 0, {}))
+		if not advanced["ok"]:
+			return advanced
+		state = advanced["state"]
+	var ids: Dictionary = {}
+	var creature_id: String = _instance_for(state, creature_definition, 0)
+	if creature_id.is_empty():
+		return {"ok": false, "code": "TEST_CREATURE_NOT_FOUND"}
+	ids[creature_definition] = creature_id
+	var creature_move: Dictionary = _move_direct_card(state, creature_id, "creatures:0", {
+		"face_up": creature_face_up,
+		"position": "attack" if creature_face_up else "guard",
+		"summoned_turn": -1,
+		"last_attack_turn": -1,
+		"last_position_change_turn": -1,
+	})
+	if not creature_move["ok"]:
+		return creature_move
+	state = creature_move["state"]
+	for definition_id in equipment_definitions:
+		var equipment_id: String = _instance_for(state, definition_id, 0)
+		if equipment_id.is_empty():
+			return {"ok": false, "code": "TEST_EQUIPMENT_NOT_FOUND"}
+		ids[definition_id] = equipment_id
+		var hand_move: Dictionary = _move_direct_card(state, equipment_id, "hand:0", {})
+		if not hand_move["ok"]:
+			return hand_move
+		state = hand_move["state"]
+	var check: Dictionary = module.validate_state(state)
+	if not check["ok"]:
+		return check
+	return {"ok": true, "module": module, "state": state, "ids": ids}
+
+
+func _move_direct_card(state: Dictionary, instance_id: String, destination_zone: String, metadata_patch: Dictionary) -> Dictionary:
+	var located: Dictionary = CardState.locate_card(state["cards"], instance_id)
+	if not located["ok"]:
+		return located
+	var next_state: Dictionary = state.duplicate(true)
+	var cards: Dictionary = next_state["cards"]
+	var metadata: Dictionary = cards["instances"][instance_id]["metadata"].duplicate(true)
+	metadata.merge(metadata_patch, true)
+	var update: Dictionary = CardState.update_instance_metadata(cards, instance_id, metadata)
+	if not update["ok"]:
+		return update
+	cards = update["value"]
+	if located["zone_id"] != destination_zone:
+		var move: Dictionary = CardState.move_card(cards, instance_id, located["zone_id"], destination_zone)
+		if not move["ok"]:
+			return move
+		cards = move["value"]
+	next_state["cards"] = cards
+	return {"ok": true, "state": next_state}
+
+
+func _instance_for(state: Dictionary, definition_id: String, owner_id: int) -> String:
+	for instance_id in state["cards"]["instances"]:
+		var instance: Dictionary = state["cards"]["instances"][instance_id]
+		if instance["definition_id"] == definition_id and instance["metadata"].get("owner_id", -1) == owner_id:
+			return instance_id
+	return ""
 
 
 func _engine_with_opening(required_definitions: Array) -> Dictionary:

@@ -20,6 +20,7 @@ var _request_sequence := 0
 
 
 func _init() -> void:
+	_test_one_normal_terrain_per_turn()
 	_test_all_ordered_recipes()
 	_test_transformed_terrain_is_replaced()
 	_test_transformed_identity_has_no_invented_bonus()
@@ -34,6 +35,24 @@ func _init() -> void:
 	quit(1)
 
 
+func _test_one_normal_terrain_per_turn() -> void:
+	var engine = _start_with_all_base_terrains()
+	_expect(engine != null and _reach_main(engine), "se prepara la cadencia normal de Terreno")
+	if engine == null:
+		return
+	var state: Dictionary = engine.export_module_state()
+	var forest_id: String = _find_in_hand(state, "R01")
+	var lake_id: String = _find_in_hand(state, "R02")
+	_expect(_perform(engine, forest_id, "cadence-first"), "la primera jugada normal de Terreno es legal")
+	_expect(not _legal_terrain_exists(engine, lake_id), "un segundo Terreno no se ofrece el mismo turno")
+	var rejected = engine.perform_action(GameAction.new("play_terrain", 0, {"instance_id": lake_id}, _next_request("cadence-reject")))
+	_expect(not rejected.success, "una segunda jugada normal de Terreno se rechaza")
+	_expect_equal(rejected.code, "JCP_TERRAIN_ALREADY_USED", "el rechazo usa codigo especifico")
+	_expect(lake_id in engine.export_module_state()["cards"]["zones"]["hand:0"]["cards"], "el rechazo no mueve el segundo Terreno")
+	_expect(_next_own_main(engine), "la jugada normal de Terreno se restaura en el siguiente turno propio")
+	_expect(_legal_terrain_exists(engine, lake_id), "el segundo Terreno vuelve a ser legal en el siguiente turno propio")
+
+
 func _test_all_ordered_recipes() -> void:
 	for recipe in RECIPES:
 		var engine = _start_with_all_base_terrains()
@@ -45,7 +64,9 @@ func _test_all_ordered_recipes() -> void:
 		var first_id: String = _find_in_hand(state, recipe[0])
 		var second_id: String = _find_in_hand(state, recipe[1])
 		_expect(_perform(engine, first_id, "first"), "%s juega el primer componente" % recipe[2])
-		_expect(_legal_terrain_exists(engine, second_id), "%s ofrece el segundo Terreno aunque la zona este ocupada" % recipe[2])
+		_expect(not _legal_terrain_exists(engine, second_id), "%s no ofrece una segunda jugada normal el mismo turno" % recipe[2])
+		_expect(_next_own_main(engine), "%s espera al siguiente turno propio" % recipe[2])
+		_expect(_legal_terrain_exists(engine, second_id), "%s ofrece el segundo Terreno en el nuevo turno" % recipe[2])
 		_expect(_perform(engine, second_id, "second"), "%s transforma el Terreno" % recipe[2])
 		state = engine.export_module_state()
 		_expect_equal(state["cards"]["zones"]["terrain:0"]["cards"], [second_id], "%s conserva como soporte fisico la carta entrante" % recipe[2])
@@ -78,7 +99,10 @@ func _test_transformed_terrain_is_replaced() -> void:
 	var forest_id: String = _find_in_hand(state, "R01")
 	var lake_id: String = _find_in_hand(state, "R02")
 	var volcano_id: String = _find_in_hand(state, "R03")
-	_expect(_perform(engine, forest_id, "forest") and _perform(engine, lake_id, "lake"), "se forma Bosque Inundado")
+	_expect(_perform(engine, forest_id, "forest"), "Bosque entra como primer componente")
+	_expect(_next_own_main(engine), "se espera al siguiente turno antes de Lago")
+	_expect(_perform(engine, lake_id, "lake"), "se forma Bosque Inundado")
+	_expect(_next_own_main(engine), "se espera al siguiente turno antes del tercer Terreno")
 	_expect(_perform(engine, volcano_id, "volcano"), "un tercer Terreno sin receta sustituye al transformado")
 	state = engine.export_module_state()
 	_expect_equal(state["cards"]["zones"]["terrain:0"]["cards"], [volcano_id], "la sustitucion deja un unico Terreno base")
@@ -109,6 +133,7 @@ func _test_transformed_identity_has_no_invented_bonus() -> void:
 	_expect(_perform_action(engine, "summon_creature", {"instance_id": creature_id}, "creature"), "M10 se invoca legalmente con dos energias")
 	_expect(_perform(engine, forest_id, "forest-bonus"), "Bosque entra para comprobar su efecto base")
 	_expect_equal(_owner_creature_defense(engine), 4, "Bosque concede +1 DEF a Naturaleza")
+	_expect(_next_own_main(engine), "se espera al siguiente turno propio para transformar")
 	_expect(_perform(engine, lake_id, "transform-no-bonus"), "Lago transforma Bosque en Bosque Inundado")
 	_expect_equal(_owner_creature_defense(engine), 3, "la forma transformada no hereda ni inventa bonos pendientes de definir")
 
@@ -121,7 +146,9 @@ func _test_invalid_transformed_metadata_is_rejected() -> void:
 	var state: Dictionary = engine.export_module_state()
 	var first_id: String = _find_in_hand(state, "R01")
 	var second_id: String = _find_in_hand(state, "R02")
-	_expect(_perform(engine, first_id, "valid-first") and _perform(engine, second_id, "valid-second"), "se crea una forma valida antes de alterarla")
+	_expect(_perform(engine, first_id, "valid-first"), "se juega el primer componente valido")
+	_expect(_next_own_main(engine), "se espera al siguiente turno para la receta valida")
+	_expect(_perform(engine, second_id, "valid-second"), "se crea una forma valida antes de alterarla")
 	var tampered: Dictionary = engine.export_module_state()
 	tampered["cards"]["instances"][second_id]["metadata"]["terrain_components"] = ["R02", "R01"]
 	var validation: Dictionary = GameModule.new().validate_state(tampered)
@@ -156,6 +183,10 @@ func _play_empty_turn(engine, player_id: int) -> bool:
 		if not engine.perform_action(GameAction.new("advance_phase", player_id, {}, _next_request("empty"))).success:
 			return false
 	return true
+
+
+func _next_own_main(engine) -> bool:
+	return _finish_turn_from_main(engine, 0) and _play_empty_turn(engine, 1) and _reach_main(engine)
 
 
 func _perform(engine, instance_id: String, prefix: String) -> bool:

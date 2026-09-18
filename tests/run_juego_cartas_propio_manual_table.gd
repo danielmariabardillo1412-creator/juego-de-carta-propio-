@@ -3,6 +3,7 @@ extends SceneTree
 
 const CardTile = preload("res://demo/card_tile.gd")
 const ProjectedFieldPiece = preload("res://demo/projected_field_piece.gd")
+const GameAction = preload("res://src/core/game_action.gd")
 
 var _checks := 0
 var _failures: Array = []
@@ -177,6 +178,13 @@ func _run() -> void:
 	if terrain_ids.size() == 2:
 		table.call("_select_card", terrain_ids[0])
 		table.call("_on_terrain_pressed", 0)
+		snapshot = table.debug_snapshot()
+		var second_terrain_legal_same_turn := false
+		for legal in snapshot["legal_actions"]:
+			if legal["type"] == "play_terrain" and legal["payload"].get("instance_id", "") == terrain_ids[1]:
+				second_terrain_legal_same_turn = true
+		_expect(not second_terrain_legal_same_turn, "la mesa no ofrece un segundo Terreno normal el mismo turno")
+		_expect(_advance_table_to_next_own_main(table, 0), "la mesa alcanza el siguiente turno propio antes de transformar")
 		table.call("_select_card", terrain_ids[1])
 		table.call("_on_terrain_pressed", 0)
 		snapshot = table.debug_snapshot()
@@ -297,6 +305,23 @@ func _run() -> void:
 		DirAccess.remove_absolute(ProjectSettings.globalize_path(test_save_path))
 	table.queue_free()
 	_finish()
+
+
+func _advance_table_to_next_own_main(table: Control, player_id: int) -> bool:
+	var engine = table.get("_engine")
+	var initial_state: Dictionary = engine.export_module_state()
+	var initial_turn: int = initial_state["turn"]["turn_number"]
+	for step in range(24):
+		var state: Dictionary = engine.export_module_state()
+		var active: int = state["turn"]["order"][state["turn"]["active_index"]]
+		if state["turn"]["turn_number"] > initial_turn and active == player_id and state["phase"]["current"] == "MAIN_1" and not state["turn_usage"]["terrain_used"]:
+			table.call("_refresh")
+			return true
+		var result = engine.perform_action(GameAction.new("advance_phase", active, {}, "manual-terrain-advance-%02d" % step))
+		if not result.success:
+			return false
+	table.call("_refresh")
+	return false
 
 
 func _finish() -> void:
