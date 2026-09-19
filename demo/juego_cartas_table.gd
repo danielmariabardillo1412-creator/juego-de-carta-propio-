@@ -637,7 +637,9 @@ func _build_interface() -> void:
 	_build_activation_reveal()
 
 	_onboarding = PrehumanOnboarding.new()
-	_onboarding.visible = DisplayServer.get_name() != "headless"
+	# Solo autoabrir cuando esta mesa es la escena principal real.
+	# Tests/herramientas instancian la mesa como hija y no deben quedar bloqueados.
+	_onboarding.visible = DisplayServer.get_name() != "headless" and get_tree().current_scene == self
 	add_child(_onboarding)
 
 
