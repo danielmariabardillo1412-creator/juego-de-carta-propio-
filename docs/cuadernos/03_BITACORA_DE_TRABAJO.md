@@ -736,3 +736,39 @@ No se modificaron motor, UCE, mesa, interfaz, reglas implementadas, cartas, cifr
 - Se incorporan el trabajo local vigente y los documentos recientes de fuentes, reconciliación, balance, mesa, pruebas y cuadernos. Se ignoran las copias físicas `artifacts/backup_*`, `.godot`, importaciones PNG y temporales; se versionan los `.gd.uid` estables.
 - La importación con Godot 4.7 pasó. Las 26 suites específicas del juego pasaron; las diez suites de interacción gráfica pasaron en modo gráfico (dos no eran válidas bajo `--headless` por depender del renderizado). Pasaron además nueve suites UCE, diagnóstico 15/15, experimento integral 80/80 y caché de fuentes 6/6.
 - Se registra el envío a `main` mediante el commit `chore: resync repository with current local project`, sin pull, merge, eliminación de historial, modificación de Zapity principal ni cambio de reglas. El SHA final se obtiene del propio `main` publicado.
+
+
+## 2026-09-19 — PREH-VIS-01 / ONB-01: vertical slice antes de la prueba humana
+
+Motivo:
+
+- Tras cerrar UX #1–#12 y congelar H1–H7, se detectó que entregar la mesa a una persona externa seguía siendo una prueba inválida: las cartas y el tablero conservaban aspecto de greybox y faltaba onboarding.
+- Se bloqueó explícitamente UX #13 hasta construir una presentación mínima que separase incomprensión visual de fallos reales de interacción.
+
+Cambios principales:
+
+- `demo/card_art_placeholder.gd`: arte procedural determinista por tipo/elemento y monograma de identidad.
+- `demo/card_tile.gd`: usa la identidad gráfica provisional y marca cartas con efecto en mano.
+- `demo/prehuman_onboarding.gd`: guía de seis páginas sobre reglas/vocabulario sin secuencia procedural de clics.
+- `demo/juego_cartas_table.gd`: botón `GUÍA`, integración del onboarding y aislamiento cuando la mesa se instancia dentro de tests/herramientas.
+- `demo/field_template_layer.gd`: rótulos `APOYOS RIVAL`, `CRIATURAS RIVAL`, `TUS CRIATURAS`, `TUS APOYOS`, anclados antes de las zonas laterales sin añadir nodos que alteren la malla.
+- `tests/run_jcp_table_presentation_preflight.gd`: nueva puerta de presentación.
+- `tools/capture_manual_table.gd` y workflow: captura reproducible de onboarding y mesa como artefacto CI.
+
+Incidencias corregidas durante el PR:
+
+- El primer arte procedural no compiló bajo warnings estrictos por inferencia `Variant`; se tiparon explícitamente las variables.
+- El primer posicionamiento de rótulos invadía FUSIÓN/TERRITORIO; se pasó a calcular su posición desde `side_corners()`.
+- El onboarding autoabierto bloqueó `ATTACK_GUI` bajo `xvfb`; se cambió para autoabrirse solo cuando la mesa es la escena principal real y la herramienta de capturas lo abre de forma explícita.
+
+Cierre:
+
+- PR #10 fusionado por squash.
+- `main @ afa92a02d7a1397ff8e0481408f11e173c61a1aa`.
+- workflow `35437896191`: seis jobs SUCCESS.
+- `PRESENTATION_PREFLIGHT PASS: 11 checks`.
+- `HUMAN_PREFLIGHT PASS: 11 checks` con H4=4 / R03+R02 y el resto de fixtures conservados.
+- `GEOMETRY_HITBOX PASS: 18`, `CLICK_BUDGET PASS: 18`, `FUSION_GUI PASS`; fusion-vertical SUCCESS.
+- Capturas finales revisadas: onboarding legible, bandas sin solapamientos y cartas distinguibles a nivel provisional.
+
+Siguiente: ejecutar prueba humana; no ampliar arte final ni balancear antes de observarla.

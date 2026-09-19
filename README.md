@@ -6,7 +6,7 @@ Laboratorio independiente para construir el segundo juego de cartas sobre el mot
 
 Módulo: **0.24.0 — Stress Hardening**.
 
-Estado: **mesa manual local funcional; RUNTIME PASS en Godot 4.7 estable**.
+Estado: **mesa manual local funcional + vertical slice prehumana visual/onboarding; CI y RUNTIME PASS en Godot 4.7 estable**.
 
 La descripción breve del sistema jugable está en `JUEGO_CARTAS_PROPIO.md`. La memoria autoritativa para retomar el trabajo está en `docs/cuadernos/README.md`.
 
@@ -37,7 +37,7 @@ No hay que unir B01, B02, B03, F01 ni paquetes experimentales. El ZIP F05 contie
 
 ## Próxima fase
 
-Realizar una primera sesión de uso humano completa y corregir únicamente los problemas prácticos que aparezcan. La base técnica ya permite jugar, consultar cartas, terminar y reanudar una partida; el siguiente bloque puede centrarse en equilibrio, contenido, comentalista textual y dirección artística. La integración con Zapity sigue fuera de esta capa.
+Realizar la primera sesión humana controlada sobre `main @ afa92a02d7a1397ff8e0481408f11e173c61a1aa`: guía breve de seis páginas, 10–15 minutos de juego libre sin ayuda procedural y después los escenarios H1–H7 que no hayan aparecido de forma natural. La capa visual actual es deliberadamente provisional y sirve para medir comprensión operacional, no calidad artística final. No iniciar balance antes de registrar esa evidencia. La integración con Zapity sigue fuera de esta capa.
 
 ## Documentos principales
 
