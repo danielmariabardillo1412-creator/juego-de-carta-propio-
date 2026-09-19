@@ -21,7 +21,7 @@ func _run() -> void:
 	# H1 — criatura/postura/ataque.
 	table.start_match(210921)
 	await process_frame
-	var h1 := table.debug_snapshot()
+	var h1: Dictionary = table.debug_snapshot()
 	_check(_has_action_type(h1["legal_actions"], "summon_creature") or _has_action_type(h1["legal_actions"], "set_creature"),
 		"H1 seed 210921 conserva una criatura jugable")
 
@@ -40,7 +40,7 @@ func _run() -> void:
 	_check(_hand_has(h3_hand, "E02"), "H3 seed 487 conserva E02")
 
 	# H4 — buscar fixture estable con dos Terrenos iniciales para no improvisar la microprueba.
-	var terrain_fixture := _find_two_terrain_seed(table)
+	var terrain_fixture: Dictionary = _find_two_terrain_seed(table)
 	_check(terrain_fixture.get("seed", -1) >= 0, "H4 encuentra una semilla con dos Terrenos iniciales")
 	if terrain_fixture.get("seed", -1) >= 0:
 		print("HUMAN_PREFLIGHT H4_SEED=", terrain_fixture["seed"], " TERRAINS=", terrain_fixture["terrains"])
