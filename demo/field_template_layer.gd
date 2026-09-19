@@ -9,6 +9,7 @@ const BANDS := [
 	[Vector2(565, 355), Vector2(1038, 355), Vector2(1062, 433), Vector2(542, 433)],
 	[Vector2(540, 440), Vector2(1063, 440), Vector2(1092, 537), Vector2(512, 537)],
 ]
+const BAND_LABELS := ["APOYOS RIVAL", "CRIATURAS RIVAL", "TUS CRIATURAS", "TUS APOYOS"]
 const CENTERS := [
 	[Vector2(643, 221), Vector2(722, 221), Vector2(802, 220), Vector2(881, 221), Vector2(962, 221)],
 	[Vector2(628, 278), Vector2(715, 279), Vector2(803, 278), Vector2(888, 279), Vector2(975, 279)],
@@ -79,8 +80,21 @@ func _band_strip(band_index: int, left_t: float, right_t: float, top_v: float, b
 
 
 func _draw() -> void:
+	var factor: float = template_scale()
+	var font_size: int = maxi(10, roundi(12.0 * factor))
+	var label_width: float = maxf(92.0, 118.0 * factor)
 	for index in range(BANDS.size()):
 		var quad := band_corners(index)
 		draw_colored_polygon(quad, Color("c8d8b005"))
 		for edge in range(4):
 			draw_line(quad[edge], quad[(edge + 1) % 4], Color("91a89430"), 1.0, true)
+		var left_mid: Vector2 = quad[0].lerp(quad[3], 0.56)
+		var label_pos := Vector2(left_mid.x - label_width - 10.0 * factor, left_mid.y + float(font_size) * 0.35)
+		draw_string_outline(
+			ThemeDB.fallback_font, label_pos, BAND_LABELS[index],
+			HORIZONTAL_ALIGNMENT_RIGHT, label_width, font_size, 2, Color("05090bcc")
+		)
+		draw_string(
+			ThemeDB.fallback_font, label_pos, BAND_LABELS[index],
+			HORIZONTAL_ALIGNMENT_RIGHT, label_width, font_size, Color("c9d2c8b8")
+		)
