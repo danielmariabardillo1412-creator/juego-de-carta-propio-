@@ -89,7 +89,11 @@ func _draw() -> void:
 		for edge in range(4):
 			draw_line(quad[edge], quad[(edge + 1) % 4], Color("91a89430"), 1.0, true)
 		var left_mid: Vector2 = quad[0].lerp(quad[3], 0.56)
-		var label_pos := Vector2(left_mid.x - label_width - 78.0 * factor, left_mid.y + float(font_size) * 0.35)
+		var side_quad: PackedVector2Array = side_corners(index, false)
+		var side_left_x: float = side_quad[0].x
+		for corner in side_quad:
+			side_left_x = minf(side_left_x, corner.x)
+		var label_pos := Vector2(side_left_x - label_width - 10.0 * factor, left_mid.y + float(font_size) * 0.35)
 		draw_string_outline(
 			ThemeDB.fallback_font, label_pos, BAND_LABELS[index],
 			HORIZONTAL_ALIGNMENT_RIGHT, label_width, font_size, 2, Color("05090bcc")
