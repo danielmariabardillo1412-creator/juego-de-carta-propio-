@@ -1,9 +1,9 @@
 # Cuaderno 1 — Estado actual
 
-Última actualización: **2026-09-15**
+Última actualización: **2026-09-19**
 Módulo: **`zapiti.juego_cartas_propio`**  
 Versión: **`0.24.0-stress-hardening`**  
-Estado: **prototipo de reglas con mesa visual de duelo local; RUNTIME PASS en Godot 4.7 estable**
+Estado: **prototipo jugable local con UX automatizable y vertical slice prehumana de presentación cerradas; primera prueba humana LISTA / NO EJECUTADA**
 
 ## Límites del trabajo
 
@@ -11,7 +11,7 @@ Estado: **prototipo de reglas con mesa visual de duelo local; RUNTIME PASS en Go
 - Zápiti activo: `F:/Taller de Juegos Zapity/zapity`.
 - El proyecto activo no se modifica durante este laboratorio.
 - La integración con Zápiti se estudiará únicamente cuando el segundo juego sea estable.
-- El arte, las imágenes definitivas y la presentación 3D quedan para después de validar los sistemas.
+- El arte final, las imágenes definitivas y la presentación 3D quedan para después de validar los sistemas. Para la primera prueba humana existe una capa 2D provisional de identidad gráfica de cartas, rótulos de mesa y onboarding.
 - Las seis fuentes de diseño de Drive disponen de copia local normalizada, índice temático y manifiesto de revisión en `docs/fuentes_diseno/`.
 - La baraja inicial de fantasía aporta al runtime 40 nombres y cinco familias. Sus ocho Fusiones iniciales y todos los textos de criatura M01–M18 están integrados.
 - La auditoría de trazabilidad S01 enlaza cada regla básica cerrada con su implementación y prueba; no quedan discrepancias cerradas conocidas después de 0.22/0.23.
@@ -92,7 +92,7 @@ Estado: **prototipo de reglas con mesa visual de duelo local; RUNTIME PASS en Go
 - S01 aplazaba la anatomía concreta; los libros de familia y la baraja inicial ya han completado esa decisión de diseño para M01–M18.
 - Construcción de mazos y equilibrio definitivo.
 - Bots específicos para este reglamento.
-- Red, animaciones, audio y arte final. La mesa técnica ya cubre detalle mecánico, objetivos, final y guardado/carga; queda validar comodidad con personas y desarrollar la capa artística.
+- Red, animaciones, audio y arte final. La mesa ya dispone de una skin prehumana provisional y onboarding; queda validar comodidad con personas y, después, desarrollar la dirección artística definitiva.
 
 ## Última verificación cerrada
 
@@ -139,7 +139,7 @@ Pruebas humanas del 2026-09-13 (JCP-DEC-051/052): se detectó latencia al cambia
 
 UX de Fusión del 2026-09-14 (JCP-DEC-054): arrastrar una criatura propia sobre otra compatible ilumina la pareja legal y abre el mismo selector que dos clics. El selector nombra la Fusión resultante y distingue Ataque, Guardia y objetivo cuando procede; cancelar no muta. Muestra **0 Energía** de pago para la Fusión normal vigente, distinto del coste de referencia impreso en el perfil del resultado. Las posibles variantes más caras aún no están diseñadas ni implementadas. La legalidad continúa procediendo de UCE y no se alteran recetas, reglas ni geometría.
 
-Frontal provisional del 2026-09-14 (JCP-DEC-055): las criaturas de la mano y la ficha ampliada muestran elemento, coste numérico de Energía, ATQ y DEF impresos antes de jugarlas. La ficha ampliada incorpora su efecto y la vista textual repite las cifras; la zona central sigue reservada para una ilustración futura. Una criatura ya en campo usa estadísticas efectivas; una Fusión muestra explícitamente `REF` para el coste de referencia, que no es el pago de la Fusión normal. Se conservan tamaños, perspectiva, geometría, reglas y privacidad. Los símbolos alternativos para representar coste y el arte definitivo siguen abiertos.
+Frontal provisional del 2026-09-14 (JCP-DEC-055): las criaturas de la mano y la ficha ampliada muestran elemento, coste numérico de Energía, ATQ y DEF impresos antes de jugarlas. La ficha ampliada incorpora su efecto y la vista textual repite las cifras; la zona central usa ahora arte procedural provisional por tipo/elemento y continúa reservada conceptualmente para ilustración final. Una criatura ya en campo usa estadísticas efectivas; una Fusión muestra explícitamente `REF` para el coste de referencia, que no es el pago de la Fusión normal. Se conservan tamaños, perspectiva, geometría, reglas y privacidad. Los símbolos alternativos para representar coste y el arte definitivo siguen abiertos.
 
 Inicio aleatorio de partidas del 2026-09-14 (JCP-DEC-056): al abrir la mesa y al pulsar «Nueva partida» se elige una semilla nueva. El motor mezcla por separado las dos copias del mismo mazo didáctico de 40 cartas; no cambia su composición ni garantiza una Fusión temprana. La semilla actual se guarda visible en Herramientas y «Jugar semilla» permite repetir un reparto concreto. Las pruebas automáticas fijan su semilla explícitamente. No se altera el RNG determinista de UCE, el catálogo ni las reglas.
 
@@ -166,3 +166,15 @@ Fase abierta de equilibrio del primer mazo (JCP-DEC-060): no hay todavía un gua
 Auditoría de fuentes del 2026-09-15 (JCP-DEC-061): se verificó directamente la carpeta oficial de Drive `JUEGO_CARTAS_PROPIO` (`1m54Q-WmufRhdVleWMq6mTwUbP3Nzxqcl`) y sus seis fuentes S00–S05. IDs, títulos, padres y fechas coinciden con `docs/fuentes_diseno/SOURCE_MANIFEST.json`; la caché local pasa 6/6. S03 confirma el catálogo de 60 familias, diez elementos base, capas taxonómicas, prioridades, semillas y matriz V0.4; S04 conserva 125 recetas conceptuales y S05 contiene P01–P05 más P06 reservado. El contenido local reciente se conserva como propuesta, pero el Atlas no debe ampliarse hasta resolver la reconciliación documentada en `docs/diseno/AUDITORIA_RECONCILIACION_DRIVE_CONTENIDO_LOCAL_V0_1.md`. Hallazgos abiertos principales: el índice local resumió mal varias afinidades, el límite local de una Fusión por turno contradice S04 y algunas anatomías/aptitudes/nombres requieren ratificación. Esta pasada no modifica código, reglas, cartas, cifras, habilidades, balance ni Fusiones implementadas.
 
 Resincronización de GitHub del 2026-09-15 (JCP-DEC-062): el árbol vigente de `main` en `danielmariabardillo1412-creator/juego-de-carta-propio-` corresponde al proyecto local actual de `F:/Taller de Juegos Zapity/juego_cartas_propio/engine`, incluidos los documentos recientes, pruebas y cuadernos. El estado remoto anterior (`b0cc5dad3b2d35193c4626be966518964ccaf3f8`) queda recuperable en la rama remota `backup/pre_sync_local_actual_20260915`; no se elimina historial ni se crea otro repositorio. No se publican `.godot`, importaciones PNG regenerables, temporales ni copias físicas `artifacts/backup_*`. Los sidecars `.gd.uid` sí se conservan como identificadores estables de recursos de Godot. Esta operación de repositorio no altera Zapity principal ni añade desarrollo o reglas de juego.
+
+
+## Puerta prehumana de presentación — 2026-09-19
+
+- PR #10 `PREH-VIS-01` fusionado a `main`; commit canónico `afa92a02d7a1397ff8e0481408f11e173c61a1aa`.
+- Las cartas visibles usan identidad gráfica provisional determinista por tipo/elemento, nombre, coste, tipo, elemento y estadísticas; la vista ampliada conserva texto de efecto.
+- Las cuatro bandas del campo están rotuladas explícitamente y los rótulos se posicionan respecto a las zonas laterales sin modificar el árbol de hitboxes.
+- La escena principal abre un onboarding de seis páginas sobre objetivo, lectura de carta, zonas, turno/posturas, respuestas/Fusión y comienzo de partida; `GUÍA` permite reabrirlo.
+- El onboarding no enseña secuencias exactas de clics y no se autoabre cuando la mesa está embebida por tests/herramientas.
+- Workflow `35437896191`: seis jobs SUCCESS. `PRESENTATION_PREFLIGHT` 11/11, `HUMAN_PREFLIGHT` 11/11, `GEOMETRY_HITBOX` 18/18, `CLICK_BUDGET` 18/18 y `FUSION_GUI` PASS.
+- Capturas CI de onboarding, mesa e interacciones revisadas antes de fusionar.
+- Siguiente fase: tester nuevo → guía breve → 10–15 min de juego libre sin ayuda procedural → H1–H7 para cubrir huecos → registrar OK/FRICCIÓN/BLOQUEO/ERROR GRAVE. No balancear todavía.
