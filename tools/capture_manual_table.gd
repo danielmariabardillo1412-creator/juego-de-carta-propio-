@@ -25,6 +25,9 @@ func _capture() -> void:
 	table.startup_seed = 210921
 	root.add_child(table)
 	await process_frame
+	var onboarding: Node = table.find_child("PrehumanOnboarding", true, false)
+	if onboarding != null:
+		onboarding.open()
 	await process_frame
 	await RenderingServer.frame_post_draw
 	var error := _save_viewport(ONBOARDING_PATH)
@@ -32,7 +35,7 @@ func _capture() -> void:
 		printerr("No se pudo guardar la captura de onboarding: %s" % error_string(error))
 		quit(1)
 		return
-	var onboarding: Node = table.find_child("PrehumanOnboarding", true, false)
+	onboarding = table.find_child("PrehumanOnboarding", true, false)
 	if onboarding != null:
 		onboarding.close()
 	await process_frame
