@@ -216,8 +216,8 @@ Resultado vigente:
 
 ## Cola ordenada
 
-1. Realizar una sesión humana completa con `FLUJO_DE_PARTIDA_E_INTERACCION_V0_1.md` ya implementado y registrar problemas observables de comodidad, claridad o ritmo.
-2. Corregir únicamente los problemas reproducibles de esa sesión antes de ampliar arte o contenido.
+1. Realizar la primera sesión humana controlada sobre `main @ afa92a02d7a1397ff8e0481408f11e173c61a1aa`: mostrar la guía de seis páginas, observar 10–15 minutos de juego libre sin ayuda procedural y usar H1–H7 solo para mecánicas no observadas.
+2. Corregir únicamente ERROR GRAVE, BLOQUEO o FRICCIÓN repetida antes de ampliar arte final, contenido o balance.
 3. Mantener las pruebas verticales de criaturas y de las ocho Fusiones como puertas al tocar interfaz, combate o catálogo.
 4. Recoger en partidas los indicadores definidos por la auditoría métrica de F001/F067; la sonda bruta desaconseja restringir o reducir antes de observar preparación, respuestas y permanencia.
 5. Cerrar en una fase separada el alcance mínimo del narrador/locutor y sus mensajes mecánicos accesibles.
@@ -447,3 +447,19 @@ Informe completo: `docs/diseno/AUDITORIA_RECONCILIACION_DRIVE_CONTENIDO_LOCAL_V0
 - Seguridad de publicación: `backup/pre_sync_local_actual_20260915` conserva el remoto anterior `b0cc5dad3b2d35193c4626be966518964ccaf3f8`. Se comprueba el árbol staged para excluir `.godot`, `.png.import`, `artifacts/backup_*` y temporales antes del push; los `.gd.uid` son identificadores de recursos que sí se versionan.
 
 Pendiente de diseño, no de la resincronización: la evidencia humana para equilibrio y los conflictos con S04 y la matriz de afinidades siguen abiertos tal como se enumeran arriba. Esta puerta no autoriza retocar cartas, cifras ni reglas.
+
+
+## Puerta prehumana de presentación — 2026-09-19
+
+- PR #10 / `main @ afa92a02d7a1397ff8e0481408f11e173c61a1aa`.
+- Workflow `35437896191`: seis jobs SUCCESS.
+- `PRESENTATION_PREFLIGHT PASS: 11 checks` — seis páginas de onboarding, `GUÍA`, cartas con nombre/elemento/arte provisional y apertura/cierre sin mutar UCE.
+- `HUMAN_PREFLIGHT PASS: 11 checks` — H1=210921, H2=419, H3=487, H4=4 con R03+R02, H5=555, H6=53927, H7 independiente.
+- `GEOMETRY_HITBOX PASS: 18 checks`; los rótulos nuevos se dibujan dentro de la capa y no añaden hijos a la malla congelada.
+- `CLICK_BUDGET PASS: 18 checks`; `FUSION_GUI PASS`; `fusion-vertical` SUCCESS.
+- `presentation-capture` SUCCESS y artefacto visual revisado: onboarding legible, mesa sin solapamiento de rótulos y cartas distinguibles mediante gráficos provisionales.
+
+Riesgo residual aceptado para la prueba:
+
+- El arte procedural NO es arte final y los nombres largos pueden abreviarse en mano; la vista ampliada conserva identidad y texto completos. Esto es aceptable para medir comprensión operacional, pero no para juzgar atractivo artístico ni legibilidad final de producto.
+- UX #13 sigue PENDIENTE_HUMANO. Ninguna batería automática puede cerrarlo.
