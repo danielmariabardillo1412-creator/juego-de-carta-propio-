@@ -11,6 +11,7 @@ const CardTile = preload("res://demo/card_tile.gd")
 const ProjectedFieldPiece = preload("res://demo/projected_field_piece.gd")
 const FieldTemplateLayer = preload("res://demo/field_template_layer.gd")
 const DuelTableBackdrop = preload("res://demo/duel_table_backdrop.gd")
+const PrehumanOnboarding = preload("res://demo/prehuman_onboarding.gd")
 const TableInteractionState = preload("res://demo/table_interaction_state.gd")
 const CreatureDropSlot = preload("res://demo/creature_drop_slot.gd")
 const ProjectedHitButton = preload("res://demo/projected_hit_button.gd")
@@ -120,6 +121,7 @@ var _creature_mode_buttons: HBoxContainer
 var _creature_action_popup: PanelContainer
 var _creature_action_buttons: VBoxContainer
 var _end_turn_dialog: ConfirmationDialog
+var _onboarding
 
 
 func _ready() -> void:
@@ -309,6 +311,8 @@ func debug_snapshot() -> Dictionary:
 		"direct_board_action_types": DIRECT_BOARD_ACTIONS.duplicate(),
 		"event_expanded": _event_expanded,
 		"phase_track_count": 1 if _phase_indicator != null else 0,
+		"onboarding_visible": _onboarding.visible if _onboarding != null else false,
+		"onboarding_page_count": _onboarding.page_count() if _onboarding != null else 0,
 		"event_text": _event_log.text if _event_log != null else "",
 		"view": envelope,
 	}
@@ -412,6 +416,15 @@ func _build_interface() -> void:
 	restart_button.text = "Nueva partida"
 	restart_button.pressed.connect(_restart_pressed)
 	controls.add_child(restart_button)
+	var guide_button := Button.new()
+	guide_button.name = "GuideButton"
+	guide_button.text = "GUÍA"
+	guide_button.tooltip_text = "Repasa objetivo, tipos de carta, zonas, posturas y respuestas."
+	guide_button.pressed.connect(func() -> void:
+		if _onboarding != null:
+			_onboarding.open()
+	)
+	controls.add_child(guide_button)
 
 	_summary_label = Label.new()
 	_summary_label.name = "Summary"
@@ -622,6 +635,10 @@ func _build_interface() -> void:
 	_creature_action_buttons.add_theme_constant_override("separation", 3)
 	action_margin.add_child(_creature_action_buttons)
 	_build_activation_reveal()
+
+	_onboarding = PrehumanOnboarding.new()
+	_onboarding.visible = DisplayServer.get_name() != "headless"
+	add_child(_onboarding)
 
 
 func _build_activation_reveal() -> void:
