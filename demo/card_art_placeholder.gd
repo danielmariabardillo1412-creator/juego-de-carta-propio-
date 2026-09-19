@@ -31,12 +31,12 @@ func _draw() -> void:
 	draw_rect(bounds, base.darkened(0.42))
 	draw_rect(Rect2(Vector2(2, 2), size - Vector2(4, 4)), base.darkened(0.20), false, 1.0)
 
-	var center := size * 0.5
-	var unit := min(size.x, size.y)
-	var accent := base.lightened(0.42)
-	var soft := Color(accent, 0.35)
-	var seed := _stable_hash(_title)
-	var shift := float((seed % 9) - 4) * unit * 0.012
+	var center: Vector2 = size * 0.5
+	var unit: float = minf(size.x, size.y)
+	var accent: Color = base.lightened(0.42)
+	var soft: Color = Color(accent, 0.35)
+	var seed: int = _stable_hash(_title)
+	var shift: float = float((seed % 9) - 4) * unit * 0.012
 
 	match _card_type:
 		"creature":
