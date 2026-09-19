@@ -82,19 +82,19 @@ func _band_strip(band_index: int, left_t: float, right_t: float, top_v: float, b
 func _draw() -> void:
 	var factor: float = template_scale()
 	var font_size: int = maxi(10, roundi(12.0 * factor))
-	var label_width: float = maxf(92.0, 118.0 * factor)
+	var label_width: float = maxf(120.0, 150.0 * factor)
 	for index in range(BANDS.size()):
 		var quad := band_corners(index)
 		draw_colored_polygon(quad, Color("c8d8b005"))
 		for edge in range(4):
 			draw_line(quad[edge], quad[(edge + 1) % 4], Color("91a89430"), 1.0, true)
 		var left_mid: Vector2 = quad[0].lerp(quad[3], 0.56)
-		var label_pos := Vector2(left_mid.x - label_width - 10.0 * factor, left_mid.y + float(font_size) * 0.35)
+		var label_pos := Vector2(left_mid.x - label_width - 78.0 * factor, left_mid.y + float(font_size) * 0.35)
 		draw_string_outline(
 			ThemeDB.fallback_font, label_pos, BAND_LABELS[index],
 			HORIZONTAL_ALIGNMENT_RIGHT, label_width, font_size, 2, Color("05090bcc")
 		)
 		draw_string(
 			ThemeDB.fallback_font, label_pos, BAND_LABELS[index],
-			HORIZONTAL_ALIGNMENT_RIGHT, label_width, font_size, Color("c9d2c8b8")
+			HORIZONTAL_ALIGNMENT_RIGHT, label_width, font_size, Color("d7ddd4d8")
 		)
