@@ -1,5 +1,7 @@
 extends "res://demo/projected_hit_button.gd"
-## Carta visual provisional con silueta, postura y reverso. Las reglas siguen perteneciendo al motor.
+## Carta visual provisional con identidad gráfica, postura y reverso. Las reglas siguen perteneciendo al motor.
+
+const CardArtPlaceholder = preload("res://demo/card_art_placeholder.gd")
 
 signal card_selected(instance_id: String)
 signal creature_drag_started(instance_id: String)
@@ -206,14 +208,9 @@ func _build_face(title: String, detail: String) -> void:
 	art.add_theme_stylebox_override("panel", _art_style())
 	art.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	content.add_child(art)
-	var sigil := Label.new()
-	sigil.text = _sigil(title)
-	sigil.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	sigil.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
-	sigil.add_theme_font_size_override("font_size", 42 if display_mode == "preview" else (20 if display_mode == "hand" else 15))
-	sigil.add_theme_color_override("font_color", Color("ffffff99"))
-	sigil.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	art.add_child(sigil)
+	var card_art = CardArtPlaceholder.new()
+	card_art.setup(title, card_type, element)
+	art.add_child(card_art)
 	var footer := Label.new()
 	footer.text = detail if not detail.is_empty() else _type_label(card_type)
 	footer.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
@@ -261,14 +258,18 @@ func _build_info_face(content: VBoxContainer, title: String) -> void:
 	art.add_theme_stylebox_override("panel", _art_style())
 	art.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	content.add_child(art)
-	var sigil := Label.new()
-	sigil.text = _sigil(title)
-	sigil.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	sigil.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
-	sigil.add_theme_font_size_override("font_size", 42 if large else 20)
-	sigil.add_theme_color_override("font_color", Color("ffffff99"))
-	sigil.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	art.add_child(sigil)
+	var card_art = CardArtPlaceholder.new()
+	card_art.setup(title, card_type, element)
+	art.add_child(card_art)
+	if not large and not String(face_data.get("effect_text", "")).is_empty():
+		var effect_mark := Label.new()
+		effect_mark.name = "CardEffectMark"
+		effect_mark.text = "◆ EFECTO"
+		effect_mark.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+		effect_mark.add_theme_font_size_override("font_size", 7)
+		effect_mark.add_theme_color_override("font_color", Color("ffe8a6"))
+		effect_mark.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		content.add_child(effect_mark)
 	if large and not String(face_data.get("effect_text", "")).is_empty():
 		var effect := Label.new()
 		effect.name = "CardEffect"
